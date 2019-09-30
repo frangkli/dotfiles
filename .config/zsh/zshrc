@@ -20,7 +20,7 @@ source "$HOME/.config/aliasrc"
 source "$HOME/.config/shortcutrc"
 
 # Alias overwrite
-alias repr="source $HOME/.zshrc && cd -"
+alias repr="source $HOME/.config/zsh/zshrc && cd -"
 
 # PS1 management
 # PS1="%B%{$fg[red]%}[%{$fg[yellow]%}%n%{$fg[green]%}@%{$fg[blue]%}%M:%{$fg[magenta]%}%~%{$fg[red]%}]%{$reset_color%}$%b "
