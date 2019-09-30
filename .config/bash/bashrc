@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#Infinite history
+HISTSIZE=
+HISTFILESIZE=
+
+#Formatting bash header
+export PS1="\[$(tput bold)\]\[$(tput setaf 1)\][\[$(tput setaf 3)\]\u\[$(tput setaf 2)\]@\[$(tput setaf 4)\]\h:\[$(tput setaf 5)\]\W\[$(tput setaf 1)\]]\[$(tput setaf 7)\]\\$ \[$(tput sgr0)\]"
+
+#Load configs
+[ -f "$HOME/.config/bash/shortcutrc" ] && source "$HOME/.config/bash/shortcutrc"
+[ -f "$HOME/.config/bash/aliasrc" ] && source "$HOME/.config/bash/aliasrc"
+complete -C /usr/local/bin/vault vault

@@ -1,0 +1,87 @@
+#!/bin/sh
+# Profile file. Runs on login.
+
+# PATH
+export PATH="$PATH:/sbin"
+export PATH="$PATH:/usr/local/sbin"
+export PATH="$PATH:$(du "$HOME/.local/bin" | cut -f2 | tr '\n' ':' | sed 's/:*$//')"
+export PATH="$PATH:$HOME/.gem/ruby/2.6.0/bin"
+export PATH="$PATH:/Library/Frameworks/Python.framework/Versions/3.7/bin"
+export PATH="$PATH:/usr/local/opt/gettext/bin"
+export PATH="$PATH:/usr/local/opt/openssl/bin"
+export PATH="$PATH:/usr/local/opt/ncurses/bin"
+export GOPATH="$HOME/Programming/Go"
+export NODE_PATH="$HOME/.local/share/node_modules"
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.config"
+export _Z_DATA="$HOME/.config/z/z"
+export TASKRC="$HOME/.config/task/taskrc"
+export HISTFILE="$HOME/.config/bash/bash_history"
+export WWW_HOME="$HOME/.config/w3m"
+export ZDOTDIR="$HOME/.config/zsh"
+export SCHOOL="$HOME/OneDrive/School"
+
+# Personalization
+export EDITOR="nvim"
+export VISUAL="nvim"
+export BROWSER="qutebrowser"
+export READER="zathura --fork"
+export CLICOLOR=1
+export HOMEBREW_NO_AUTO_UPDATE=1
+export LC_ALL="en_US.UTF-8"
+export XML_CATALOG_FILES="/usr/local/etc/xml/catalog"
+export LPASS_HOME="$HOME/.config/lpass"
+
+# Python
+export PYTHON_CONFIGURE_OPTS="--enable-framework"
+
+# Openblas
+export LDFLAGS="-L/usr/local/opt/openblas/lib"
+export CPPFLAGS="-I/usr/local/opt/openblas/include"
+export PKG_CONFIG_PATH="/usr/local/opt/openblas/lib/pkgconfig"
+
+# Openssl
+export LDFLAGS="$LDFLAGS -L/usr/local/opt/openssl/lib"
+export CPPFLAGS="$CPPFLAGS -I/usr/local/opt/openssl/include"
+export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl/lib/pkgconfig"
+
+# C packages
+export LDFLAGS="$LDFLAGS -L/usr/local/opt/libffi/lib"
+export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/Cellar/cairo/1.16.0/lib/pkgconfig"
+export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/X11/lib/pkgconfig"
+export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/Homebrew/Library/Homebrew/os/mac/pkgconfig/10.15"
+export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(echo /usr/local/opt/*/lib/pkgconfig | sed 's/ /:/g')"
+
+# Fuzzy finder config
+export FZF_DEFAULT_COMMAND="ag --hidden --ignore .git -g ''"
+export FZF_COMPLETION_TRIGGER="~~"
+
+# Less/Man colors
+export LESS=-R
+export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"; a="${a%_}"
+export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"; a="${a%_}"
+export LESS_TERMCAP_me="$(printf '%b' '[0m')"; a="${a%_}"
+export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"; a="${a%_}"
+export LESS_TERMCAP_se="$(printf '%b' '[0m')"; a="${a%_}"
+export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"; a="${a%_}"
+export LESS_TERMCAP_ue="$(printf '%b' '[0m')"; a="${a%_}"
+
+# Read .bashrc if exists
+[ -f ~/.config/bash/bashrc ] && source "$HOME/.config/bash/bashrc"
+[ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
+
+# Vi mode
+set -o vi
+
+# Z
+. /usr/local/etc/profile.d/z.sh
+
+# Iterm2 shell integration support
+test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
+
+# Pywal restore color scheme
+wal -Rqn
+
+# Start up config
+cd ~
+echo "Welcome, Frank Li"
