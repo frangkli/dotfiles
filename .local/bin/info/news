@@ -1,0 +1,3 @@
+#!/bin/bash
+num=$(/usr/local/bin/newsboat -x print-unread | awk '{print $1}')
+echo ✎ $num

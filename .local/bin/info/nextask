@@ -1,0 +1,13 @@
+#!/bin/sh
+first=$(/usr/local/bin/task list | sed -n 4p | cut -d " " -f2)
+name=$(/usr/local/bin/task $first info | sed -n 5p | sed "s/Description   //g")
+
+text="Next Task: "$name
+charcount=$(echo $text | wc -m)
+
+if [ $charcount -gt 45 ]
+then
+	echo $(echo $text | cut -c -42)...
+else
+	echo $text
+fi

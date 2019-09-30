@@ -1,0 +1,30 @@
+#!/bin/bash
+#if [ "$(pgrep -x cmus)" == "" ]
+#then
+#    echo ♬ No music playing
+#else
+#    file=$(/usr/local/bin/cmus-remote -Q | sed -n 2p | cut -d "/" -f6)
+#    charcount=$(echo $file | wc -m)
+#
+#    if [ $charcount -gt 37 ]
+#    then
+#        echo ♬ $(echo $file | cut -c -34)...
+#    else
+#        echo ♬ $file
+#    fi
+#fi
+
+if [ "$(/usr/local/bin/ncmpcpp  --current-song '%t - %a' 2> /dev/null)" == "" ]
+then
+	echo ♬ No music playing
+else
+	text=$(/usr/local/bin/ncmpcpp  --current-song '%t - %a' 2> /dev/null)
+	charcount=$(echo $text | wc -m)
+
+	if [ $charcount -gt 37 ]
+	then
+		echo ♬ $(echo $text | cut -c -35)...
+	else
+		echo ♬ $text
+	fi
+fi
