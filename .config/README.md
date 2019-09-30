@@ -10,14 +10,14 @@ This is my macbook setup in which I use the config files in this repository.
 
 - Laptop: macbook air 2014
 - Operating system: macOS mojave
-- Terminal: iterm2
-- Shell: bash
+- Terminal: alacritty (used to use iterm2)
+- Shell: zsh with oh-my-zsh (used to use bash)
 - Window manager: yabai with skhd (used to use chunkwm with skhd)
 - Editor: nvim (the only editor in the world)
-- Music: mpd, mpc, ncmpcpp
-- Email: neomutt (Luke's mw)
+- Music: mpd, mpc, ncmpcpp (used to use cmus)
+- Email: neomutt, abook (Luke's mw)
 - RSS feed: newsboat
-- File manager: ranger, vifm
+- File manager: lf, ranger (fzf for fuzzy search)
 - Schedule: calcurse
 - Task manager: taskwarrior
 
