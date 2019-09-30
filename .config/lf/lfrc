@@ -107,7 +107,7 @@ cmd zip ${{
 
 # wal color
 map gp :cd ~/Pictures/Wallpapers
-map bg $wal -i $f && recolor
+map bg $wal -sq -i $f && recolor 1> /dev/null
 
 # fzf find
 map f $$EDITOR $(fzf)
