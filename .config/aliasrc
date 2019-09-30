@@ -1,0 +1,68 @@
+#!/bin/sh
+alias ka="killall" \
+	g="git" \
+	e="$EDITOR" \
+	v="$EDITOR" \
+    vim="$EDITOR" \
+    calcurse="calcurse -D ~/.config/calcurse" \
+	mpd="mpd ~/.config/mpd/mpd.conf" \
+    abook="abook -C $HOME/.config/abook/abookrc --datafile $HOME/.config/abook/addressbook" \
+    cl="calcurse -D ~/.config/calcurse" \
+    cat="highlight --force --out-format=ansi" \
+    ccat="bat --color=always" \
+    ls="gls -hN --color=auto --group-directories-first" \
+	grep="grep --color=auto" \
+	diff="colordiff" \
+    fzfp="fzf --preview 'highlight --force --out-format=ansi {}'" \
+    clock="tty-clock -c" \
+    youtube="youtube-dl --add-metadata -i -o '%(upload_date)s-%(title)s.%(ext)s'" \
+    download="cd ~/Downloads && aria2c" \
+    repr="source ~/.bash_profile && cd -" \
+    nm="neomutt" \
+    cmusd="tmux new-session -A -D -s cmus '$(which cmus)'" \
+    serverlinux="ssh -i $HOME/.ssh/keys/serverlinux.pem ubuntu@ec2-18-162-190-160.ap-east-1.compute.amazonaws.com" \
+    trem="transmission-remote-cli" \
+    lock="/System/Library/CoreServices/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine" \
+	python="python3" \
+    musicphp="/Users/frank/.config/composer/vendor/bin/music-php" \
+    hw="task list project:School" \
+    dotfiles="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME" \
+
+fvim() {
+	$EDITOR "$(fzfp -m --prompt='File> ')"
+}
+fzat() {
+	zathura --fork "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | grep ".pdf$" | fzfp -m --prompt='PDF> ')" 2> /dev/null
+}
+fimg() {
+	sxiv -qb "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | awk '/jpeg/ || /png/ || /jpg/ || /gif/' | fzfp -m --prompt='Image> ')"
+}
+fconfig() {
+    $EDITOR "$(du -a ~/.config ~/.local/bin | awk '{print $2}' | fzfp --prompt='Config> ')"
+}
+fbrew() {
+	inst="$(brew search | fzf -m --prompt='Package> ' --preview 'brew info {}')"
+	if [[ $inst ]]; then
+		for prog in "$(echo $inst)";
+    	do brew install $prog; done;
+  	fi
+}
+fman() {
+	man "$(man -k . | fzf --prompt='Man> ' | sed 's/(/ /g' | awk '{print $1}')"
+}
+fp() {
+	lpass show -c --password $(lpass ls  | fzf -m --prompt='Account> ' | awk '{print $(NF)}' | sed 's/\]//g')
+}
+lfcd () {
+    tmp="$(mktemp)"
+    lf -last-dir-path="$tmp" "$@"
+    if [ -f "$tmp" ]; then
+        dir="$(cat "$tmp")"
+        rm -f "$tmp"
+        if [ -d "$dir" ]; then
+            if [ "$dir" != "$(pwd)" ]; then
+                cd "$dir"
+            fi
+        fi
+    fi
+}
