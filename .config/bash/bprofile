@@ -79,9 +79,6 @@ set -o vi
 # Iterm2 shell integration support
 test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
 
-# Pywal restore color scheme
-wal -Rqn
-
 # Start up config
 cd ~
 echo "Welcome, Frank Li"

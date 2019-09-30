@@ -26,8 +26,8 @@ alias repr="source $HOME/.config/zsh/zshrc && cd -"
 # PS1="%B%{$fg[red]%}[%{$fg[yellow]%}%n%{$fg[green]%}@%{$fg[blue]%}%M:%{$fg[magenta]%}%~%{$fg[red]%}]%{$reset_color%}$%b "
 
 # History file
-HISTSIZE=
-SAVEHIST=
+HISTSIZE=10000
+SAVEHIST=10000
 HISTFILE=~/.config/zsh/history
 
 # Less/Man colors
