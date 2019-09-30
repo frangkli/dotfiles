@@ -1,5 +1,8 @@
 # Dotfiles
 
+Sorry for not putting the README.md file into the root folder.
+I have to do it like this because I push my dotfiles using a bare repository, so if I put README.md into the root directory of the repository, I would have a README.md file in my $HOME directory all the time.
+Which is pretty annoying.
 Obviously this is a repository for my configuration files.
 Config files are seperated into folders, although most of them only have one file in them, because I wanted to keep the name of the config file as it is.
 
