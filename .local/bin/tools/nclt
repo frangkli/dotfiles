@@ -1,0 +1,188 @@
+#!/bin/sh
+
+# aliases and functions
+tmp_deck="/tmp/tmpdeck"
+today=$(gdate +"%Y%m%d")
+tomorrow=$(gdate -d "now +1 days" +"%Y%m%d")
+resets="n"
+
+question_dialog() {
+	dialog --no-lines --no-shadow --title "Question" --msgbox "$1" 20 70
+}
+
+answer_dialog() {
+	dialog --no-lines --no-shadow --title "Answer" --msgbox "$1" 20 70
+}
+
+quality_dialog() {
+	dialog --no-lines --no-shadow --no-cancel --title "Answer" --menu "$1\n\nRate your answer:" 20 70 6 0 "complete blackout" 1 "incorrect" 2 "incorrect but the correct answer seemed easy to recall" 3 "correct response recalled with difficulty" 4 "correct response with some hesitation" 5 "correct response recalled easily" --output-fd 1
+}
+
+# studying functions
+study_deck() {
+	# shuffle deck
+	shuf $deck -o $tmp_deck
+	mv $tmp_deck $deck
+
+	# we have not failed any review, yet
+	resets="n"
+
+	# loop through items
+	while read item; do
+	    study_item "$item"
+	done < $deck
+
+	# update the deck from the temporary deck
+	mv $tmp_deck $deck
+
+	# say goodbye and relaunch main
+	if [[ $resets == "y" ]]; then
+		dialog --no-lines --no-shadow --colors --title "Warning" --msgbox "\Zb\Z1Some flashcards have been resetted because of poor performances so you should study the deck again" 20 70
+	else
+		dialog --no-lines --no-shadow --colors --title "Completed" --msgbox "\Zb\Z2All flashcards have been reviewed for today" 20 70
+	fi
+	main
+}
+
+study_item() {
+	# set up variables
+	IFS='|' read -a q <<< "$1"
+	question="${q[0]}"
+	answer="${q[1]}"
+	efactor="${q[2]}"
+	date="${q[3]}"
+	repetition_number="${q[4]}"
+	interval="${q[5]}"
+
+	if [[ "$today" -ge "$date" ]]; then
+		# asks questions, show answers and get quality
+		question_dialog "$question"
+		# answer_dialog "$question\n\n$answer"
+		quality=$(quality_dialog "$question\n\n$answer")
+
+		# if not one of the above numbers is given change quality to 0
+		if [[ $quality != 0 && $quality != 1 && $quality != 2 && $quality != 3 && $quality != 4 && $quality != 5 ]]; then
+			quality=0
+		fi
+
+		# update the e-factor
+		new_efactor=$(echo "$efactor - 0.8 + 0.28 * $quality - 0.02 * $quality * $quality" | bc)
+		[[ $(echo "$new_efactor > 2.5" | bc) == 1 ]] && new_efactor="2.5"
+		[[ $(echo "$new_efactor < 1.3" | bc) == 1 ]] && new_efactor="1.3"
+
+		# calculate new interval
+		if [[ $repetition_number == "0" ]]; then
+			new_interval="1";
+		else
+			new_interval=$(echo "$interval * $new_efactor" | bc)
+			new_interval=$(printf "%.0f" $new_interval)
+			[[ $new_interval == "0" ]] && new_interval="1"
+		fi
+
+		# update the item and store it in a temporary file
+		if [[ $(echo "$quality < 3" | bc) == "1" ]]; then
+			resets="y"
+			echo "$question|$answer|$new_efactor|$today|0|0" >> $tmp_deck
+		else
+			echo "$question|$answer|$new_efactor|$(date -d "now +$new_interval days" +"%Y%m%d")|$(echo "$repetition_number + 1" | bc)|$new_interval" >> $tmp_deck
+		fi
+	else
+		echo $1 >> $tmp_deck
+	fi
+}
+
+# cramming functions
+cram_deck() {
+	# shuffle deck
+	shuf $deck -o $tmp_deck
+	mv $tmp_deck $deck
+
+	# drill the items
+	while read item; do
+	    cram_item "$item"
+	done < $deck
+
+	# bye bye message and relaunch main
+	dialog --no-lines --no-shadow --colors --title "Completed" --msgbox "\Zb\Z2Cram completed" 20 70
+	main
+}
+
+cram_item() {
+	# set up variables
+	IFS='|' read -a q <<< "$1"
+	question="${q[0]}"
+	answer="${q[1]}"
+
+	# ask the question and give the answer
+	question_dialog "$question"
+	answer_dialog "$question\n\n$answer"
+}
+
+add_to_deck() {
+	question=$(dialog --no-lines --no-cancel --no-shadow --colors --title "Add" --inputbox "Question:" 20 70 --output-fd 1)
+	answer=$(dialog --no-lines --no-cancel --no-shadow --colors --title "Add" --inputbox "Answer:" 20 70 --output-fd 1)
+	echo "$question|$answer|2.5|$(date +"%Y%m%d")|0|0" >> $deck
+
+	# asks "another one?" just to avoid having to deal with the menu again
+	dialog --no-lines --no-cancel --no-shadow --colors --yesno "Do you want to add another flashcard?" 20 70
+	c=$?
+	if [[ $c == "0" ]]; then
+		add_to_deck
+	else
+		main
+	fi
+}
+
+# print informations about the deck
+info_deck() {
+	items=$(grep -c '' $deck)
+	sum=0
+	due_today=0
+	due_tomorrow=0
+
+	# loop through the flashcards to get infos
+	while read item; do
+		IFS='|' read -a q <<< "$item"
+
+		efactor="${q[2]}"
+		sum="$sum + $efactor"
+
+		date="${q[3]}"
+		if [[ "$date" -le "$today" ]]; then
+			due_today=$(echo "$due_today + 1" | bc -l)
+		elif [[ $date == $tomorrow ]]; then
+			due_tomorrow=$(echo "$due_tomorrow + 1" | bc -l)
+		fi
+	done < $deck
+
+	# e-factor average
+	avg=$(echo "($sum)/$items" | bc -l)
+	avg=$(printf "%.2f" $avg)
+
+	# info box
+	dialog --no-lines --no-shadow --colors --title "Info" --msgbox "Total cards:      $items\nDue Today:        $due_today\nDue tomorrow:     $due_tomorrow\nAverage E-factor: $avg" 20 70
+	main
+}
+
+# main function
+main() {
+	# get action
+	action=$(dialog --no-lines --no-shadow --no-cancel --title "Menu" --menu "Select what you want to do:" 20 70 5 1 "review deck" 2 "cram deck" 3 "info" 4 "add flashcard" 5 "quit" --output-fd 1)
+
+	# perform action
+	if [[ $action == "1" ]]; then
+		cp $deck backup_$deck
+		study_deck
+	elif [[ $action == "2" ]]; then
+		cram_deck
+	elif [[ $action == "3" ]]; then
+		info_deck
+	elif [[ $action == "4" ]]; then
+		add_to_deck
+	elif [[ $action == "5" ]]; then
+		clear
+	fi
+}
+
+deck=$1
+main

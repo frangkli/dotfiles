@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Clears the build files of a LaTeX/XeLaTeX build.
+# I have vim run this file whenever I exit a .tex file.
+
+case "$1" in
+	*.tex)
+	file=$(greadlink -f "$1")
+	dir=$(dirname "$file")
+	base="${file%.*}"
+	rm "$base".aux "$base".idx "$base".log "$base".out "$base".toc ;;
+	*) printf "Give .tex file as argument.\\n" ;;
+esac
+
