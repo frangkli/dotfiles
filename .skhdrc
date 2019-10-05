@@ -1,5 +1,5 @@
 # open terminal
-# cmd - return : /Applications/Kitty.app/Contents/MacOS/kitty --single-instance -d ~
+alt - return : open -n /Applications/Alacritty.app
 
 # focus window
 alt - h : yabai -m window --focus west
@@ -76,10 +76,10 @@ shift + alt - 9 : yabai -m window --space  9; yabai -m space --focus 9
 shift + alt - 0 : yabai -m window --space 10; yabai -m space --focus 10
 
 # move window
-shift + ctrl - a : yabai -m window --move rel:-20:0
-shift + ctrl - s : yabai -m window --move rel:0:20
-shift + ctrl - w : yabai -m window --move rel:2:-20
-shift + ctrl - d : yabai -m window --move rel:20:0
+shift + ctrl - h : yabai -m window --move rel:-20:0
+shift + ctrl - j : yabai -m window --move rel:0:20
+shift + ctrl - k : yabai -m window --move rel:0:-20
+shift + ctrl - l : yabai -m window --move rel:20:0
 
 # increase window size
 shift + alt - a : yabai -m window --resize left:-20:0
@@ -149,3 +149,6 @@ alt - m : mpc toggle && kill $(pgrep ffplay)
 
 # close window
 alt - q : yabai -m window --close
+
+# drop down window
+alt - v : ~/.local/bin/tools/popterm
