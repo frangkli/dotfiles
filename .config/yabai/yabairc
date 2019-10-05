@@ -19,7 +19,7 @@ yabai -m config window_topmost               off
 yabai -m config window_opacity               on
 yabai -m config window_opacity_duration      0.0
 yabai -m config window_shadow                on
-yabai -m config window_border                on
+yabai -m config window_border                off
 yabai -m config window_border_width          3
 yabai -m config active_window_border_color   0xffb2b2b2
 yabai -m config normal_window_border_color   0xff202020
@@ -43,3 +43,4 @@ yabai -m config window_gap                   10
 # ignore
 yabai -m rule --add app="^System Preferences$" manage=off
 yabai -m rule --add app="^WeChat$" manage=off
+yabai -m rule --add app="^QQ音乐$" manage=off
