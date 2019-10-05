@@ -21,6 +21,7 @@ Plug 'dylanaraps/wal.vim'
 Plug 'octol/vim-cpp-enhanced-highlight'
 Plug 'suan/vim-instant-markdown', {'for':'markdown'}
 Plug '/usr/local/opt/fzf'
+Plug 'junegunn/fzf.vim'
 Plug 'ervandew/supertab'
 Plug 'ryanoasis/vim-devicons'
 Plug 'jiangmiao/auto-pairs'
