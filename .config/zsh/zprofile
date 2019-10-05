@@ -56,6 +56,16 @@ export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(echo /usr/local/opt/*/lib/pkgconfig |
 export FZF_DEFAULT_COMMAND="ag --hidden --ignore .git -g ''"
 export FZF_COMPLETION_TRIGGER="~~"
 
+# Less/Man colors
+export LESS=-R
+export LESS_TERMCAP_md="$(printf '%b' '[1;31m')"; a="${a%_}"
+export LESS_TERMCAP_me="$(printf '%b' '[1;36m')"; a="${a%_}"
+export LESS_TERMCAP_mb="$(printf '%b' '[0m')"; a="${a%_}"
+export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"; a="${a%_}"
+export LESS_TERMCAP_se="$(printf '%b' '[0m')"; a="${a%_}"
+export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"; a="${a%_}"
+export LESS_TERMCAP_ue="$(printf '%b' '[0m')"; a="${a%_}"
+
 # Vi mode
 set -o vi
 
@@ -63,5 +73,4 @@ set -o vi
 . /usr/local/etc/profile.d/z.sh
 
 # Start up config
-cd ~
 echo "Welcome, Frank Li"
