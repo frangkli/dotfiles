@@ -106,8 +106,12 @@ cmd zip ${{
 }}
 
 # wal color
-map gp :cd ~/Pictures/Wallpapers
 map bg $wal -sq -i $f && recolor 1> /dev/null
 
 # fzf find
 map f $$EDITOR $(fzf)
+
+# quickmarks
+map gs cd ~/OneDrive/School
+map gp cd ~/Pictures/Wallpapers
+map gd cd ~/Downloads
