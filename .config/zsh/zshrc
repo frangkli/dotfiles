@@ -1,66 +1,89 @@
-# Basic oh-my-zsh config
-export ZSH="/Users/frank/.config/oh-my-zsh"
-ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-ZSH_THEME="powerlevel10k/powerlevel10k"
-POWERLEVEL9K_LEFT=(user dir vcs)
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status vi-mode public_ip)
-POWERLEVEL9K_CONTEXT_BACKGROUND="red"
-POWERLEVEL9K_CONTEXT_FOREGROUND="black"
-POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
-ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern cursor root line)
-ZSH_HIGHLIGHT_PATTERNS=('rm -rf *' 'fg=white,bold,bg=red')
-plugins=(colored-man-pages brew colorize pip python vi-mode)
+# Basic colors
+autoload colors && colors
 
-# Source files
-source "$HOME/.config/zsh/zprofile"
-source "$ZSH/oh-my-zsh.sh"
-source "$HOME/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh"
-source "$HOME/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh"
-source "$HOME/.config/aliasrc"
-source "$HOME/.config/shortcutrc"
+# Zsh completion config
+autoload -U compinit
+zstyle ':completion:*' menu select
+zmodload zsh/complist
+compinit
+_comp_options+=(globdots) # Show dotfiles
 
-# Alias overwrite
-alias repr="source $HOME/.config/zsh/zshrc && cd -"
+# Vcs for git prompt info
+autoload -Uz vcs_info
+zstyle ':vcs_info:*' enable git svn hg
+zstyle ':vcs_info:*' check-for-changes true
+zstyle ':vcs_info:*' formats "%{$fg[yellow]%}%c%{$fg[green]%}%u%{$reset_color%} [%{$fg[blue]%}%b%{$reset_color%}] %{$fg[yellow]%}%s%{$fg[blue]%}:%r%{$reset_color%}"
+precmd() {  # Run before each prompt
+    vcs_info
+}
 
-# PS1 management
-# PS1="%B%{$fg[red]%}[%{$fg[yellow]%}%n%{$fg[green]%}@%{$fg[blue]%}%M:%{$fg[magenta]%}%~%{$fg[red]%}]%{$reset_color%}$%b "
-
-# History file
-HISTSIZE=10000
-SAVEHIST=10000
-HISTFILE=~/.config/zsh/history
-
-# Less/Man colors
-export LESS=-R
-
-# Vim keys
+# Vim commandline mode config
 bindkey -v
 export KEYTIMEOUT=1
+vim_ins_mode="%{$fg[yellow]%}[INS]%{$reset_color%}"
+vim_cmd_mode="%{$fg[cyan]%}[CMD]%{$reset_color%}"
+vim_mode=$vim_ins_mode
+function zle-keymap-select {
+    # Change cursor depending on vi mode
+    if [[ ${KEYMAP} == vicmd ]] ||
+        [[ $1 = "block" ]]; then
+        echo -ne "\e[1 q"
+    elif [[ ${KEYMAP} == main ]] ||
+        [[ ${KEYMAP} == viins ]] ||
+        [[ ${KEYMAP} = "" ]] ||
+        [[ $1 = "beam" ]]; then
+        echo -ne "\e[5 q"
+    fi
+    vim_mode="${${KEYMAP/vicmd/${vim_cmd_mode}}/(main|viins)/${vim_ins_mode}}" # Vim mode symbol
+    zle reset-prompt
+}
+zle -N zle-keymap-select
+function zle-line-finish {
+    vim_mode=$vim_ins_mode
+}
+zle -N zle-line-finish
+function zle-line-init {
+    zle -K viins
+    echo -ne "\e[5 q"
+}
+zle -N zle-line-init
+echo -ne '\e[5 q' # Use beam shape cursor on startup.
+preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
 
-# Use vim keys in tab complete menu:
+# Vim keys in tab complete menu:
 bindkey -M menuselect "h" vi-backward-char
 bindkey -M menuselect "k" vi-up-line-or-history
 bindkey -M menuselect "l" vi-forward-char
 bindkey -M menuselect "j" vi-down-line-or-history
 bindkey -v "^?" backward-delete-char
 
-# Change cursor depending on vi mode
-function zle-keymap-select {
-  if [[ ${KEYMAP} == vicmd ]] ||
-     [[ $1 = "block" ]]; then
-    echo -ne "\e[1 q"
-  elif [[ ${KEYMAP} == main ]] ||
-       [[ ${KEYMAP} == viins ]] ||
-       [[ ${KEYMAP} = "" ]] ||
-       [[ $1 = "beam" ]]; then
-    echo -ne "\e[5 q"
-  fi
-}
-zle -N zle-keymap-select
-zle-line-init() {
-    zle -K viins
-    echo -ne "\e[5 q"
-}
+# Vim bindings in quotations
+autoload -U select-quoted
+zle -N select-quoted
+for m in visual viopp; do
+    for c in {a,i}{\',\",\`}; do
+        bindkey -M $m $c select-quoted
+    done
+done
+
+# Vim bindings in brackets
+autoload -U select-bracketed
+zle -N select-bracketed
+for m in visual viopp; do
+    for c in {a,i}${(s..)^:-'()[]{}<>bB'}; do
+        bindkey -M $m $c select-bracketed
+    done
+done
+
+# Prompt styling
+setopt PROMPT_SUBST
+PROMPT="%B%{$fg[red]%}[%{$fg[yellow]%}%n%{$fg[green]%}@%{$fg[blue]%}%M:%{$fg[magenta]%}%~%{$fg[red]%}]%{$reset_color%}$%b "
+RPROMPT='${vim_mode}${vcs_info_msg_0_}'
+
+# History file
+HISTSIZE=10000
+SAVEHIST=10000
+HISTFILE=~/.config/zsh/history
 
 # Bind lfcd to ctrl-o
 lfcd () {
@@ -73,3 +96,13 @@ lfcd () {
     fi
 }
 bindkey -s "^o" "lfcd\n"
+
+# Source files
+[ -f "$HOME/.config/zsh/zprofile" ] && source "$HOME/.config/zsh/zprofile"
+[ -f "$HOME/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh" ] && source "$HOME/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh"
+[ -f "$HOME/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh" ] && source "$HOME/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh"
+[ -f "$HOME/.config/aliasrc" ] && source "$HOME/.config/aliasrc"
+[ -f "$HOME/.config/shortcutrc" ] && source "$HOME/.config/shortcutrc"
+
+# Alias overwrite
+alias repr="source $HOME/.config/zsh/zshrc"
