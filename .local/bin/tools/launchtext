@@ -1,2 +1,3 @@
 #!/bin/sh
+
 osascript -e "tell application \"LaunchBar\" to display in large type \"$1\""
