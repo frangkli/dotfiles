@@ -4,6 +4,9 @@ autoload colors && colors
 # Zsh completion config
 autoload -U compinit
 zstyle ':completion:*' menu select
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' special-dirs true
+zstyle ':completion:*' group-name ''
 zmodload zsh/complist
 compinit
 _comp_options+=(globdots) # Show dotfiles
