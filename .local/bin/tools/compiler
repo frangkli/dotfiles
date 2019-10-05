@@ -29,8 +29,8 @@ case "$file" in
 	*\.tex) textype "$file" ;;
 	*\.md) pandoc "$file" --pdf-engine=xelatex --listings --number-sections -o "$base".pdf ;;
 	*config.h) sudo make install ;;
-    *\.c) gcc -std=c99 -Wall -lm "$file" -o "$base" && "$base" ;;
-    *\.cpp) g++ "$file" -o "$base" && "$base" ;;
+    *\.c) gcc-9 -std=c99 -Wall -lm "$file" -o "$base" && "$base" ;;
+    *\.cpp) g++-9 "$file" -o "$base" && "$base" ;;
 	*\.py) python3 "$file" ;;
 	*\.go) go run "$file" ;;
 esac
