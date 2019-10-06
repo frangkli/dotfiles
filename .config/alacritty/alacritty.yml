@@ -111,7 +111,7 @@ font:
     family: FuraMono Nerd Font
 
     # The `style` can be specified to pick a specific face.
-    #style: Regular
+    style: Regular
 
   # Bold font face
   bold:
@@ -122,11 +122,7 @@ font:
     family: FuraMono Nerd Font
 
     # The `style` can be specified to pick a specific face.
-    #style: Regular
-
-
-    # The `style` can be specified to pick a specific face.
-    style: Regular
+    style: Bold
 
   # Italic font face
   italic:
@@ -134,11 +130,7 @@ font:
     #
     # If the italic family is not specified, it will fall back to the
     # value specified for the normal font.
-    family: FuraMono Nerd Font
-
-    # The `style` can be specified to pick a specific face.
-    #style: Regular
-
+    family: Hack Nerd Font
 
     # The `style` can be specified to pick a specific face.
     style: Italic
@@ -173,7 +165,7 @@ font:
   #
   # This is a global setting and will require a log out or restart to take
   # effect.
-  use_thin_strokes: false
+  use_thin_strokes: true
 
 # If `true`, bold text is drawn using the bright color variants.
 draw_bold_text_with_bright_colors: false
@@ -448,28 +440,28 @@ key_bindings:
 # BEGIN ACE
 colors:
   primary:
-    background: '0x101414'
-    foreground: '0xdfd9d6'
+    background: '0x0a070a'
+    foreground: '0xebdecf'
   cursor:
-    text:       '0x101414'
-    cursor:     '0xdfd9d6'
+    text:       '0x0a070a'
+    cursor:     '0xebdecf'
   normal:
-    black:      '0x101414'
-    red:        '0x166E9A'
-    green:      '0x617691'
-    yellow:     '0x258AAF'
-    blue:       '0x648FB0'
-    magenta:    '0x6B9FC7'
-    cyan:       '0x9B9EA7'
-    white:      '0xdfd9d6'
+    black:      '0x0a070a'
+    red:        '0x936C5E'
+    green:      '0xA06941'
+    yellow:     '0xC4936E'
+    blue:       '0x877A84'
+    magenta:    '0xB0A19B'
+    cyan:       '0xD1B3A3'
+    white:      '0xebdecf'
   bright:
-    black:      '0x9c9795'
-    red:        '0x166E9A'
-    green:      '0x617691'
-    yellow:     '0x258AAF'
-    blue:       '0x648FB0'
-    magenta:    '0x6B9FC7'
-    cyan:       '0x9B9EA7'
-    white:      '0xdfd9d6'
+    black:      '0xa49b90'
+    red:        '0x936C5E'
+    green:      '0xA06941'
+    yellow:     '0xC4936E'
+    blue:       '0x877A84'
+    magenta:    '0xB0A19B'
+    cyan:       '0xD1B3A3'
+    white:      '0xebdecf'
 
 # END ACE
