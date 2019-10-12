@@ -61,7 +61,7 @@ syntax on
 " Syntastic config
     let g:syntastic_always_populate_loc_list = 1
     let g:syntastic_auto_loc_list = 0
-    let g:syntastic_check_on_open = 1
+    let g:syntastic_check_on_open = 0
     let g:syntastic_check_on_wq = 1
     let g:syntastic_error_symbol = "✗"
     let g:syntastic_warning_symbol = "⚠"
@@ -135,7 +135,7 @@ syntax on
 	autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
 " Goyo plugin makes text more readable when writing prose:
-	map <leader>f :Goyo \| set bg=dark \| set linebreak<CR>
+	map <leader>F :Goyo \| set bg=dark \| set linebreak<CR>
 
 " Spell-check set to <leader>o, 'o' for 'orthography':
 	map <leader>o :setlocal spell! spelllang=en_us<CR>
