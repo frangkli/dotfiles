@@ -26,6 +26,8 @@ alias ka="killall" \
     musicphp="/Users/frank/.config/composer/vendor/bin/music-php" \
     hw="task list project:School" \
     dotfiles="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME" \
+    cpr="compiler" \
+    r="/usr/local/bin/r" \
 
 fvim() {
 	$EDITOR "$(fzfp -m --prompt='File> ')"
@@ -49,19 +51,15 @@ fbrew() {
 fman() {
 	man "$(man -k . | fzf --prompt='Man> ' | sed 's/(/ /g' | awk '{print $1}')"
 }
-fp() {
+fpass() {
 	lpass show -c --password $(lpass ls  | fzf -m --prompt='Account> ' | awk '{print $(NF)}' | sed 's/\]//g')
 }
-lfcd () {
+lfcd() {
     tmp="$(mktemp)"
     lf -last-dir-path="$tmp" "$@"
     if [ -f "$tmp" ]; then
         dir="$(cat "$tmp")"
         rm -f "$tmp"
-        if [ -d "$dir" ]; then
-            if [ "$dir" != "$(pwd)" ]; then
-                cd "$dir"
-            fi
-        fi
+        [ -d "$dir" ] && [ "$dir" != "$(pwd)" ] && cd "$dir"
     fi
 }
