@@ -33,4 +33,5 @@ case "$file" in
     *\.cpp) g++-9 "$file" -o "$base" && "$base" ;;
 	*\.py) python3 "$file" ;;
 	*\.go) go run "$file" ;;
+    *\.java) javac "$file"  && java "${1%.*}" ;;
 esac
