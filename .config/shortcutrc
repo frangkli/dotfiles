@@ -10,6 +10,7 @@ alias h="cd ~/ && ls -l" \
     cf="cd ~/.config && ls -l" \
     sc="cd ~/.local/bin && ls -l" \
 	fr="cd ~/Sites/frankology && ls -l" \
+    tb="cd ~/Testbench && ls -l" \
     cfb="$EDITOR ~/.config/bash/bprofile" \
     cfbr="$EDITOR ~/.config/bash/bashrc" \
     cfz="$EDITOR ~/.config/zsh/zprofile" \
