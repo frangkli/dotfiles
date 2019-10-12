@@ -63,6 +63,11 @@ for m in visual viopp; do
     done
 done
 
+# Edit command in vim
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey "^E" edit-command-line
+
 # Prompt styling
 setopt PROMPT_SUBST
 PROMPT="%{$fg[red]%}[%{$fg[yellow]%}%n%{$fg[green]%}@%{$fg[blue]%}%M:%{$fg[magenta]%}%c%{$fg[red]%}]%{$reset_color%}$ "
@@ -81,17 +86,9 @@ HISTSIZE=10000
 SAVEHIST=10000
 HISTFILE=~/.config/zsh/history
 
-# Bind lfcd to ctrl-o
-function lfcd {
-    tmp="$(mktemp)"
-    lf -last-dir-path="$tmp" "$@"
-    if [ -f "$tmp" ]; then
-        dir="$(cat "$tmp")"
-        rm -f "$tmp"
-        [ -d "$dir" ] && [ "$dir" != "$(pwd)" ] && cd "$dir"
-    fi
-}
+# Quick bindings
 bindkey -s "^o" "lfcd\n"
+bindkey -s "^h" "htop\n"
 
 # Pip completion
 function _pip_completion {
