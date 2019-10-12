@@ -11,7 +11,7 @@ set shell sh
 set shellopts '-eu'
 
 # set preview program
-set previewer ~/.local/bin/tools/pv
+set previewer ~/.local/bin/tools/preview
 
 # set internal field separator (IFS) to "\n" for shell commands
 # This is useful to automatically split file names in $fs and $fx properly
@@ -107,6 +107,7 @@ cmd zip ${{
 
 # wal color
 map bg $wal -sq -i $f && recolor 1> /dev/null
+map bG $wal -l -sq -i $f && recolor 1> /dev/null
 
 # fzf find
 map f $$EDITOR $(fzf)
