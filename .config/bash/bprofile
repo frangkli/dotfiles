@@ -20,6 +20,7 @@ export HISTFILE="$HOME/.config/bash/bash_history"
 export WWW_HOME="$HOME/.config/w3m"
 export ZDOTDIR="$HOME/.config/zsh"
 export SCHOOL="$HOME/OneDrive/School"
+export PASSWORD_STORE_DIR="$HOME/.config/password-store"
 
 # Personalization
 export EDITOR="nvim"
@@ -65,6 +66,7 @@ export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"; a="${a%_}"
 export LESS_TERMCAP_se="$(printf '%b' '[0m')"; a="${a%_}"
 export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"; a="${a%_}"
 export LESS_TERMCAP_ue="$(printf '%b' '[0m')"; a="${a%_}"
+export LESSOPEN="|/usr/local/bin/lesspipe.sh %s" LESS_ADVANCED_PREPROCESSOR=1
 
 # Read .bashrc if exists
 [ -f ~/.config/bash/bashrc ] && source "$HOME/.config/bash/bashrc"
