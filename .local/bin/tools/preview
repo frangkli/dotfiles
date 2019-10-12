@@ -5,7 +5,7 @@ case "$1" in
     *.zip) unzip -l "$1";;
     *.rar) unrar l "$1";;
     *.7z) 7z l "$1";;
-    *.pdf) pdftotext "$1" -;;
+    *.pdf) pdftotext "$1" - | sed "s///g";;
     *.jpg) imgcat "$1";;
     *) highlight --force --out-format=ansi "$1" || bat --color=always "$1";;
 esac
