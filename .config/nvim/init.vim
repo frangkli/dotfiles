@@ -15,7 +15,6 @@ Plug 'LukeSmithxyz/vimling'
 Plug 'vimwiki/vimwiki'
 Plug 'bling/vim-airline'
 Plug 'tpope/vim-commentary'
-Plug 'vifm/vifm.vim'
 Plug 'dracula/vim', {'as':'dracula'}
 Plug 'dylanaraps/wal.vim'
 Plug 'octol/vim-cpp-enhanced-highlight'
@@ -30,7 +29,6 @@ Plug 'maxmellon/vim-jsx-pretty'
 Plug 'alvan/vim-closetag'
 Plug 'Shougo/deoplete.nvim', {'do':':UpdateRemotePlugins'}
 Plug 'deoplete-plugins/deoplete-jedi'
-Plug 'mhinz/vim-startify'
 Plug 'scrooloose/syntastic'
 Plug 'ptzz/lf.vim'
 Plug 'rbgrouleff/bclose.vim'
@@ -58,6 +56,11 @@ syntax on
 	color wal
 	hi CursorLineNr ctermfg=2
 
+" Enable folding
+    set foldmethod=indent
+    set foldlevel=99
+    nnoremap <space> za
+
 " Syntastic config
     let g:syntastic_always_populate_loc_list = 1
     let g:syntastic_auto_loc_list = 0
@@ -81,18 +84,21 @@ syntax on
     let g:airline#extensions#syntastic#enabled = 1
     let g:airline#extensions#fugitive#enabled = 1
 
-" Startify config:
-	let g:startify_bookmarks = [
-		\ {'A':'~/.profile'},
-		\ {'B':'~/.config/nvim/init.vim'},
-		\ {'C':'~/.config/aliasrc'},
-		\ {'D':'~/.config/shortcutrc'},
-		\ ]
-
 " Deoplete config:
 	let g:deoplete#enable_at_startup = 1
 	let g:deoplete#sources#jedi#statement_length = 50
 	let g:deoplete#sources#jedi#enable_typeinfo = 0
+
+" Jedi-vim:
+    let g:jedi#completions_enabled = 0
+    let g:jedi#use_splits_not_buffers = "right"
+    let g:jedi#goto_command = "<leader>d"
+    let g:jedi#goto_assignments_command = "<leader>g"
+    let g:jedi#goto_definitions_command = ""
+    let g:jedi#documentation_command = "K"
+    let g:jedi#usages_command = "<leader>n"
+    let g:jedi#completions_command = "<C-Space>"
+    let g:jedi#rename_command = "<leader>r"
 
 " Instant markdown preview config:
     let g:instant_markdown_autostart = 0
@@ -135,7 +141,11 @@ syntax on
 	autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
 " Goyo plugin makes text more readable when writing prose:
+    let g:goyo_width=90
 	map <leader>F :Goyo \| set bg=dark \| set linebreak<CR>
+
+" Reading environment
+    map <leader>R :Goyo \| set bg=dark \| set linebreak \| set so=999 \| set cursorline!<CR>
 
 " Spell-check set to <leader>o, 'o' for 'orthography':
 	map <leader>o :setlocal spell! spelllang=en_us<CR>
@@ -145,7 +155,7 @@ syntax on
 
 " Nerd tree
 	map <leader>n :NERDTreeToggle<CR>
-	autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+	autocmd Bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
 " Cpp highlight
 	let g:cpp_class_scope_highlight = 1
@@ -187,10 +197,11 @@ syntax on
 
 " Ensure files are read as what I want:
 	let g:vimwiki_ext2syntax = {'.Rmd': 'markdown', '.rmd': 'markdown','.md': 'markdown', '.markdown': 'markdown', '.mdown': 'markdown'}
-	let g:vimwiki_list = [{'path': '~/vimwiki', 'syntax': 'markdown', 'ext': '.md'}]
+	let g:vimwiki_list = [{'path': '~/Documents/Notebooks/Vimwiki', 'syntax': 'markdown', 'ext': '.rmd'}]
 	autocmd BufRead,BufNewFile /tmp/calcurse*,~/.calcurse/notes/* set filetype=markdown
 	autocmd BufRead,BufNewFile *.ms,*.me,*.mom,*.man set filetype=groff
 	autocmd BufRead,BufNewFile *.tex set filetype=tex
+    autocmd BufRead,BufNewFile *.asm set syntax=nasm
 
 " Copy selected text to system clipboard (requires gvim/nvim/vim-x11 installed):
 	vnoremap <C-c> "+y
@@ -223,20 +234,18 @@ syntax on
 	" Word count:
 	autocmd FileType tex map <leader>w :w !detex \| wc -w<CR>
 	" Code snippets
-	autocmd FileType tex inoremap ,fr \begin{frame}<Enter>\frametitle{}<Enter><Enter><++><Enter><Enter>\end{frame}<Enter><Enter><++><Esc>6kf}i
-	autocmd FileType tex inoremap ,fi \begin{fitch}<Enter><Enter>\end{fitch}<Enter><Enter><++><Esc>3kA
-	autocmd FileType tex inoremap ,exe \begin{exe}<Enter>\ex<Space><Enter>\end{exe}<Enter><Enter><++><Esc>3kA
 	autocmd FileType tex inoremap ,em \emph{}<++><Esc>T{i
 	autocmd FileType tex inoremap ,bf \textbf{}<++><Esc>T{i
-	autocmd FileType tex vnoremap , <ESC>`<i\{<ESC>`>2la}<ESC>?\\{<Enter>a
 	autocmd FileType tex inoremap ,it \textit{}<++><Esc>T{i
 	autocmd FileType tex inoremap ,ct \textcite{}<++><Esc>T{i
 	autocmd FileType tex inoremap ,cp \parencite{}<++><Esc>T{i
-	autocmd FileType tex inoremap ,glos {\gll<Space><++><Space>\\<Enter><++><Space>\\<Enter>\trans{``<++>''}}<Esc>2k2bcw
 	autocmd FileType tex inoremap ,x \begin{xlist}<Enter>\ex<Space><Enter>\end{xlist}<Esc>kA<Space>
-	autocmd FileType tex inoremap ,ol \begin{enumerate}<Enter><Enter>\end{enumerate}<Enter><Enter><++><Esc>3kA\item<Space>
-	autocmd FileType tex inoremap ,ul \begin{itemize}<Enter><Enter>\end{itemize}<Enter><Enter><++><Esc>3kA\item<Space>
+	autocmd FileType tex inoremap ,ol \begin{enumerate}<Enter>\item<Space><Enter>\end{enumerate}<Enter><++><Esc>2kA
+	autocmd FileType tex inoremap ,ul \begin{itemize}<Enter>\item<Space><Enter>\end{itemize}<Enter><++><Esc>2kA
 	autocmd FileType tex inoremap ,li <Enter>\item<Space>
+	autocmd FileType tex inoremap ,fr \begin{frame}<Enter>\frametitle{}<Enter><Enter><++><Enter><Enter>\end{frame}<Enter><Enter><++><Esc>6kf}i
+	autocmd FileType tex inoremap ,fi \begin{fitch}<Enter><Enter>\end{fitch}<Enter><Enter><++><Esc>3kA
+	autocmd FileType tex inoremap ,exe \begin{exe}<Enter>\ex<Space><Enter>\end{exe}<Enter><Enter><++><Esc>3kA
 	autocmd FileType tex inoremap ,ref \ref{}<Space><++><Esc>T{i
 	autocmd FileType tex inoremap ,tab \begin{tabular}<Enter><++><Enter>\end{tabular}<Enter><Enter><++><Esc>4kA{}<Esc>i
 	autocmd FileType tex inoremap ,ot \begin{tableau}<Enter>\inp{<++>}<Tab>\const{<++>}<Tab><++><Enter><++><Enter>\end{tableau}<Enter><Enter><++><Esc>5kA{}<Esc>i
@@ -252,7 +261,6 @@ syntax on
 	autocmd FileType tex inoremap ,st <Esc>F{i*<Esc>f}i
 	autocmd FileType tex inoremap ,beg \begin{DELRN}<Enter><++><Enter>\end{DELRN}<Enter><Enter><++><Esc>4k0fR:MultipleCursorsFind<Space>DELRN<Enter>c
 	autocmd FileType tex inoremap ,up <Esc>/usepackage<Enter>o\usepackage{}<Esc>i
-	autocmd FileType tex nnoremap ,up /usepackage<Enter>o\usepackage{}<Esc>i
 	autocmd FileType tex inoremap ,tt \texttt{}<Space><++><Esc>T{i
 	autocmd FileType tex inoremap ,bt {\blindtext}
 	autocmd FileType tex inoremap ,nu $\varnothing$
@@ -303,7 +311,6 @@ syntax on
 	autocmd FileType html inoremap ì &igrave;
 	autocmd FileType html inoremap ò &ograve;
 	autocmd FileType html inoremap ù &ugrave;
-
 
 """.bib
 	autocmd FileType bib inoremap ,a @article{<Enter>author<Space>=<Space>{<++>},<Enter>year<Space>=<Space>{<++>},<Enter>title<Space>=<Space>{<++>},<Enter>journal<Space>=<Space>{<++>},<Enter>volume<Space>=<Space>{<++>},<Enter>pages<Space>=<Space>{<++>},<Enter>}<Enter><++><Esc>8kA,<Esc>i

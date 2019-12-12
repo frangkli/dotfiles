@@ -18,7 +18,6 @@ alias ka="killall" \
     youtube="youtube-dl --add-metadata -i -o '%(upload_date)s-%(title)s.%(ext)s'" \
     download="cd ~/Downloads && aria2c" \
     repr="source ~/.profile && cd -" \
-    nm="neomutt" \
     cmusd="tmux new-session -A -D -s cmus '$(which cmus)'" \
     trem="transmission-remote-cli" \
     lock="/System/Library/CoreServices/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine" \
@@ -28,6 +27,7 @@ alias ka="killall" \
     dotfiles="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME" \
     cpr="compiler" \
     r="/usr/local/bin/r" \
+    bookmarks="buku --colors oKlxm -p | less" \
 
 fvim() {
 	$EDITOR "$(fzfp -m --prompt='File> ')"
@@ -43,13 +43,16 @@ fconfig() {
 }
 fbrew() {
 	inst="$(brew search | fzf -m --prompt='Package> ' --preview 'brew info {}')"
-	if [[ $inst ]]; then
-		for prog in "$(echo $inst)";
-    	do brew install $prog; done;
+	if [ "$inst" ]; then
+		for prog in $inst;
+    	do brew install "$prog"; done;
   	fi
 }
 fman() {
 	man "$(man -k . | fzf --prompt='Man> ' | sed 's/(/ /g' | awk '{print $1}')"
+}
+ftldr() {
+    tldr "$(tldr --list | sed "s/ //g" | tr "," "\n" | fzf --prompt='Tldr> ' --preview 'tldr {}')"
 }
 fpass() {
 	lpass show -c --password $(lpass ls  | fzf -m --prompt='Account> ' | awk '{print $(NF)}' | sed 's/\]//g')

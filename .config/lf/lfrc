@@ -44,6 +44,7 @@ cmd open ${{
         image/*) sxiv $fx &;;
         */pdf) zathura --fork $fx 2>/dev/null;;
         audio/*) ffplay -autoexit $fx 2>/dev/null &;;
+        video/*) ffplay -autoexit $fx 2>/dev/null &;;
         *) for f in $fx; do $OPENER $f > /dev/null 2> /dev/null & done;;
     esac
 }}
@@ -113,6 +114,7 @@ map bG $wal -l -sq -i $f && recolor 1> /dev/null
 map f $$EDITOR $(fzf)
 
 # quickmarks
-map gs cd ~/OneDrive/School
+map gs cd "~/OneDrive - Yew Chung International School HK/School"
+map ge cd "~/OneDrive - Yew Chung International School HK/Educational Materials"
 map gp cd ~/Pictures/Wallpapers
 map gd cd ~/Downloads

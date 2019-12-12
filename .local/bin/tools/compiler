@@ -13,7 +13,7 @@ base="${file%.*}"
 cd "$dir" || exit
 
 textype() { \
-	command="pdflatex"
+	command="pdflatex -shell-escape"
 	( sed 5q "$file" | grep -i -q 'xelatex' ) && command="xelatex"
 	$command --output-directory="$dir" "$base" &&
 	grep -i addbibresource "$file" >/dev/null &&
@@ -34,4 +34,5 @@ case "$file" in
 	*\.py) python3 "$file" ;;
 	*\.go) go run "$file" ;;
     *\.java) javac "$file"  && java "${1%.*}" ;;
+    *\.asm) nasm -f macho64 -o "$base".o "$file" && ld -macosx_version_min 10.7.0 -o "$base" "$base".o ;;
 esac

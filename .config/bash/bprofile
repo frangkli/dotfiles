@@ -33,6 +33,12 @@ export LC_ALL="en_US.UTF-8"
 export XML_CATALOG_FILES="/usr/local/etc/xml/catalog"
 export LPASS_HOME="$HOME/.config/lpass"
 
+# Vulkan config
+export VULKAN_SDK="$HOME/.local/software/vulkansdk-macos-1.1.121.1/macOS"
+export PATH="$PATH:$VULKAN_SDK/bin"
+export DYLD_LIBRARY_PATH="$VULKAN_SDK/lib:$DYLD_LIBRARY_PATH"
+export VK_ICD_FILENAMES="$VULKAN_SDK/etc/vulkan/icd.d/MoltenVK_icd.json"
+
 # Python
 export PYTHON_CONFIGURE_OPTS="--enable-framework"
 
