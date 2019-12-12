@@ -146,6 +146,8 @@ alt - z : /System/Library/CoreServices/ScreenSaverEngine.app/Contents/MacOS/Scre
 
 # mpc binds
 alt - m : mpc toggle && kill $(pgrep ffplay)
+alt - n : mpc next
+shift + alt - n : mpc prev
 
 # close window
 alt - q : yabai -m window --close

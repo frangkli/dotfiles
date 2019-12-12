@@ -440,28 +440,28 @@ key_bindings:
 # BEGIN ACE
 colors:
   primary:
-    background: '0x0a070a'
-    foreground: '0xebdecf'
+    background: '0x131206'
+    foreground: '0xe4e0da'
   cursor:
-    text:       '0x0a070a'
-    cursor:     '0xebdecf'
+    text:       '0x131206'
+    cursor:     '0xe4e0da'
   normal:
-    black:      '0x0a070a'
-    red:        '0x936C5E'
-    green:      '0xA06941'
-    yellow:     '0xC4936E'
-    blue:       '0x877A84'
-    magenta:    '0xB0A19B'
-    cyan:       '0xD1B3A3'
-    white:      '0xebdecf'
+    black:      '0x131206'
+    red:        '0xD4A316'
+    green:      '0xC5AE38'
+    yellow:     '0x9A9A69'
+    blue:       '0xB7B78F'
+    magenta:    '0xD5CD93'
+    cyan:       '0xD5D0B0'
+    white:      '0xe4e0da'
   bright:
-    black:      '0xa49b90'
-    red:        '0x936C5E'
-    green:      '0xA06941'
-    yellow:     '0xC4936E'
-    blue:       '0x877A84'
-    magenta:    '0xB0A19B'
-    cyan:       '0xD1B3A3'
-    white:      '0xebdecf'
+    black:      '0x9f9c98'
+    red:        '0xD4A316'
+    green:      '0xC5AE38'
+    yellow:     '0x9A9A69'
+    blue:       '0xB7B78F'
+    magenta:    '0xD5CD93'
+    cyan:       '0xD5D0B0'
+    white:      '0xe4e0da'
 
 # END ACE
