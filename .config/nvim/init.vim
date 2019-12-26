@@ -7,7 +7,7 @@ if ! filereadable(expand('~/.config/nvim/autoload/plug.vim'))
 endif
 
 call plug#begin('~/.config/nvim/plugged')
-Plug 'tpope/vim-surround'
+" Plug 'tpope/vim-surround'
 Plug 'scrooloose/nerdtree'
 Plug 'tpope/vim-fugitive'
 Plug 'junegunn/goyo.vim'
@@ -15,35 +15,31 @@ Plug 'LukeSmithxyz/vimling'
 Plug 'vimwiki/vimwiki'
 Plug 'bling/vim-airline'
 Plug 'tpope/vim-commentary'
-Plug 'dracula/vim', {'as':'dracula'}
+Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'dylanaraps/wal.vim'
-Plug 'octol/vim-cpp-enhanced-highlight'
-Plug 'suan/vim-instant-markdown', {'for':'markdown'}
+Plug 'octol/vim-cpp-enhanced-highlight', { 'for': ['c', 'cpp'] }
+Plug 'suan/vim-instant-markdown', { 'for': 'markdown' }
 Plug '/usr/local/opt/fzf'
 Plug 'junegunn/fzf.vim'
 Plug 'ervandew/supertab'
 Plug 'ryanoasis/vim-devicons'
 Plug 'jiangmiao/auto-pairs'
-Plug 'pangloss/vim-javascript'
-Plug 'maxmellon/vim-jsx-pretty'
-Plug 'alvan/vim-closetag'
-Plug 'Shougo/deoplete.nvim', {'do':':UpdateRemotePlugins'}
-Plug 'deoplete-plugins/deoplete-jedi'
-Plug 'scrooloose/syntastic'
-Plug 'ptzz/lf.vim'
-Plug 'rbgrouleff/bclose.vim'
-" Plug 'vim-scripts/c.vim'
+Plug 'pangloss/vim-javascript', { 'for': ['javascript', 'jsx', 'javascriptreact'] }
+Plug 'maxmellon/vim-jsx-pretty', { 'for': ['javascript', 'jsx', 'javascriptreact'] }
+Plug 'alvan/vim-closetag', { 'for': ['javascript', 'jsx', 'javascriptreact', 'html'] }
+Plug 'Valloric/YouCompleteMe', { 'do':'./install.py', 'for': ['python', 'c', 'javascript', 'jsx', 'javascriptreact', 'java', 'cpp'] }
+Plug 'scrooloose/syntastic', { 'for': ['python'] }
 call plug#end()
 
 set bg=light
 set go=a
 set mouse=a
+set exrc
 set hlsearch
 set expandtab
 set clipboard=unnamedplus
 set undodir=~/.config/nvim/undodir
 set undofile
-set nocompatible
 set encoding=utf-8
 set number relativenumber
 set tabstop=4
@@ -54,7 +50,7 @@ syntax on
 
 " Highlight colors:
 	color wal
-	hi CursorLineNr ctermfg=2
+	highlight CursorLineNr ctermfg=2
 
 " Enable folding
     set foldmethod=indent
@@ -64,16 +60,19 @@ syntax on
 " Syntastic config
     let g:syntastic_always_populate_loc_list = 1
     let g:syntastic_auto_loc_list = 0
-    let g:syntastic_check_on_open = 0
+    let g:syntastic_check_on_open = 1
     let g:syntastic_check_on_wq = 1
     let g:syntastic_error_symbol = "✗"
     let g:syntastic_warning_symbol = "⚠"
+    let g:syntastic_cpp_include_dirs = ['']
+    highlight SyntasticErrorSign ctermfg=12 ctermbg=0
+    highlight SyntasticWarningSign ctermfg=14 ctermbg=0
     map <leader>l :lopen<CR>
     map <leader>L :lclose<CR>
 
 " Cursor precision:
-	hi CursorLine ctermbg=9
-	hi CursorColumn ctermbg=9
+	highlight CursorLine ctermbg=9
+	highlight CursorColumn ctermbg=9
 	map + :set cursorline! cursorcolumn!<CR>
 
 " Airline config:
@@ -84,21 +83,29 @@ syntax on
     let g:airline#extensions#syntastic#enabled = 1
     let g:airline#extensions#fugitive#enabled = 1
 
-" Deoplete config:
-	let g:deoplete#enable_at_startup = 1
-	let g:deoplete#sources#jedi#statement_length = 50
-	let g:deoplete#sources#jedi#enable_typeinfo = 0
-
-" Jedi-vim:
-    let g:jedi#completions_enabled = 0
-    let g:jedi#use_splits_not_buffers = "right"
-    let g:jedi#goto_command = "<leader>d"
-    let g:jedi#goto_assignments_command = "<leader>g"
-    let g:jedi#goto_definitions_command = ""
-    let g:jedi#documentation_command = "K"
-    let g:jedi#usages_command = "<leader>n"
-    let g:jedi#completions_command = "<C-Space>"
-    let g:jedi#rename_command = "<leader>r"
+" Youcompleteme config:
+    let g:ycm_global_ycm_extra_conf = '$HOME/.config/nvim/plugged/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
+    let g:ycm_confirm_extra_conf = 0
+    let g:ycm_semantic_triggers =  {
+      \   'c': ['->', '.', 're!\w{2}'],
+      \   'objc': ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s',
+      \            're!\[.*\]\s'],
+      \   'ocaml': ['.', '#'],
+      \   'cpp,cuda,objcpp': ['->', '.', '::', 're!\w{2}'],
+      \   'perl': ['->'],
+      \   'php': ['->', '::'],
+      \   'cs,d,elixir,go,groovy,java,javascript,julia,perl6,scala,typescript,vb': ['.'],
+      \   'ruby,rust': ['.', '::'],
+      \   'lua': ['.', ':'],
+      \   'erlang': [':'],
+      \   'python': ['.', 're!\w{2}'],
+      \ }
+    let g:ycm_python_binary_path = '/usr/local/bin/python3'
+    let g:ycm_autoclose_preview_window_after_completion = 1
+    nmap yd :YcmCompleter GetDoc<CR>
+    nmap <leader>d :YcmCompleter GoToDefinition<CR>
+    nmap <leader>g :YcmCompleter GoTo<CR>
+    highlight Pmenu ctermbg=gray guibg=gray ctermfg=black
 
 " Instant markdown preview config:
     let g:instant_markdown_autostart = 0
@@ -122,10 +129,6 @@ syntax on
 " Warn when more than 100 columns:
     call matchadd('ColorColumn', '\%100v', 100)
 
-" Switch tabs easily:
-    map <C-u> :tabprev<CR>
-    map <C-i> :tabnext<CR>
-
 " Enable autocompletion:
 	set wildmode=longest,list,full
 
@@ -133,9 +136,6 @@ syntax on
     map <leader>. :Files<CR>
     map <leader> :Maps<CR>,
     map <leader>m :Buffers<CR>
-
-" Lf configuration:
-    map <leader>/ :LfNewTab<CR>
 
 " Disables automatic commenting on newline:
 	autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
@@ -163,12 +163,12 @@ syntax on
 	let g:cpp_class_decl_highlight = 1
 	let g:cpp_concepts_highlight = 1
 
-" vimling:
-	nm <leader>d :call ToggleDeadKeys()<CR>
-	imap <leader>d <esc>:call ToggleDeadKeys()<CR>a
-	nm <leader>i :call ToggleIPA()<CR>
+" Vimling binding:
+	nmap <leader>D :call ToggleDeadKeys()<CR>
+	imap <leader>D <esc>:call ToggleDeadKeys()<CR>a
+	nmap <leader>i :call ToggleIPA()<CR>
 	imap <leader>i <esc>:call ToggleIPA()<CR>a
-	nm <leader>q :call ToggleProse()<CR>
+	nmap <leader>q :call ToggleProse()<CR>
 
 " Shortcutting split navigation, saving a keypress:
 	map <C-h> <C-w>h
@@ -180,8 +180,8 @@ syntax on
 	map <leader>s :!clear && shellcheck %<CR>
 
 " Open my bibliography file in split
-	map <leader>b :vsp<space>$BIB<CR>
-	map <leader>r :vsp<space>$REFER<CR>
+	"map <leader>b :vsp<space>$BIB<CR>
+	"map <leader>r :vsp<space>$REFER<CR>
 
 " Replace all is aliased to S.
 	nnoremap S :%s//g<Left><Left>
@@ -196,7 +196,7 @@ syntax on
 	autocmd VimLeave *.tex !texclear %
 
 " Ensure files are read as what I want:
-	let g:vimwiki_ext2syntax = {'.Rmd': 'markdown', '.rmd': 'markdown','.md': 'markdown', '.markdown': 'markdown', '.mdown': 'markdown'}
+	let g:vimwiki_ext2syntax = {'.Rmd': 'markdown', '.rmd': 'markdown', '.md': 'markdown', '.markdown': 'markdown', '.mdown': 'markdown'}
 	let g:vimwiki_list = [{'path': '~/Documents/Notebooks/Vimwiki', 'syntax': 'markdown', 'ext': '.rmd'}]
 	autocmd BufRead,BufNewFile /tmp/calcurse*,~/.calcurse/notes/* set filetype=markdown
 	autocmd BufRead,BufNewFile *.ms,*.me,*.mom,*.man set filetype=groff
@@ -207,19 +207,8 @@ syntax on
 	vnoremap <C-c> "+y
 	map <C-p> "+P
 
-" Enable Goyo by default for mutt writting
-	" Goyo's width will be the line limit in mutt.
-	autocmd BufRead,BufNewFile /tmp/neomutt* let g:goyo_width=80
-	autocmd BufRead,BufNewFile /tmp/neomutt* :Goyo \| set bg=light
-
 " Automatically deletes all trailing whitespace on save.
 	autocmd BufWritePre * %s/\s\+$//e
-
-" When shortcut files are updated, renew bash and vifm configs with new material:
-	autocmd BufWritePost ~/.config/bmdirs,~/.config/bmfiles !shortcuts
-
-" Run xrdb whenever Xdefaults or Xresources are updated.
-	autocmd BufWritePost *Xresources,*Xdefaults !xrdb %
 
 " Navigating with guides
 	inoremap <leader><leader> <Esc>/<++><Enter>"_c4l
@@ -334,7 +323,3 @@ syntax on
 	autocmd Filetype rmd inoremap ,r ```{r}<CR>```<CR><CR><esc>2kO
 	autocmd Filetype rmd inoremap ,p ```{python}<CR>```<CR><CR><esc>2kO
 	autocmd Filetype rmd inoremap ,c ```<cr>```<cr><cr><esc>2kO
-
-""".xml
-	autocmd FileType xml inoremap ,e <item><Enter><title><++></title><Enter><guid<space>isPermaLink="false"><++></guid><Enter><pubDate><Esc>:put<Space>=strftime('%a, %d %b %Y %H:%M:%S %z')<Enter>kJA</pubDate><Enter><link><++></link><Enter><description><![CDATA[<++>]]></description><Enter></item><Esc>?<title><enter>cit
-	autocmd FileType xml inoremap ,a <a href="<++>"><++></a><++><Esc>F"ci"
