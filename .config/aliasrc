@@ -28,6 +28,7 @@ alias ka="killall" \
     cpr="compiler" \
     r="/usr/local/bin/r" \
     bookmarks="buku --colors oKlxm -p | less" \
+    ycom="unlink conan_ycm_flags.json && rm .ycm_extra_conf.py && cp build/conan_ycm_extra_conf.py .ycm_extra_conf.py && ln -s build/conan_ycm_flags.json conan_ycm_flags.json" \
 
 fvim() {
 	$EDITOR "$(fzfp -m --prompt='File> ')"
