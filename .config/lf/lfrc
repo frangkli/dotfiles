@@ -118,3 +118,8 @@ map gs cd "~/OneDrive - Yew Chung International School HK/School"
 map ge cd "~/OneDrive - Yew Chung International School HK/Educational Materials"
 map gp cd ~/Pictures/Wallpapers
 map gd cd ~/Downloads
+
+# alter defaults
+set hidden on
+set relativenumber on
+set icons on
