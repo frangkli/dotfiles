@@ -1,0 +1,116 @@
+diff --git a/config.def.h b/config.def.h
+index 546edda..67404ca 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -5,8 +5,8 @@
+  *
+  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
+  */
+-static char *font = "Liberation Mono:pixelsize=12:antialias=true:autohint=true";
+-static int borderpx = 2;
++static char *font = "FuraMono Nerd Font:size=8:antialias=true:autohint=true";
++static int borderpx = 20;
+ 
+ /*
+  * What program is execed by st depends of these precedence rules:
+@@ -80,46 +80,45 @@ char *termname = "st-256color";
+  *
+  *	stty tabs
+  */
+-unsigned int tabspaces = 8;
++unsigned int tabspaces = 4;
+ 
+ /* Terminal colors (16 first used in escape sequence) */
+ static const char *colorname[] = {
+-	/* 8 normal colors */
+-	"black",
+-	"red3",
+-	"green3",
+-	"yellow3",
+-	"blue2",
+-	"magenta3",
+-	"cyan3",
+-	"gray90",
+-
+-	/* 8 bright colors */
+-	"gray50",
+-	"red",
+-	"green",
+-	"yellow",
+-	"#5c5cff",
+-	"magenta",
+-	"cyan",
+-	"white",
+-
+-	[255] = 0,
+-
+-	/* more colors can be added after 255 to use with DefaultXX */
+-	"#cccccc",
+-	"#555555",
++   /* 8 normal colors */
++     "black",
++     "red3",
++     "green3",
++     "yellow3",
++     "blue2",
++     "magenta3",
++     "cyan3",
++     "gray90",
++
++     /* 8 bright colors */
++     "gray50",
++     "red",
++     "green",
++     "yellow",
++     "#5c5cff",
++     "magenta",
++     "cyan",
++     "white",
++
++     [255] = 0,
++
++     /* more colors can be added after 255 to use with DefaultXX */
++     "#cccccc",
++     "#555555",
+ };
+ 
+-
+ /*
+  * Default colors (colorname index)
+  * foreground, background, cursor, reverse cursor
+  */
+-unsigned int defaultfg = 7;
+-unsigned int defaultbg = 0;
+-static unsigned int defaultcs = 256;
+-static unsigned int defaultrcs = 257;
++unsigned int defaultfg = 257;
++unsigned int defaultbg = 256;
++static unsigned int defaultcs = 257;
++static unsigned int defaultrcs = 256;
+ 
+ /*
+  * Default shape of cursor
+diff --git a/config.mk b/config.mk
+index 0cbb002..0eb5e3c 100644
+--- a/config.mk
++++ b/config.mk
+@@ -7,8 +7,8 @@ VERSION = 0.8.2
+ PREFIX = /usr/local
+ MANPREFIX = $(PREFIX)/share/man
+ 
+-X11INC = /usr/X11R6/include
+-X11LIB = /usr/X11R6/lib
++X11INC = /usr/X11/include
++X11LIB = /usr/X11/lib
+ 
+ PKG_CONFIG = pkg-config
+ 
+@@ -16,7 +16,7 @@ PKG_CONFIG = pkg-config
+ INCS = -I$(X11INC) \
+        `$(PKG_CONFIG) --cflags fontconfig` \
+        `$(PKG_CONFIG) --cflags freetype2`
+-LIBS = -L$(X11LIB) -lm -lrt -lX11 -lutil -lXft \
++LIBS = -L$(X11LIB) -lm -lX11 -lutil -lXft \
+        `$(PKG_CONFIG) --libs fontconfig` \
+        `$(PKG_CONFIG) --libs freetype2`
+ 

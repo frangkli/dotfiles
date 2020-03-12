@@ -1,0 +1,2 @@
+shell /Users/frank/.config/cmus/cmus-osx/media-keys.py
+set status_display_program=/Users/frank/.config/cmus/cmus-osx/notify.py

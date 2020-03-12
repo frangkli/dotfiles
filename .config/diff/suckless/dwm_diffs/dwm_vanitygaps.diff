@@ -1,0 +1,206 @@
+diff --git a/config.def.h b/config.def.h
+index 1c0b587..4e81798 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -5,8 +5,8 @@ static const unsigned int borderpx  = 1;        /* border pixel of windows */
+ static const unsigned int snap      = 32;       /* snap pixel */
+ static const int showbar            = 1;        /* 0 means no bar */
+ static const int topbar             = 1;        /* 0 means bottom bar */
+-static const char *fonts[]          = { "monospace:size=10" };
+-static const char dmenufont[]       = "monospace:size=10";
++static const char *fonts[]          = { "FuraMono Nerd Font Mono:size=9" };
++static const char dmenufont[]       = "FuraMono Nerd Font Mono:size=9";
+ static const char col_gray1[]       = "#222222";
+ static const char col_gray2[]       = "#444444";
+ static const char col_gray3[]       = "#bbbbbb";
+@@ -27,14 +27,13 @@ static const Rule rules[] = {
+ 	 *	WM_NAME(STRING) = title
+ 	 */
+ 	/* class      instance    title       tags mask     isfloating   monitor */
+-	{ "Gimp",     NULL,       NULL,       0,            1,           -1 },
+-	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 },
++	{ NULL,       NULL,       NULL,       0,            0,           -1 },
+ };
+ 
+ /* layout(s) */
+ static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
+ static const int nmaster     = 1;    /* number of clients in master area */
+-static const int resizehints = 1;    /* 1 means respect size hints in tiled resizals */
++static const int resizehints = 0;    /* 1 means respect size hints in tiled resizals */
+ 
+ static const Layout layouts[] = {
+ 	/* symbol     arrange function */
+diff --git a/config.mk b/config.mk
+index 6d36cb7..14112c5 100644
+--- a/config.mk
++++ b/config.mk
+@@ -7,8 +7,8 @@ VERSION = 6.2
+ PREFIX = /usr/local
+ MANPREFIX = ${PREFIX}/share/man
+ 
+-X11INC = /usr/X11R6/include
+-X11LIB = /usr/X11R6/lib
++X11INC = /usr/X11/include
++X11LIB = /usr/X11/lib
+ 
+ # Xinerama, comment if you don't want it
+ XINERAMALIBS  = -lXinerama
+@@ -16,7 +16,7 @@ XINERAMAFLAGS = -DXINERAMA
+ 
+ # freetype
+ FREETYPELIBS = -lfontconfig -lXft
+-FREETYPEINC = /usr/include/freetype2
++FREETYPEINC = /usr/local/Cellar/freetype/2.10.1/include/freetype2
+ # OpenBSD (uncomment)
+ #FREETYPEINC = ${X11INC}/freetype2
+ 
+@@ -27,7 +27,7 @@ LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS}
+ # flags
+ CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_POSIX_C_SOURCE=2 -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS}
+ #CFLAGS   = -g -std=c99 -pedantic -Wall -O0 ${INCS} ${CPPFLAGS}
+-CFLAGS   = -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}
++CFLAGS   = -std=c99 -pedantic -Wall -Wno-implicit-function-declaration -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}
+ LDFLAGS  = ${LIBS}
+ 
+ # Solaris
+diff --git a/dwm.c b/dwm.c
+index 4465af1..c3b2d82 100644
+--- a/dwm.c
++++ b/dwm.c
+@@ -119,6 +119,10 @@ struct Monitor {
+ 	int by;               /* bar geometry */
+ 	int mx, my, mw, mh;   /* screen size */
+ 	int wx, wy, ww, wh;   /* window area  */
++	int gappih;           /* horizontal gap between windows */
++	int gappiv;           /* vertical gap between windows */
++	int gappoh;           /* horizontal outer gaps */
++	int gappov;           /* vertical outer gaps */
+ 	unsigned int seltags;
+ 	unsigned int sellt;
+ 	unsigned int tagset[2];
+@@ -208,7 +212,6 @@ static void sigchld(int unused);
+ static void spawn(const Arg *arg);
+ static void tag(const Arg *arg);
+ static void tagmon(const Arg *arg);
+-static void tile(Monitor *);
+ static void togglebar(const Arg *arg);
+ static void togglefloating(const Arg *arg);
+ static void toggletag(const Arg *arg);
+@@ -638,6 +641,10 @@ createmon(void)
+ 	m->nmaster = nmaster;
+ 	m->showbar = showbar;
+ 	m->topbar = topbar;
++	m->gappih = gappih;
++	m->gappiv = gappiv;
++	m->gappoh = gappoh;
++	m->gappov = gappov;
+ 	m->lt[0] = &layouts[0];
+ 	m->lt[1] = &layouts[1 % LENGTH(layouts)];
+ 	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
+@@ -1670,32 +1677,6 @@ tagmon(const Arg *arg)
+ 	sendmon(selmon->sel, dirtomon(arg->i));
+ }
+ 
+-void
+-tile(Monitor *m)
+-{
+-	unsigned int i, n, h, mw, my, ty;
+-	Client *c;
+-
+-	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+-	if (n == 0)
+-		return;
+-
+-	if (n > m->nmaster)
+-		mw = m->nmaster ? m->ww * m->mfact : 0;
+-	else
+-		mw = m->ww;
+-	for (i = my = ty = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
+-		if (i < m->nmaster) {
+-			h = (m->wh - my) / (MIN(n, m->nmaster) - i);
+-			resize(c, m->wx, m->wy + my, mw - (2*c->bw), h - (2*c->bw), 0);
+-			my += HEIGHT(c);
+-		} else {
+-			h = (m->wh - ty) / (n - i);
+-			resize(c, m->wx + mw, m->wy + ty, m->ww - mw - (2*c->bw), h - (2*c->bw), 0);
+-			ty += HEIGHT(c);
+-		}
+-}
+-
+ void
+ togglebar(const Arg *arg)
+ {
+diff --git a/vanitygaps.c b/vanitygaps.c
+new file mode 100644
+index 0000000..bf609f4
+--- /dev/null
++++ b/vanitygaps.c
+@@ -0,0 +1,68 @@
++/* Key binding functions */
++static void togglegaps(const Arg *arg);
++/* Layouts */
++static void tile(Monitor *m);
++/* Internals */
++static void getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc);
++
++/* Settings */
++static int enablegaps = 1;
++
++static void
++togglegaps(const Arg *arg)
++{
++	enablegaps = !enablegaps;
++	arrange(NULL);
++}
++
++static void
++getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc )
++{
++	unsigned int n, oe = enablegaps, ie = enablegaps;
++	Client *c;
++
++	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
++	if (smartgaps && n == 1) {
++		oe = 0; // outer gaps disabled when only one client
++	}
++
++	*oh = m->gappoh*oe; // outer horizontal gap
++	*ov = m->gappov*oe; // outer vertical gap
++	*ih = m->gappih*ie; // inner horizontal gap
++	*iv = m->gappiv*ie; // inner vertical gap
++	*nc = n;            // number of clients
++}
++
++/***
++ * Layouts
++ */
++
++static void
++tile(Monitor *m)
++{
++	unsigned int i, n, h, r, mw, my, ty;
++	int oh, ov, ih, iv;
++	Client *c;
++
++	getgaps(m, &oh, &ov, &ih, &iv, &n);
++
++	if (n == 0)
++		return;
++
++	if (n > m->nmaster)
++		mw = m->nmaster ? (m->ww - iv) * m->mfact: 0;
++	else
++		mw = m->ww - 2*ov;
++	for (i = 0, my = ty = oh, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
++		if (i < m->nmaster) {
++			r = MIN(n, m->nmaster) - i;
++			h = (m->wh - my - oh - ih * (r - 1)) / r;
++			resize(c, m->wx + ov, m->wy + my, mw - (2*c->bw) - oh, h - (2*c->bw), 0);
++			my += HEIGHT(c) + ih;
++		} else {
++			r = n - i;
++			h = (m->wh - ty - oh - ih * (r - 1)) / r;
++			resize(c, m->wx + mw + ov + (m->nmaster ? iv : 0) - oh, m->wy + ty, m->ww - mw - (2*c->bw) - 2*ov - (m->nmaster ? iv : 0) + oh, h - (2*c->bw), 0);
++			ty += HEIGHT(c) + ih;
++		}
++}
