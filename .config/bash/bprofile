@@ -17,7 +17,7 @@ export XDG_DATA_HOME="$HOME/.config"
 export _Z_DATA="$HOME/.config/z/z"
 export TASKRC="$HOME/.config/task/taskrc"
 export HISTFILE="$HOME/.config/bash/bash_history"
-export WWW_HOME="$HOME/.config/w3m"
+export WWW_HOME="$HOME/.w3m"
 export ZDOTDIR="$HOME/.config/zsh"
 export SCHOOL="$HOME/OneDrive/School"
 export PASSWORD_STORE_DIR="$HOME/.config/password-store"
@@ -25,8 +25,10 @@ export PASSWORD_STORE_DIR="$HOME/.config/password-store"
 # Personalization
 export EDITOR="nvim"
 export VISUAL="nvim"
-export BROWSER="qutebrowser"
+export BROWSER="web"
 export READER="zathura --fork"
+export BIB="$HOME/Documents/Bibliography"
+export TEMPDIR="$HOME/Documents/Document-Templates"
 export CLICOLOR=1
 export HOMEBREW_NO_AUTO_UPDATE=1
 export LC_ALL="en_US.UTF-8"
@@ -54,6 +56,7 @@ export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl/lib/pkgconfig"
 
 # C packages
 export LDFLAGS="$LDFLAGS -L/usr/local/opt/libffi/lib"
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/local/include"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/Cellar/cairo/1.16.0/lib/pkgconfig"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/X11/lib/pkgconfig"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/Homebrew/Library/Homebrew/os/mac/pkgconfig/10.15"

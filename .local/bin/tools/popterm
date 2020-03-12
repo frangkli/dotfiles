@@ -1,0 +1,14 @@
+#!/bin/sh
+
+open /Applications/Popterm.app
+focused=$(yabai -m query --windows | jq ".[].focused")
+others=${focused#*"1"}
+index=$(( ${#focused} - ${#others} - 1 ))
+
+yposition=$(yabai -m query --windows | jq ".[$index].frame.y")
+if [ $yposition -gt 0 ]; then
+    yabai -m window --move rel:0:-1500
+    yabai -m window --focus recent
+else
+    yabai -m window --grid 4:4:1:1:2:2
+fi

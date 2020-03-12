@@ -34,8 +34,8 @@ window:
   # Blank space added around the window in pixels. This padding is scaled
   # by DPI and the specified value is always added at both opposing sides.
   padding:
-    x: 20
-    y: 15
+    x: 15 #25
+    y: 15 #25
 
   # Spread additional padding evenly around the terminal content.
   dynamic_padding: true
@@ -244,9 +244,9 @@ mouse:
     #   - (macOS) open
     #   - (Linux) xdg-open
     #   - (Windows) explorer
-    #launcher:
-    #  program: xdg-open
-    #  args: []
+    launcher:
+      program: w3m
+      args: []
 
     # URL modifiers
     #
@@ -435,33 +435,34 @@ key_bindings:
   - { key: Minus,  mods: Control,         action: IncreaseFontSize }
   - { key: K,      mods: Command,         action: ClearHistory     }
   - { key: N,      mods: Command,         action: SpawnNewInstance }
-  - { key: Slash,  mods: Control,         chars: "\\"              }
+  - { key: Slash,  mods: Alt,             chars: "\\"              }
+  - { key: X,      mods: Alt,             chars: "\x1bx"           }
 
 # BEGIN ACE
 colors:
   primary:
-    background: '0x131206'
-    foreground: '0xe4e0da'
+    background: '0x0d0f10'
+    foreground: '0xf1eae0'
   cursor:
-    text:       '0x131206'
-    cursor:     '0xe4e0da'
+    text:       '0x0d0f10'
+    cursor:     '0xf1eae0'
   normal:
-    black:      '0x131206'
-    red:        '0xD4A316'
-    green:      '0xC5AE38'
-    yellow:     '0x9A9A69'
-    blue:       '0xB7B78F'
-    magenta:    '0xD5CD93'
-    cyan:       '0xD5D0B0'
-    white:      '0xe4e0da'
+    black:      '0x0d0f10'
+    red:        '0xCAA576'
+    green:      '0x6F7C82'
+    yellow:     '0xB1A18D'
+    blue:       '0xD0B490'
+    magenta:    '0xE4C79E'
+    cyan:       '0xEED3AE'
+    white:      '0xf1eae0'
   bright:
-    black:      '0x9f9c98'
-    red:        '0xD4A316'
-    green:      '0xC5AE38'
-    yellow:     '0x9A9A69'
-    blue:       '0xB7B78F'
-    magenta:    '0xD5CD93'
-    cyan:       '0xD5D0B0'
-    white:      '0xe4e0da'
+    black:      '0xa8a39c'
+    red:        '0xCAA576'
+    green:      '0x6F7C82'
+    yellow:     '0xB1A18D'
+    blue:       '0xD0B490'
+    magenta:    '0xE4C79E'
+    cyan:       '0xEED3AE'
+    white:      '0xf1eae0'
 
 # END ACE

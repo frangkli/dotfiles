@@ -1,18 +1,18 @@
 #!/bin/sh
 alias ka="killall" \
-	g="git" \
-	e="$EDITOR" \
-	v="$EDITOR" \
+    e="$EDITOR" \
+    dmenu_run="/usr/local/bin/dmenu_run -p 'Command >'" \
+    v="$EDITOR" \
     vim="$EDITOR" \
     calcurse="calcurse -D ~/.config/calcurse" \
-	mpd="mpd ~/.config/mpd/mpd.conf" \
+    mpd="mpd ~/.config/mpd/mpd.conf" \
     abook="abook -C $HOME/.config/abook/abookrc --datafile $HOME/.config/abook/addressbook" \
     cl="calcurse -D ~/.config/calcurse" \
     cat="highlight --force --out-format=ansi" \
-    ccat="bat --color=always" \
+    ccat="/bin/cat" \
     ls="gls -hN --color=auto --group-directories-first" \
-	grep="grep --color=auto" \
-	diff="colordiff" \
+    grep="grep --color=auto" \
+    diff="colordiff" \
     fzfp="fzf --preview 'highlight --force --out-format=ansi {}'" \
     clock="tty-clock -c" \
     youtube="youtube-dl --add-metadata -i -o '%(upload_date)s-%(title)s.%(ext)s'" \
@@ -21,7 +21,7 @@ alias ka="killall" \
     cmusd="tmux new-session -A -D -s cmus '$(which cmus)'" \
     trem="transmission-remote-cli" \
     lock="/System/Library/CoreServices/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine" \
-	python="python3" \
+    python="python3" \
     musicphp="/Users/frank/.config/composer/vendor/bin/music-php" \
     hw="task list project:School" \
     dotfiles="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME" \
@@ -29,9 +29,15 @@ alias ka="killall" \
     r="/usr/local/bin/r" \
     bookmarks="buku --colors oKlxm -p | less" \
     ycom="unlink conan_ycm_flags.json && rm .ycm_extra_conf.py && cp build/conan_ycm_extra_conf.py .ycm_extra_conf.py && ln -s build/conan_ycm_flags.json conan_ycm_flags.json" \
+    sf="surfraw google" \
+    newsboat="newsboat -q" \
+    suckclean="make clean && rm config.h && git reset --hard origin/master" \
 
 fvim() {
 	$EDITOR "$(fzfp -m --prompt='File> ')"
+}
+fweb() {
+	w3m "$(buku --colors oKlxm -p | fzf --prompt='Website> ')"
 }
 fzat() {
 	zathura --fork "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | grep ".pdf$" | fzfp -m --prompt='PDF> ')" 2> /dev/null
@@ -41,6 +47,9 @@ fimg() {
 }
 fconfig() {
     $EDITOR "$(du -a ~/.config ~/.local/bin | awk '{print $2}' | fzfp --prompt='Config> ')"
+}
+ftex() {
+    $EDITOR "$(du -a ~/Documents/Document-Templates/LaTeX ~/Documents/Bibliography | awk '{print $2}' | fzfp --prompt='Config> ')"
 }
 fbrew() {
 	inst="$(brew search | fzf -m --prompt='Package> ' --preview 'brew info {}')"

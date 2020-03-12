@@ -1,10 +1,6 @@
 #!/bin/sh
 # This script will compile or run another finishing operation on a document. I
 # have this script run via vim.
-#
-# Compiles:
-# Runs:
-# Opens:
 
 file=$(greadlink -f "$1")
 dir=$(dirname "$file")
@@ -29,8 +25,8 @@ case "$file" in
 	*\.tex) textype "$file" ;;
 	*\.md) pandoc "$file" --pdf-engine=xelatex --listings --number-sections -o "$base".pdf ;;
 	*config.h) sudo make install ;;
-    *\.c) gcc-9 -std=c99 -Wall -lm "$file" -o "$base" && "$base" ;;
-    *\.cpp) g++-9 "$file" -o "$base" && "$base" ;;
+    *\.c) gcc -std=c99 -Wall -Wextra -Werror -Wno-long-long -Wno-unused-parameter -Wno-unused-variable -lm "$file" -o "$base" && "$base" ;;
+    *\.cpp) g++ "$file" -Wall -Wextra -Werror -Wno-long-long -Wno-unused-parameter -Wno-unused-variable -o "$base" -l SDL2 && "$base";;
 	*\.py) python3 "$file" ;;
 	*\.go) go run "$file" ;;
     *\.java) javac "$file"  && java "${1%.*}" ;;

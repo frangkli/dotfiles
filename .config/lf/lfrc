@@ -49,6 +49,17 @@ cmd open ${{
     esac
 }}
 
+cmd apen ${{
+    case $(file --mime-type $f -b) in
+        text/*) /Applications/Alacritty.app/Contents/MacOS/alacritty -e $EDITOR $fx &;;
+        image/*) sxiv $fx &;;
+        */pdf) zathura --fork $fx 2>/dev/null;;
+        audio/*) ffplay -autoexit $fx 2>/dev/null &;;
+        video/*) ffplay -autoexit $fx 2>/dev/null &;;
+        *) for f in $fx; do $OPENER $f > /dev/null 2> /dev/null & done;;
+    esac
+}}
+
 # define a custom 'rename' command without prompt for overwrite
 # cmd rename %[ -e $1 ] && printf "file exists" || mv $f $1
 # map r push :rename<space>
@@ -107,19 +118,20 @@ cmd zip ${{
 }}
 
 # wal color
-map bg $wal -sq -i $f && recolor 1> /dev/null
-map bG $wal -l -sq -i $f && recolor 1> /dev/null
+map bg $wal -sq -i $f && recolor 1> /dev/null && /Users/frank/Library/Application\ Support/Übersicht/widgets/pecan/wal-set && xrdb -merge ~/.Xresources
+map bG $wal -l -sq -i $f && recolor 1> /dev/null && /Users/frank/Library/Application\ Support/Übersicht/widgets/pecan/wal-set && xrdb -merge ~/.Xresources
 
 # fzf find
-map f $$EDITOR $(fzf)
+map f $EDITOR $(fzf)
+map L apen $fx
 
 # quickmarks
 map gs cd "~/OneDrive - Yew Chung International School HK/School"
 map ge cd "~/OneDrive - Yew Chung International School HK/Educational Materials"
-map gp cd ~/Pictures/Wallpapers
-map gd cd ~/Downloads
+map gp cd "~/Pictures/Wallpapers"
+map gd cd "~/Downloads"
+map gc cd "~/.config"
 
 # alter defaults
 set hidden on
 set relativenumber on
-set icons on

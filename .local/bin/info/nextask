@@ -1,5 +1,13 @@
 #!/bin/sh
-first=$(/usr/local/bin/task list | sed -n 4p | cut -d " " -f2)
+export TASKRC="$HOME/.config/task/taskrc"
+
+first=$(/usr/local/bin/task list | sed -n 4p)
+if [ ${first:0:2} == " " ]
+then
+    first=$(echo $first | cut -d " " -f2)
+else
+    first=$(echo $first | cut -d " " -f1)
+fi
 name=$(/usr/local/bin/task $first info | sed -n 5p | sed "s/Description   //g")
 
 text="Next Task: "$name

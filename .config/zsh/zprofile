@@ -7,9 +7,9 @@ export PATH="$PATH:/usr/local/sbin"
 export PATH="$PATH:$(du "$HOME/.local/bin" | cut -f2 | tr '\n' ':' | sed 's/:*$//')"
 export PATH="$PATH:$HOME/.gem/ruby/2.6.0/bin"
 export PATH="$PATH:/Library/Frameworks/Python.framework/Versions/3.7/bin"
-export PATH="$PATH:/usr/local/opt/gettext/bin"
-export PATH="$PATH:/usr/local/opt/openssl/bin"
-export PATH="$PATH:/usr/local/opt/ncurses/bin"
+export PATH="$PATH:/usr/local/opt/gettext/bin:/usr/local/opt/openssl/bin:/usr/local/opt/ncurses/bin"
+export PATH="$PATH:$(echo /usr/local/opt/{findutils,gnu-sed,gnu-indent,gnu-tar,grep,gawk,gnutls,gnu-getopt}/libexec/gnubin: | sed 's/ //g' | sed 's/.$//')"
+export MANPATH="$MANPATH:$(echo /usr/local/opt/{findutils,gnu-sed,gnu-indent,gnu-tar,grep,gawk,gnutls,gnu-getopt}/libexec/gnuman: | sed 's/ //g' | sed 's/.$//')"
 export GOPATH="$HOME/Programming/Go"
 export NODE_PATH="$HOME/.local/share/node_modules"
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -17,16 +17,19 @@ export XDG_DATA_HOME="$HOME/.config"
 export _Z_DATA="$HOME/.config/z/z"
 export TASKRC="$HOME/.config/task/taskrc"
 export HISTFILE="$HOME/.config/bash/bash_history"
-export WWW_HOME="$HOME/.config/w3m"
+export WWW_HOME="$HOME/.w3m"
 export ZDOTDIR="$HOME/.config/zsh"
 export SCHOOL="$HOME/OneDrive/School"
 export PASSWORD_STORE_DIR="$HOME/.config/password-store"
+export STARDICT_DATA_DIR="$HOME/Documents/Dictionaries"
 
 # Personalization
 export EDITOR="nvim"
 export VISUAL="nvim"
-export BROWSER="qutebrowser"
+export BROWSER="web"
 export READER="zathura --fork"
+export BIB="$HOME/Documents/Bibliography"
+export TEMPDIR="$HOME/Documents/Document-Templates"
 export CLICOLOR=1
 export HOMEBREW_NO_AUTO_UPDATE=1
 export LC_ALL="en_US.UTF-8"
@@ -48,6 +51,8 @@ export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl/lib/pkgconfig"
 
 # C packages
 export LDFLAGS="$LDFLAGS -L/usr/local/opt/libffi/lib"
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/local/include"
+export LIBRARY_PATH="$LIBRARY_PATH:/usr/local/lib"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/Cellar/cairo/1.16.0/lib/pkgconfig"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/X11/lib/pkgconfig"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/Homebrew/Library/Homebrew/os/mac/pkgconfig/10.15"
@@ -66,7 +71,8 @@ export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"; a="${a%_}"
 export LESS_TERMCAP_se="$(printf '%b' '[0m')"; a="${a%_}"
 export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"; a="${a%_}"
 export LESS_TERMCAP_ue="$(printf '%b' '[0m')"; a="${a%_}"
-export LESSOPEN="|/usr/local/bin/lesspipe.sh %s" LESS_ADVANCED_PREPROCESSOR=1
+# export LESSOPEN="|/usr/local/bin/lesspipe.sh %s"
+# export LESS_ADVANCED_PREPROCESSOR=1
 
 # Vi mode
 set -o vi

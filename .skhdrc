@@ -14,10 +14,10 @@ shift + alt - k : yabai -m window --swap north
 shift + alt - l : yabai -m window --swap east
 
 # move window
-# ctrl + alt - h : yabai -m window --warp west
-# ctrl + alt - j : yabai -m window --warp south
-# ctrl + alt - k : yabai -m window --warp north
-# ctrl + alt - l : yabai -m window --warp east
+ctrl + alt - h : yabai -m window --warp west
+ctrl + alt - j : yabai -m window --warp south
+ctrl + alt - k : yabai -m window --warp north
+ctrl + alt - l : yabai -m window --warp east
 
 # balance size of windows
 shift + alt - 0 : yabai -m space --balance
@@ -46,9 +46,9 @@ cmd + alt - n : yabai -m space --create && \
 cmd + alt - w : yabai -m space --destroy
 
 # fast focus desktop
-cmd + alt - x : yabai -m space --focus recent
-cmd + alt - z : yabai -m space --focus prev
-cmd + alt - c : yabai -m space --focus next
+ctrl + alt - x : yabai -m space --focus recent
+ctrl + alt - z : yabai -m space --focus prev
+ctrl + alt - c : yabai -m space --focus next
 alt - 1 : yabai -m space --focus 1
 alt - 2 : yabai -m space --focus 2
 alt - 3 : yabai -m space --focus 3
@@ -94,10 +94,10 @@ ctrl + alt - w : yabai -m window --resize top:0:20
 ctrl + alt - d : yabai -m window --resize right:-20:0
 
 # set insertion point in focused container
-ctrl + alt - h : yabai -m window --insert west
-ctrl + alt - j : yabai -m window --insert south
-ctrl + alt - k : yabai -m window --insert north
-ctrl + alt - l : yabai -m window --insert east
+ctrl + alt - u : yabai -m window --insert west
+ctrl + alt - i : yabai -m window --insert south
+ctrl + alt - o : yabai -m window --insert north
+ctrl + alt - p : yabai -m window --insert east
 
 # rotate tree
 alt - r : yabai -m space --rotate 90
@@ -106,10 +106,11 @@ alt - r : yabai -m space --rotate 90
 alt - y : yabai -m space --mirror y-axis
 
 # mirror tree x-axis
-alt - x : yabai -m space --mirror x-axis
+alt - u : yabai -m space --mirror x-axis
 
 # toggle desktop offset
-alt - a : yabai -m space --toggle padding; yabai -m space --toggle gap
+alt - a : yabai -m space --toggle gap; yabai -m space --padding abs:16:0:0:0
+alt - o : yabai -m space --toggle gap; yabai -m space --padding abs:35:20:20:20
 
 # toggle window parent zoom
 alt - d : yabai -m window --toggle zoom-parent
@@ -138,8 +139,8 @@ alt - p : yabai -m window --toggle sticky;\
           yabai -m window --grid 5:5:4:0:1:1
 
 # change layout of desktop
-ctrl + alt - a : yabai -m space --layout bsp
-ctrl + alt - d : yabai -m space --layout float
+ctrl + alt - y : yabai -m space --layout bsp
+ctrl + alt - t : yabai -m space --layout float
 
 # lock screen
 alt - z : /System/Library/CoreServices/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine

@@ -1,11 +1,11 @@
 #!/bin/sh
 
-case "$1" in
-    *.tar*) tar tf "$1";;
-    *.zip) unzip -l "$1";;
-    *.rar) unrar l "$1";;
-    *.7z) 7z l "$1";;
-    *.pdf) pdftotext "$1" - | sed "s///g";;
-    *.jpg) imgcat "$1";;
+case $(file --mime-type -b "$1") in
+    */x-tar) tar -tf "$1";;
+    */zip) unzip -l "$1";;
+    */rar) unrar l "$1";;
+    */pdf) pdftotext -eol unix -layout -nopgbrk "$1" - | sed "s///g";;
+    */x-mach-binary) hexdump -C "$1";;
+    */octet-stream) hexdump -C "$1";;
     *) highlight --force --out-format=ansi "$1" || bat --color=always "$1";;
 esac

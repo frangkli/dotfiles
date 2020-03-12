@@ -14,11 +14,11 @@
 #    fi
 #fi
 
-if [ "$(/usr/local/bin/ncmpcpp  --current-song '%t - %a' 2> /dev/null)" == "" ]
+if [ "$(/usr/local/bin/ncmpcpp  --current-song '%t - %l' 2> /dev/null)" == "" ]
 then
 	echo ♬ No music playing
 else
-	text=$(/usr/local/bin/ncmpcpp  --current-song '%t - %a' 2> /dev/null)
+	text=$(/usr/local/bin/ncmpcpp  --current-song '%t - %l' 2> /dev/null)
 	charcount=$(echo $text | wc -m)
 
 	if [ $charcount -gt 37 ]
