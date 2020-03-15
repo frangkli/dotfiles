@@ -1,5 +1,11 @@
 # Dotfiles
 
+## Screenshot of yabai and alacritty
+![Screenshot 1](https://raw.githubusercontent.com/FrankLA0203/Dotfiles/master/Screen%20Shot%202.png)
+
+## Screenshot of dwm and st
+![Screenshot 2](https://raw.githubusercontent.com/FrankLA0203/Dotfiles/master/Screen%20Shot%201.png)
+
 Obviously this is a repository for my configuration files.
 This repository is managed using the bare repository trick, so all file paths should be exactly the same as my local setup.
 
