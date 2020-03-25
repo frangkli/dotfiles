@@ -53,7 +53,7 @@ fconfig() {
     $EDITOR "$(fd -H . ~/.config ~/.local/bin -d 2 --type f | fzfp --prompt='Config> ')"
 }
 ftex() {
-    $EDITOR "$(fd . ~/OneDrive\ -\ Yew\ Chung\ International\ School\ HK ~/Documents ~/Repositories -e tex | fzfp --prompt='File> ')"
+    $EDITOR "$(fd . ~/OneDrive* ~/Documents ~/Repositories -e tex | fzfp --prompt='File> ')"
 }
 fbrew() {
 	inst="$(brew search | fzf -m --prompt='Package> ' --preview 'brew info {}')"
