@@ -4,7 +4,8 @@ case $(file --mime-type -b "$1") in
     */x-tar) tar -tf "$1";;
     */zip) unzip -l "$1";;
     */rar) unrar l "$1";;
-    */pdf) pdftotext -eol unix -layout -nopgbrk "$1" - | sed "s///g";;
+    #*/pdf) pdftotext -eol unix -simple -nopgbrk "$1" -;;
+    */pdf) ps2ascii "$1";;
     */x-mach-binary) hexdump -C "$1";;
     */octet-stream) hexdump -C "$1";;
     *) highlight --force --out-format=ansi "$1" || bat --color=always "$1";;

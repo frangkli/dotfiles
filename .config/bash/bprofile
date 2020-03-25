@@ -3,37 +3,51 @@
 
 # PATH
 export PATH="$PATH:/sbin"
+export PATH="$PATH:/opt/local/bin:/opt/local/sbin"
 export PATH="$PATH:/usr/local/sbin"
 export PATH="$PATH:$(du "$HOME/.local/bin" | cut -f2 | tr '\n' ':' | sed 's/:*$//')"
 export PATH="$PATH:$HOME/.gem/ruby/2.6.0/bin"
 export PATH="$PATH:/Library/Frameworks/Python.framework/Versions/3.7/bin"
-export PATH="$PATH:/usr/local/opt/gettext/bin"
-export PATH="$PATH:/usr/local/opt/openssl/bin"
-export PATH="$PATH:/usr/local/opt/ncurses/bin"
+export PATH="$PATH:/usr/local/opt/gettext/bin:/usr/local/opt/openssl/bin:/usr/local/opt/ncurses/bin"
+export PATH="$PATH:$(echo /usr/local/opt/{findutils,gnu-sed,gnu-indent,gnu-tar,grep,gawk,gnutls,gnu-getopt}/libexec/gnubin: | sed 's/ //g' | sed 's/.$//')"
+export MANPATH="$MANPATH:$(echo /usr/local/opt/{findutils,gnu-sed,gnu-indent,gnu-tar,grep,gawk,gnutls,gnu-getopt}/libexec/gnuman: | sed 's/ //g' | sed 's/.$//')"
 export GOPATH="$HOME/Programming/Go"
 export NODE_PATH="$HOME/.local/share/node_modules"
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_DATA_HOME="$HOME/.config"
-export _Z_DATA="$HOME/.config/z/z"
-export TASKRC="$HOME/.config/task/taskrc"
-export HISTFILE="$HOME/.config/bash/bash_history"
-export WWW_HOME="$HOME/.w3m"
-export ZDOTDIR="$HOME/.config/zsh"
-export SCHOOL="$HOME/OneDrive/School"
-export PASSWORD_STORE_DIR="$HOME/.config/password-store"
 
 # Personalization
 export EDITOR="nvim"
 export VISUAL="nvim"
-export BROWSER="web"
+export BROWSER="open"
+export TERM="xterm-256color"
 export READER="zathura --fork"
+export SCHOOL="$HOME/OneDrive/School"
 export BIB="$HOME/Documents/Bibliography"
-export TEMPDIR="$HOME/Documents/Document-Templates"
 export CLICOLOR=1
 export HOMEBREW_NO_AUTO_UPDATE=1
 export LC_ALL="en_US.UTF-8"
+
+# Clean up
 export XML_CATALOG_FILES="/usr/local/etc/xml/catalog"
-export LPASS_HOME="$HOME/.config/lpass"
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_DATA_HOME="$HOME/.local/share"
+export LPASS_HOME="$XDG_CONFIG_HOME/lpass"
+export _Z_DATA="$XDG_DATA_HOME/z/z"
+export TASKRC="$XDG_CONFIG_HOME/task/taskrc"
+export HISTFILE="$XDG_CONFIG_HOME/zsh/history"
+export LESSHISTFILE="-"
+export WWW_HOME="$XDG_CONFIG_HOME/w3m"
+export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+export PASSWORD_STORE_DIR="$XDG_CONFIG_HOME/password-store"
+export STARDICT_DATA_DIR="$HOME/Documents/Dictionaries"
+export NOTMUCH_CONFIG="$XDG_CONFIG_HOME/notmuch-config"
+export GNUPGHOME="$XDG_DATA_HOME/gnupg"
+export GEM_HOME="$XDG_DATA_HOME/gem"
+export GEM_SPEC_CACHE="$XDG_CACHE_HOME/gem"
+export CONDA_PREFIX="$XDG_CONFIG_HOME/conda"
+export NODE_REPL_HISTORY="$XDG_DATA_HOME/node_repl_history"
+export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc" # node-gyp in XDG_DATA_HOME
+export SQLITE_HISTORY="$XDG_DATA_HOME/sqlite_history"
 
 # Vulkan config
 export VULKAN_SDK="$HOME/.local/software/vulkansdk-macos-1.1.121.1/macOS"
@@ -57,6 +71,7 @@ export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl/lib/pkgconfig"
 # C packages
 export LDFLAGS="$LDFLAGS -L/usr/local/opt/libffi/lib"
 export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/local/include"
+export LIBRARY_PATH="$LIBRARY_PATH:/usr/local/lib"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/Cellar/cairo/1.16.0/lib/pkgconfig"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/X11/lib/pkgconfig"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/Homebrew/Library/Homebrew/os/mac/pkgconfig/10.15"
@@ -75,17 +90,17 @@ export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"; a="${a%_}"
 export LESS_TERMCAP_se="$(printf '%b' '[0m')"; a="${a%_}"
 export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"; a="${a%_}"
 export LESS_TERMCAP_ue="$(printf '%b' '[0m')"; a="${a%_}"
-export LESSOPEN="|/usr/local/bin/lesspipe.sh %s" LESS_ADVANCED_PREPROCESSOR=1
-
-# Read .bashrc if exists
-[ -f ~/.config/bash/bashrc ] && source "$HOME/.config/bash/bashrc"
-[ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
+# export LESSOPEN="|/usr/local/bin/lesspipe.sh %s"
+# export LESS_ADVANCED_PREPROCESSOR=1
 
 # Vi mode
 set -o vi
 
 # Z
 . /usr/local/etc/profile.d/z.sh
+
+# Read bash_completion if exists
+[ -f "/usr/local/etc/bash_completion" ] && . "/usr/local/etc/bash_completion"
 
 # Iterm2 shell integration support
 test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"

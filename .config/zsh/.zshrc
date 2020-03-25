@@ -1,3 +1,4 @@
+#!/bin/sh
 # Basic colors
 TERM=xterm-256color
 autoload -Uz colors && colors
@@ -9,7 +10,7 @@ zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*' special-dirs true
 zstyle ':completion:*' group-name ''
 zmodload zsh/complist
-compinit
+compinit -d $XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION
 _comp_options+=(globdots) # Show dotfiles
 
 # Vcs for git prompt info
@@ -102,14 +103,14 @@ function _pip_completion {
 compctl -K _pip_completion pip3
 
 # Source files
-[ -f "$HOME/.config/zsh/zprofile" ] && source "$HOME/.config/zsh/zprofile"
+[ -f "$HOME/.config/zsh/.zprofile" ] && source "$HOME/.config/zsh/.zprofile"
 [ -f "$HOME/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh" ] && source "$HOME/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh"
 [ -f "$HOME/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh" ] && source "$HOME/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh"
 [ -f "$HOME/.config/aliasrc" ] && source "$HOME/.config/aliasrc"
 [ -f "$HOME/.config/shortcutrc" ] && source "$HOME/.config/shortcutrc"
 
 # Alias overwrite
-alias repr="source $HOME/.config/zsh/zshrc"
+alias repr="source $HOME/.config/zsh/.zshrc"
 
 # Prompt syntax highlight
 ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=cyan'

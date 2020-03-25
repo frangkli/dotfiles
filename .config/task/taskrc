@@ -17,7 +17,7 @@ data.location=~/.config/task/
 #include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/light-16.theme
 #include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/light-256.theme
 #include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-16.theme
-#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-256.theme
+include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-256.theme
 #include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-red-256.theme
 #include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-green-256.theme
 #include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-blue-256.theme
@@ -32,3 +32,13 @@ data.location=~/.config/task/
 uda.reviewed.type=date
 uda.reviewed.label=Reviewed
 verbose=blank,footnote,label,new-id,affected,edit,special,project,sync,unwait
+
+taskd.certificate=~/.config/task/private.certificate.pem
+taskd.key=~/.config/task/private.key.pem
+taskd.ca=~/.config/task/ca.cert.pem
+taskd.server=taskwarrior.inthe.am:53589
+taskd.credentials=inthe_am/liang20040203/72fd7f58-9bd2-477f-8525-8d7e1adfb50e
+taskd.trust=ignore hostname
+
+color=on
+report.next.columns=id,start.age,entry.age,depends,priority,project,tags,recur,scheduled.countdown,due,until.remaining,description,urgency

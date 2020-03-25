@@ -26,7 +26,7 @@ case "$file" in
 	*\.md) pandoc "$file" --pdf-engine=xelatex --listings --number-sections -o "$base".pdf ;;
 	*config.h) sudo make install ;;
     *\.c) gcc -std=c99 -Wall -Wextra -Werror -Wno-long-long -Wno-unused-parameter -Wno-unused-variable -lm "$file" -o "$base" && "$base" ;;
-    *\.cpp) g++ "$file" -Wall -Wextra -Werror -Wno-long-long -Wno-unused-parameter -Wno-unused-variable -o "$base" -l SDL2 && "$base";;
+    *\.cpp) g++ "$file" -Wall -Wextra -Werror -Wno-long-long -Wno-unused-parameter -Wno-unused-variable -o "$base";;
 	*\.py) python3 "$file" ;;
 	*\.go) go run "$file" ;;
     *\.java) javac "$file"  && java "${1%.*}" ;;

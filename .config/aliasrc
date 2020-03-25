@@ -1,13 +1,10 @@
 #!/bin/sh
-alias ka="killall" \
-    e="$EDITOR" \
+
+# Alias
+alias bash="bash --init-file $HOME/.config/bash/bashrc" \
+    rm="trash" \
     dmenu_run="/usr/local/bin/dmenu_run -p 'Command >'" \
     v="$EDITOR" \
-    vim="$EDITOR" \
-    calcurse="calcurse -D ~/.config/calcurse" \
-    mpd="mpd ~/.config/mpd/mpd.conf" \
-    abook="abook -C $HOME/.config/abook/abookrc --datafile $HOME/.config/abook/addressbook" \
-    cl="calcurse -D ~/.config/calcurse" \
     cat="highlight --force --out-format=ansi" \
     ccat="/bin/cat" \
     ls="gls -hN --color=auto --group-directories-first" \
@@ -24,7 +21,7 @@ alias ka="killall" \
     python="python3" \
     musicphp="/Users/frank/.config/composer/vendor/bin/music-php" \
     hw="task list project:School" \
-    dotfiles="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME" \
+    dotfiles="/usr/bin/git --git-dir=$HOME/.config/dotfiles/ --work-tree=$HOME" \
     cpr="compiler" \
     r="/usr/local/bin/r" \
     bookmarks="buku --colors oKlxm -p | less" \
@@ -33,11 +30,18 @@ alias ka="killall" \
     newsboat="newsboat -q" \
     suckclean="make clean && rm config.h && git reset --hard origin/master" \
 
+# Clean up and conf
+alias w3m="w3m -config $HOME/.config/w3m/config -bookmark $HOME/.config/w3m/bookmark.html && trash -rf ~/.w3m" \
+    tmux="tmux -f ~/.config/tmux/tmux.conf" \
+    calcurse="calcurse -C ~/.config/calcurse -D ~/.config/calcurse" \
+    abook="abook -C ~/.config/abook/abookrc --datafile ~/.config/abook/addressbook" \
+    mpd="mpd ~/.config/mpd/mpd.conf" \
+    mbsync="mbsync -c $XDG_CONFIG_HOME/isync/mbsyncrc" \
+    gpg="gpg --homedir $XDG_DATA_HOME/gnupg" \
+    skhd="skhd -c ~/.config/skhd/skhdrc" \
+
 fvim() {
 	$EDITOR "$(fzfp -m --prompt='File> ')"
-}
-fweb() {
-	w3m "$(buku --colors oKlxm -p | fzf --prompt='Website> ')"
 }
 fzat() {
 	zathura --fork "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | grep ".pdf$" | fzfp -m --prompt='PDF> ')" 2> /dev/null
@@ -46,10 +50,10 @@ fimg() {
 	sxiv -qb "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | awk '/jpeg/ || /png/ || /jpg/ || /gif/' | fzfp -m --prompt='Image> ')"
 }
 fconfig() {
-    $EDITOR "$(du -a ~/.config ~/.local/bin | awk '{print $2}' | fzfp --prompt='Config> ')"
+    $EDITOR "$(fd -H . ~/.config ~/.local/bin -d 2 --type f | fzfp --prompt='Config> ')"
 }
 ftex() {
-    $EDITOR "$(du -a ~/Documents/Document-Templates/LaTeX ~/Documents/Bibliography | awk '{print $2}' | fzfp --prompt='Config> ')"
+    $EDITOR "$(fd . ~/OneDrive\ -\ Yew\ Chung\ International\ School\ HK ~/Documents ~/Repositories -e tex | fzfp --prompt='File> ')"
 }
 fbrew() {
 	inst="$(brew search | fzf -m --prompt='Package> ' --preview 'brew info {}')"

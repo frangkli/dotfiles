@@ -3,6 +3,7 @@
 
 # PATH
 export PATH="$PATH:/sbin"
+export PATH="$PATH:/opt/local/bin:/opt/local/sbin"
 export PATH="$PATH:/usr/local/sbin"
 export PATH="$PATH:$(du "$HOME/.local/bin" | cut -f2 | tr '\n' ':' | sed 's/:*$//')"
 export PATH="$PATH:$HOME/.gem/ruby/2.6.0/bin"
@@ -12,29 +13,47 @@ export PATH="$PATH:$(echo /usr/local/opt/{findutils,gnu-sed,gnu-indent,gnu-tar,g
 export MANPATH="$MANPATH:$(echo /usr/local/opt/{findutils,gnu-sed,gnu-indent,gnu-tar,grep,gawk,gnutls,gnu-getopt}/libexec/gnuman: | sed 's/ //g' | sed 's/.$//')"
 export GOPATH="$HOME/Programming/Go"
 export NODE_PATH="$HOME/.local/share/node_modules"
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_DATA_HOME="$HOME/.config"
-export _Z_DATA="$HOME/.config/z/z"
-export TASKRC="$HOME/.config/task/taskrc"
-export HISTFILE="$HOME/.config/bash/bash_history"
-export WWW_HOME="$HOME/.w3m"
-export ZDOTDIR="$HOME/.config/zsh"
-export SCHOOL="$HOME/OneDrive/School"
-export PASSWORD_STORE_DIR="$HOME/.config/password-store"
-export STARDICT_DATA_DIR="$HOME/Documents/Dictionaries"
 
 # Personalization
 export EDITOR="nvim"
 export VISUAL="nvim"
-export BROWSER="web"
+export BROWSER="open"
+export TERM="xterm-256color"
 export READER="zathura --fork"
+export SCHOOL="$HOME/OneDrive/School"
 export BIB="$HOME/Documents/Bibliography"
-export TEMPDIR="$HOME/Documents/Document-Templates"
 export CLICOLOR=1
 export HOMEBREW_NO_AUTO_UPDATE=1
 export LC_ALL="en_US.UTF-8"
+
+# Clean up
 export XML_CATALOG_FILES="/usr/local/etc/xml/catalog"
-export LPASS_HOME="$HOME/.config/lpass"
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_DATA_HOME="$HOME/.local/share"
+export LPASS_HOME="$XDG_CONFIG_HOME/lpass"
+export _Z_DATA="$XDG_DATA_HOME/z/z"
+export TASKRC="$XDG_CONFIG_HOME/task/taskrc"
+export HISTFILE="$XDG_CONFIG_HOME/zsh/history"
+export LESSHISTFILE="-"
+export WWW_HOME="$XDG_CONFIG_HOME/w3m"
+export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+export PASSWORD_STORE_DIR="$XDG_CONFIG_HOME/password-store"
+export STARDICT_DATA_DIR="$HOME/Documents/Dictionaries"
+export NOTMUCH_CONFIG="$XDG_CONFIG_HOME/notmuch-config"
+export GNUPGHOME="$XDG_DATA_HOME/gnupg"
+export GEM_HOME="$XDG_DATA_HOME/gem"
+export GEM_SPEC_CACHE="$XDG_CACHE_HOME/gem"
+export CONDA_PREFIX="$XDG_CONFIG_HOME/conda"
+export NODE_REPL_HISTORY="$XDG_DATA_HOME/node_repl_history"
+export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc" # node-gyp in XDG_DATA_HOME
+export SQLITE_HISTORY="$XDG_DATA_HOME/sqlite_history"
+
+# Vulkan config
+export VULKAN_SDK="$HOME/.local/software/vulkansdk-macos-1.1.121.1/macOS"
+export PATH="$PATH:$VULKAN_SDK/bin"
+export DYLD_LIBRARY_PATH="$VULKAN_SDK/lib:$DYLD_LIBRARY_PATH"
+export VK_ICD_FILENAMES="$VULKAN_SDK/etc/vulkan/icd.d/MoltenVK_icd.json"
 
 # Python
 export PYTHON_CONFIGURE_OPTS="--enable-framework"
@@ -78,7 +97,7 @@ export LESS_TERMCAP_ue="$(printf '%b' '[0m')"; a="${a%_}"
 set -o vi
 
 # Z
-. /usr/local/etc/profile.d/z.sh
+[ -f "/usr/local/etc/profile.d/z.sh" ] && . "/usr/local/etc/profile.d/z.sh"
 
 # Start up config
 echo "Welcome, Frank Li"

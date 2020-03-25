@@ -40,17 +40,6 @@ map O $mimeopen --ask $f
 # text files and a file opener for the rest.
 cmd open ${{
     case $(file --mime-type $f -b) in
-        text/*) $EDITOR $fx;;
-        image/*) sxiv $fx &;;
-        */pdf) zathura --fork $fx 2>/dev/null;;
-        audio/*) ffplay -autoexit $fx 2>/dev/null &;;
-        video/*) ffplay -autoexit $fx 2>/dev/null &;;
-        *) for f in $fx; do $OPENER $f > /dev/null 2> /dev/null & done;;
-    esac
-}}
-
-cmd apen ${{
-    case $(file --mime-type $f -b) in
         text/*) /Applications/Alacritty.app/Contents/MacOS/alacritty -e $EDITOR $fx &;;
         image/*) sxiv $fx &;;
         */pdf) zathura --fork $fx 2>/dev/null;;
@@ -123,7 +112,7 @@ map bG $wal -l -sq -i $f && recolor 1> /dev/null && /Users/frank/Library/Applica
 
 # fzf find
 map f $EDITOR $(fzf)
-map L apen $fx
+map L open $fx
 
 # quickmarks
 map gs cd "~/OneDrive - Yew Chung International School HK/School"

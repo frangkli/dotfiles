@@ -23,8 +23,8 @@ else
 
 	if [ $charcount -gt 37 ]
 	then
-		echo ♬ $(echo $text | cut -c -35)...
+		echo "♬ $(echo $text | cut -c -35)..."
 	else
-		echo ♬ $text
+		echo "♬ $text"
 	fi
 fi

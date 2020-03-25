@@ -1,3 +1,4 @@
+#!/bin/sh
 # Basic oh-my-zsh config
 export ZSH="/Users/frank/.config/oh-my-zsh"
 ZSH_AUTOSUGGEST_STRATEGY=(history)

@@ -1,5 +1,5 @@
 diff --git a/config.def.h b/config.def.h
-index 1edb647..63d03aa 100644
+index 1edb647..cacdcb8 100644
 --- a/config.def.h
 +++ b/config.def.h
 @@ -4,14 +4,15 @@
@@ -15,8 +15,8 @@ index 1edb647..63d03aa 100644
 -	[SchemeNorm] = { "#bbbbbb", "#222222" },
 -	[SchemeSel] = { "#eeeeee", "#005577" },
 -	[SchemeOut] = { "#000000", "#00ffff" },
-+ 	[SchemeNorm] = { "#ffffff", "#030303" },
-+ 	[SchemeSel]  = { "#ff009e", "#030303" },
++ 	[SchemeNorm] = { "#bbbbbb", "#222222" },
++ 	[SchemeSel]  = { "#eeeeee", "#005577" },
 + 	[SchemeOut]  = { "#000000", "#00ffff" },
 +
  };

@@ -10,15 +10,16 @@ call plug#begin('~/.config/nvim/plugged')
 " Plug 'LukeSmithxyz/vimling'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
-Plug 'scrooloose/nerdtree'
-Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'Xuyuanp/nerdtree-git-plugin', { 'on': 'NERDTreeToggle' }
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'ryanoasis/vim-devicons'
 Plug 'tpope/vim-fugitive'
 Plug 'junegunn/goyo.vim'
 Plug 'Yggdroot/indentLine'
-Plug 'vimwiki/vimwiki'
+Plug 'vimwiki/vimwiki', { 'on': 'VimwikiIndex' }
 Plug 'bling/vim-airline'
+" TODO checkout Ultisnippit
 Plug 'lervag/vimtex', { 'for': ['tex', 'bib'] }
 Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'dylanaraps/wal.vim'
@@ -31,7 +32,9 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'pangloss/vim-javascript', { 'for': ['javascript', 'jsx', 'javascriptreact'] }
 Plug 'maxmellon/vim-jsx-pretty', { 'for': ['javascript', 'jsx', 'javascriptreact'] }
 Plug 'alvan/vim-closetag', { 'for': ['javascript', 'jsx', 'javascriptreact', 'html'] }
-Plug 'Valloric/YouCompleteMe', { 'do':'./install.py', 'for': ['python', 'c', 'javascript', 'jsx', 'javascriptreact', 'java', 'cpp', 'vim', 'tex'] }
+" TODO checkout COC
+" Plug 'Valloric/YouCompleteMe', { 'do':'./install.py', 'for': ['python', 'c', 'javascript', 'jsx', 'javascriptreact', 'java', 'cpp', 'vim', 'tex', 'sh', 'bash'] }
+Plug 'Valloric/YouCompleteMe', { 'do':'./install.py' }
 Plug 'majutsushi/tagbar', { 'for': ['c', 'cpp', 'python', 'javascript', 'jsx', 'java', 'javascriptreact'] }
 " Plug 'scrooloose/syntastic', { 'for': ['python'] }
 call plug#end()
@@ -55,7 +58,8 @@ filetype plugin on
 syntax on
 
 " Vimwiki fix override
-nmap <Leader>wn <Plug>VimwikiNextLink
+nmap <Leader>vw :VimwikiIndex<CR>
+nmap <Leader>wn :VimwikiNextLink<CR>
 
 " Indent line styling
 let g:indentLine_char_list = ['|', '¦', '┆', '┊']
@@ -309,7 +313,7 @@ map <leader>s :!clear && shellcheck %<CR>
 "map <leader>r :vsp<space>$REFER<CR>
 
 " Replace all is aliased to S.
-nnoremap S :%s//g<Left><Left>
+" nnoremap S :%s//g<Left><Left>
 
 " Compiler script
 map <leader>c :w! \| !compiler "<c-r>%"<CR>
@@ -349,5 +353,5 @@ autocmd FileType html source ~/.config/nvim/myhtml.vim
 " Import markdown config if file is md
 autocmd FileType markdown,rmd source ~/.config/nvim/mymarkdown.vim
 
-""".bib
+" Other files
 autocmd FileType bib source ~/.config/nvim/mybib.vim
