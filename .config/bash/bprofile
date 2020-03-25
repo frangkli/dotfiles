@@ -20,7 +20,6 @@ export VISUAL="nvim"
 export BROWSER="open"
 export TERM="xterm-256color"
 export READER="zathura --fork"
-export SCHOOL="$HOME/OneDrive/School"
 export BIB="$HOME/Documents/Bibliography"
 export CLICOLOR=1
 export HOMEBREW_NO_AUTO_UPDATE=1
@@ -97,7 +96,7 @@ export LESS_TERMCAP_ue="$(printf '%b' '[0m')"; a="${a%_}"
 set -o vi
 
 # Z
-. /usr/local/etc/profile.d/z.sh
+[ -f "/usr/local/etc/profile.d/z.sh" ] && . "/usr/local/etc/profile.d/z.sh"
 
 # Read bash_completion if exists
 [ -f "/usr/local/etc/bash_completion" ] && . "/usr/local/etc/bash_completion"

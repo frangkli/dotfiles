@@ -20,7 +20,6 @@ export VISUAL="nvim"
 export BROWSER="open"
 export TERM="xterm-256color"
 export READER="zathura --fork"
-export SCHOOL="$HOME/OneDrive/School"
 export BIB="$HOME/Documents/Bibliography"
 export CLICOLOR=1
 export HOMEBREW_NO_AUTO_UPDATE=1
