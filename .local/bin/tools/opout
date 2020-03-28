@@ -5,6 +5,7 @@
 basename="$(echo "$1" | sed 's/\.[^\/.]*$//')"
 
 case "$1" in
-	*.tex|*.md|*.rmd|*.ms|*.me|*.mom) $READER "$basename".pdf ;;
-	*.html) $BROWSER --new-window "$basename".html ;;
+    # *.tex|*.md|*.rmd|*.ms|*.me|*.mom) $READER "$basename".pdf ;;
+    *.tex|*.md|*.rmd|*.ms|*.me|*.mom) $HOME/.local/bin/tools/dothura "$basename".pdf ;;
+    *.html) $BROWSER --new-window "$basename".html ;;
 esac
