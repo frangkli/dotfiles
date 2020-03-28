@@ -18,7 +18,13 @@ autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable git svn hg
 zstyle ':vcs_info:*' check-for-changes true
 zstyle ':vcs_info:*' formats "[%{$fg[blue]%}%b%{$reset_color%}] (%{$fg[yellow]%}%c%{$fg[green]%}%u%{$reset_color%}) %{$fg[yellow]%}%s%{$fg[blue]%}:%r%{$reset_color%}"
-precmd() { vcs_info ;} # Run before each prompt
+
+# Commands to run
+function precmd() {
+    vcs_info
+    window_title="\033]0;${PWD} - $(echo /usr/local/bin/zsh | rev | cut -d '/' -f 1 | rev | awk '{ print toupper($0) }')\007"
+    echo -ne "$window_title"
+} # Run before each prompt
 
 # Vim commandline mode config
 bindkey -v
