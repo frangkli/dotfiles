@@ -40,7 +40,7 @@ map O $mimeopen --ask $f
 # text files and a file opener for the rest.
 cmd open ${{
     case $(file --mime-type $f -b) in
-        text/*) /Applications/Alacritty.app/Contents/MacOS/alacritty -e $EDITOR $fx &;;
+        text/*) st -e $EDITOR $fx &;;
         image/*) sxiv $fx &;;
         */pdf) zathura --fork $fx 2>/dev/null;;
         audio/*) ffplay -autoexit $fx 2>/dev/null &;;
