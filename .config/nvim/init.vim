@@ -1,70 +1,103 @@
 let mapleader =","
 
+" ======================================== PLUGINS ========================================
+" Install vimplug
 if ! filereadable(expand('~/.config/nvim/autoload/plug.vim'))
-	echo "Downloading junegunn/vim-plug to manage plugins..."
-	silent !mkdir -p ~/.config/nvim/autoload/
-	silent !curl "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" > ~/.config/nvim/autoload/plug.vim
+    echo "Downloading junegunn/vim-plug to manage plugins..."
+    silent !mkdir -p ~/.config/nvim/autoload/
+    silent !curl "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" > ~/.config/nvim/autoload/plug.vim
 endif
 
+" Plug sources
 call plug#begin('~/.config/nvim/plugged')
-" Plug 'LukeSmithxyz/vimling'
+
+" Universal editing
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
-Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
-Plug 'Xuyuanp/nerdtree-git-plugin', { 'on': 'NERDTreeToggle' }
+Plug 'jiangmiao/auto-pairs'
+Plug 'SirVer/ultisnips'
+Plug 'junegunn/goyo.vim'
+Plug '/usr/local/opt/fzf'
+Plug 'junegunn/fzf.vim'
+
+" Completion
+Plug 'ervandew/supertab'
+Plug 'Valloric/YouCompleteMe', { 'do':'./install.py' }
+
+" File tree
+Plug 'scrooloose/nerdtree'
+Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+
+" Status line
 Plug 'ryanoasis/vim-devicons'
 Plug 'tpope/vim-fugitive'
-Plug 'junegunn/goyo.vim'
-Plug 'Yggdroot/indentLine'
-Plug 'vimwiki/vimwiki', { 'on': 'VimwikiIndex' }
 Plug 'bling/vim-airline'
-" TODO checkout Ultisnippit
-Plug 'lervag/vimtex', { 'for': ['tex', 'bib'] }
+
+" Color schemes
 Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'dylanaraps/wal.vim'
 Plug 'octol/vim-cpp-enhanced-highlight', { 'for': ['c', 'cpp'] }
+
+" Note taking
+Plug 'vimwiki/vimwiki'
 Plug 'suan/vim-instant-markdown', { 'for': 'markdown' }
-Plug '/usr/local/opt/fzf'
-Plug 'junegunn/fzf.vim'
-Plug 'ervandew/supertab'
-Plug 'jiangmiao/auto-pairs'
+Plug 'lervag/vimtex', { 'for': ['tex', 'bib'] }
+
+" Front end development
 Plug 'pangloss/vim-javascript', { 'for': ['javascript', 'jsx', 'javascriptreact'] }
 Plug 'maxmellon/vim-jsx-pretty', { 'for': ['javascript', 'jsx', 'javascriptreact'] }
-Plug 'alvan/vim-closetag', { 'for': ['javascript', 'jsx', 'javascriptreact', 'html'] }
-" TODO checkout COC
-" Plug 'Valloric/YouCompleteMe', { 'do':'./install.py', 'for': ['python', 'c', 'javascript', 'jsx', 'javascriptreact', 'java', 'cpp', 'vim', 'tex', 'sh', 'bash'] }
-Plug 'Valloric/YouCompleteMe', { 'do':'./install.py' }
-Plug 'majutsushi/tagbar', { 'for': ['c', 'cpp', 'python', 'javascript', 'jsx', 'java', 'javascriptreact'] }
-" Plug 'scrooloose/syntastic', { 'for': ['python'] }
+Plug 'alvan/vim-closetag', { 'for': ['javascript', 'jsx', 'javascriptreact', 'html', 'xml'] }
 call plug#end()
 
-set bg=light
-set go=a
+" ==================== BASICS ====================
+set background=dark
 set mouse=a
-set exrc
+set number relativenumber
 set hlsearch
-set expandtab
+set title
+set titleold=st
 set clipboard=unnamedplus
 set undodir=~/.config/nvim/undodir
 set undofile
-set encoding=utf-8
-set number relativenumber
-set fillchars=vert:\│
-set tabstop=4
+set encoding=UTF-8
+set expandtab
+set tabstop=8
+set softtabstop=0
 set shiftwidth=4
-nnoremap c "_c
+set smarttab
+set foldmethod=indent
+set foldlevel=99
+set completeopt-=preview
+set splitbelow splitright
+set wildmode=list,full
 filetype plugin on
 syntax on
 
-" Vimwiki fix override
-nmap <Leader>vw :VimwikiIndex<CR>
-nmap <Leader>wn :VimwikiNextLink<CR>
+" ==================== COLORS ====================
+color wal
+highlight CursorLine ctermbg=9 cterm=none
+highlight CursorColumn ctermbg=9
+highlight CursorLineNr ctermfg=2
+highlight WildMenu ctermfg=0 ctermbg=3
+highlight Statusline ctermfg=7 ctermbg=none cterm=none
+highlight YcmErrorSign ctermfg=12 ctermbg=0
+highlight YcmWarningSign ctermfg=14 ctermbg=0
+highlight Pmenu ctermfg=black ctermbg=darkgray
+highlight PmenuSel ctermfg=black ctermbg=3
 
-" Indent line styling
-let g:indentLine_char_list = ['|', '¦', '┆', '┊']
+" ==================== PLUGIN VARIABLES =====================
+" vim-cpp-enhanced-highlight
+let g:cpp_class_scope_highlight = 1
+let g:cpp_member_variable_highlight = 1
+let g:cpp_class_decl_highlight = 1
+let g:cpp_concepts_highlight = 1
 
-" Nerd tree styling
+" vimwiki
+let g:vimwiki_ext2syntax = {'.Rmd': 'markdown', '.rmd': 'markdown', '.md': 'markdown', '.markdown': 'markdown'}
+let g:vimwiki_list = [{'path': '~/Documents/Notebooks/Vimwiki', 'syntax': 'markdown', 'ext': '.rmd'}]
+
+" nerdtree/nerdtree-git-plugin/vim-nerdtree-syntax-highlight
 let g:WebDevIconsUnicodeDecorateFolderNodes = 1
 let g:DevIconsEnableFoldersOpenClose = 1
 let g:NERDTreeGitStatusNodeColorization = 1
@@ -83,108 +116,7 @@ let g:NERDTreeIndicatorMapCustom = {
     \ "Unknown"   : "?"
     \ }
 
-" Replacement for up and down arrow
-inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
-inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
-
-" Highlight colors:
-color wal
-highlight CursorLineNr ctermfg=2
-
-" Fzf
-command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, {'options': ['--preview', 'preview {}']}, <bang>0)
-let g:fzf_layout = { 'window': 'call CreateCenteredFloatingWindow()' }
-let $FZF_DEFAULT_OPTS="--reverse " " top to bottom
-let g:fzf_action = {
-  \ 'ctrl-t': 'tab split',
-  \ 'ctrl-x': 'split',
-  \ 'ctrl-v': 'vsplit',
-  \ 'ctrl-r': 'read'
-  \ }
-function! CreateCenteredFloatingWindow()
-    let width = min([&columns - 4, max([80, &columns - 20])])
-    let height = min([&lines - 4, max([20, &lines - 10])])
-    let top = ((&lines - height) / 2) - 1
-    let left = (&columns - width) / 2
-    let opts = {'relative': 'editor', 'row': top, 'col': left, 'width': width, 'height': height, 'style': 'minimal'}
-
-    let top = "╭" . repeat("─", width - 2) . "╮"
-    let mid = "│" . repeat(" ", width - 2) . "│"
-    let bot = "╰" . repeat("─", width - 2) . "╯"
-    let lines = [top] + repeat([mid], height - 2) + [bot]
-    let s:buf = nvim_create_buf(v:false, v:true)
-    call nvim_buf_set_lines(s:buf, 0, -1, v:true, lines)
-    call nvim_open_win(s:buf, v:true, opts)
-    set winhl=Normal:Floating
-    let opts.row += 1
-    let opts.height -= 2
-    let opts.col += 2
-    let opts.width -= 4
-    call nvim_open_win(nvim_create_buf(v:false, v:true), v:true, opts)
-    au BufWipeout <buffer> exe 'bw '.s:buf
-endfunction
-
-" Files + devicons + floating fzf
-function! Fzf_dev()
-    let l:fzf_files_options = '--preview "bat --theme="OneHalfDark" --style=numbers,changes --color always {2..-1} | head -'.&lines.'"'
-    function! s:files()
-        let l:files = split(system($FZF_DEFAULT_COMMAND), '\n')
-        return s:prepend_icon(l:files)
-    endfunction
-
-    function! s:prepend_icon(candidates)
-        let l:result = []
-        for l:candidate in a:candidates
-            let l:filename = fnamemodify(l:candidate, ':p:t')
-            let l:icon = WebDevIconsGetFileTypeSymbol(l:filename, isdirectory(l:filename))
-            call add(l:result, printf('%s %s', l:icon, l:candidate))
-        endfor
-        return l:result
-    endfunction
-
-    function! s:edit_file(item)
-        let l:pos = stridx(a:item, ' ')
-        let l:file_path = a:item[pos+1:-1]
-        execute 'silent e' l:file_path
-    endfunction
-
-    call fzf#run({
-        \ 'source': <sid>files(),
-        \ 'sink':   function('s:edit_file'),
-        \ 'options': '-m --reverse ' . l:fzf_files_options,
-        \ 'down':    '40%',
-        \ 'window': 'call CreateCenteredFloatingWindow()'})
-endfunction
-
-" Tagbar
-let g:tagbar_autofocus = 1
-nmap ,tt :TagbarToggle<CR>
-
-" Tmux compatibility
-map <C-q> <C-a>
-autocmd BufReadPost,FileReadPost,BufNewFile,BufEnter * call system("tmux rename-window " . expand("%:t"))
-autocmd VimLeave * call system("tmux setw automatic-rename")
-
-" Enable folding
-set foldmethod=indent
-set foldlevel=99
-
-" Syntastic config
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 0
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 1
-let g:syntastic_error_symbol = "✗"
-let g:syntastic_warning_symbol = "⚠"
-highlight SyntasticErrorSign ctermfg=12 ctermbg=0
-highlight SyntasticWarningSign ctermfg=14 ctermbg=0
-
-" Cursor precision:
-highlight CursorLine ctermbg=9
-highlight CursorColumn ctermbg=9
-nmap + :set cursorline! cursorcolumn!<CR>
-
-" Airline config:
+" vim-airline
 let g:airline_powerline_fonts=1
 let g:airline_left_sep = ''
 let g:airline_left_alt_sep = ''
@@ -203,43 +135,36 @@ let g:airline#extensions#tabline#show_buffers = 1
 let g:airline#extensions#ycm#error_symbol = 'Error:'
 let g:airline#extensions#ycm#warning_symbol = 'Warning:'
 
-" Youcompleteme config:
+" YouCompleteMe
+let g:ycm_always_populate_location_list = 1
+let g:ycm_error_symbol = "✗"
+let g:ycm_warning_symbol = "⚠"
 let g:ycm_global_ycm_extra_conf = '$HOME/.config/nvim/plugged/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
 let g:ycm_confirm_extra_conf = 0
 let g:ycm_semantic_triggers =  {
-    \   'c': ['->', '.', 're!\w{2}'],
-    \   'objc': ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s', 're!\[.*\]\s'],
-    \   'ocaml': ['.', '#'],
-    \   'cpp,cuda,objcpp': ['->', '.', '::', 're!\w{2}'],
-    \   'perl': ['->'],
-    \   'php': ['->', '::'],
-    \   'cs,d,elixir,go,groovy,java,javascript,julia,perl6,scala,typescript,vb': ['.'],
-    \   'ruby,rust': ['.', '::'],
-    \   'lua': ['.', ':'],
-    \   'erlang': [':'],
-    \   'python': ['.', 're!\w{2}'],
+    \ 'c': ['->', '.', 're!\w{2}'],
+    \ 'objc': ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s', 're!\[.*\]\s'],
+    \ 'ocaml': ['.', '#'],
+    \ 'cpp,cuda,objcpp': ['->', '.', '::', 're!\w{2}'],
+    \ 'perl': ['->'],
+    \ 'php': ['->', '::'],
+    \ 'cs,d,elixir,go,groovy,java,javascript,julia,perl6,scala,typescript,vb': ['.'],
+    \ 'ruby,rust': ['.', '::'],
+    \ 'lua': ['.', ':'],
+    \ 'erlang': [':'],
+    \ 'python': ['.', 're!\w{2}'],
     \ }
 let g:ycm_python_binary_path = 'python3'
 let g:ycm_autoclose_preview_window_after_completion = 1
 let g:ycm_add_preview_to_completeopt = 1
-set completeopt-=preview
-map yd :YcmCompleter GetDoc<CR>
-map <leader>d :YcmCompleter GoToDefinition<CR>
-map <leader>g :YcmCompleter GoTo<CR>
-map <leader>x :YcmCompleter FixIt<CR>
-map <leader>l Hmx``:lopen<CR>
-map <leader>L :lclose<CR><C-w>k`xzt``
-" map <leader>l :lopen<CR>
-" map <leader>L :lclose<CR>
-highlight Pmenu ctermbg=darkgray ctermfg=black
 
-" Instant markdown preview config:
+" vim-instant-markdown
 let g:instant_markdown_autostart = 0
 
-" Vim jsx pretty config:
+" vim-jsx-pretty
 let g:vim_jsx_pretty_colorful_config = 1
 
-" Autoclosetag config:
+" vim-closetag
 let g:closetag_filenames = '*.html,*.xhtml,*.phtml,*.js'
 let g:closetag_xhtml_filenames = '*.xhtml,*.jsx,*.js'
 let g:closetag_filetypes = 'html,xhtml,phtml'
@@ -252,106 +177,128 @@ let g:closetag_regions = {
 let g:closetag_shortcut = '>'
 let g:closetag_close_shortcut = '<leader>>'
 
-" Warn when more than 100 columns:
-call matchadd('ColorColumn', '\%100v', 100)
+" goyo.vim
+let g:goyo_width=90
 
-" Enable autocompletion:
-set wildmode=longest,list,full
+" fzf.vim
+let g:fzf_layout = { 'window': 'call CreateCenteredFloatingWindow()' }
+let $FZF_DEFAULT_OPTS="--reverse " " top to bottom
+let g:fzf_action = {
+    \ 'ctrl-t': 'tab split',
+    \ 'ctrl-x': 'split',
+    \ 'ctrl-v': 'vsplit',
+    \ 'ctrl-r': 'read'
+    \ }
 
-" Word count
-map <leader>w :w !detex \| wc -w<CR>
-
-" Fzf configuration:
+" ===================== MAPS ====================
+" Quick fzf commands
 map <leader>. :Files<CR>
 map <leader> :Maps<CR>,
 map <leader>m :Buffers<CR>
 
-" Disables automatic commenting on newline:
-autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
-
-" Goyo plugin makes text more readable when writing prose:
-let g:goyo_width=90
+" Goyo modes
 map <leader>F :Goyo \| set bg=dark \| set linebreak<CR>
 
-" Reading environment
-map <leader>R :Goyo \| set bg=dark \| set linebreak \| set so=999 \| set cursorline!<CR>
+" Ycm shortcuts
+map yd :YcmCompleter GetDoc<CR>
+map <leader>d :YcmCompleter GoToDefinition<CR>
+map <leader>g :YcmCompleter GoTo<CR>
+map <leader>x :YcmCompleter FixIt<CR>
 
-" Spell-check set to <leader>o, 'o' for 'orthography':
+" Vimwiki no-conflict shortcuts
+nmap <C-w>w :VimwikiIndex<CR>
+nmap <C-w>n :VimwikiNextLink<CR>
+nmap <C-w>p :VimwikiPrevLink<CR>
+
+" Vim replacement for up and down
+inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
+inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
+
+" Tmux compatibility
+map <C-q> <C-a>
+
+" Toggle interface
+map <leader>l :call LocationToggle()<CR>
+map <leader>n :NERDTreeToggle<CR>
+
+" Spell check
 map <leader>o :setlocal spell! spelllang=en_us<CR>
 
-" Splits open at the bottom and right, which is non-retarded, unlike vim defaults.
-set splitbelow splitright
-
-" Nerd tree
-map <C-n> :NERDTreeToggle<CR>
-autocmd Bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-
-" Cpp highlight
-let g:cpp_class_scope_highlight = 1
-let g:cpp_member_variable_highlight = 1
-let g:cpp_class_decl_highlight = 1
-let g:cpp_concepts_highlight = 1
-
-" Vimling binding:
-" nmap <leader>D :call ToggleDeadKeys()<CR>
-" imap <leader>D <esc>:call ToggleDeadKeys()<CR>a
-" nmap <leader>i :call ToggleIPA()<CR>
-" imap <leader>i <esc>:call ToggleIPA()<CR>a
-" nmap <leader>q :call ToggleProse()<CR>
-
-" Shortcutting split navigation, saving a keypress:
+" Split navigation shortcuts
 map <C-h> <C-w>h
 map <C-j> <C-w>j
 map <C-k> <C-w>k
 map <C-l> <C-w>l
 
-" Check file in shellcheck:
+" Run shell scripts
 map <leader>s :!clear && shellcheck %<CR>
-
-" Open my bibliography file in split
-"map <leader>b :vsp<space>$BIB<CR>
-"map <leader>r :vsp<space>$REFER<CR>
-
-" Replace all is aliased to S.
-" nnoremap S :%s//g<Left><Left>
-
-" Compiler script
 map <leader>c :w! \| !compiler "<c-r>%"<CR>
-
-" Open corresponding .pdf/.html or preview
-map <leader>p :!opout "<c-r>%"<CR><CR>
-
-" Runs a script that cleans out tex build files whenever I close out of a .tex file.
-autocmd VimLeave *.tex !texclear %
-
-" Ensure files are read as what I want:
-let g:vimwiki_ext2syntax = {'.Rmd': 'markdown', '.rmd': 'markdown', '.md': 'markdown', '.markdown': 'markdown', '.mdown': 'markdown'}
-let g:vimwiki_list = [{'path': '~/Documents/Notebooks/Vimwiki', 'syntax': 'markdown', 'ext': '.rmd'}]
-autocmd BufRead,BufNewFile /tmp/calcurse*,~/.calcurse/notes/* set filetype=markdown
-autocmd BufRead,BufNewFile *.ms,*.me,*.mom,*.man set filetype=groff
-autocmd BufRead,BufNewFile *.tex set filetype=tex
-autocmd BufRead,BufNewFile *.asm set syntax=nasm
-
-" Copy selected text to system clipboard (requires gvim/nvim/vim-x11 installed):
-vnoremap <C-c> "+y
-map <C-p> "+P
-
-" Automatically deletes all trailing whitespace on save.
-autocmd BufWritePre * %s/\s\+$//e
+map <leader>p :!opout "<c-r>%" &<CR><CR>
+map <leader>w :w !detex \| wc -w<CR>
 
 " Navigating with guides
 inoremap <leader><leader> <Esc>/<++><CR>"_c4l
 vnoremap <leader><leader> <Esc>/<++><CR>"_c4l
 map <leader><leader> <Esc>/<++><CR>"_c4l
 
-" Import LaTeX config if file is tex
-autocmd FileType tex source ~/.config/nvim/mylatex.vim
+" Show cursor
+nmap + :set cursorline! cursorcolumn!<CR>
 
-" Import HTML config if file is html
-autocmd FileType html source ~/.config/nvim/myhtml.vim
+" Fix c
+nnoremap c "_c
 
-" Import markdown config if file is md
-autocmd FileType markdown,rmd source ~/.config/nvim/mymarkdown.vim
+" ==================== AUTOCMDS ====================
+" Clean tex junk on exit
+autocmd VimLeave *.tex !texclear %
 
-" Other files
-autocmd FileType bib source ~/.config/nvim/mybib.vim
+" Recognize files properly
+autocmd BufRead,BufNewFile /tmp/calcurse*,~/.calcurse/notes/* set filetype=markdown
+autocmd BufRead,BufNewFile *.ms,*.me,*.mom,*.man set filetype=groff
+autocmd BufRead,BufNewFile *.tex set filetype=tex
+autocmd BufRead,BufNewFile *.asm set syntax=nasm
+
+" Deletes trailing whitespace on save
+autocmd BufWritePre * %s/\s\+$//e
+
+" Set tmux window name
+autocmd BufReadPost,FileReadPost,BufNewFile,BufEnter * call system("tmux rename-window " . expand("%:t"))
+autocmd VimLeave * call system("tmux setw automatic-rename")
+
+" Close nerdtree on last window
+autocmd Bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+" ==================== COMMANDS OR FUNCTIONS ====================
+" Fzf add preview
+command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, {'options': ['--preview', 'preview {}']}, <bang>0)
+
+" Fzf floating window
+function! CreateCenteredFloatingWindow()
+    let width = min([&columns - 4, max([80, &columns - 20])])
+    let height = min([&lines - 4, max([20, &lines - 10])])
+    let top = ((&lines - height) / 2) - 1
+    let left = (&columns - width) / 2
+    let opts = {'relative': 'editor', 'row': top, 'col': left, 'width': width, 'height': height, 'style': 'minimal'}
+    let top = "‚ï≠" . repeat("‚îÄ", width - 2) . "‚ïÆ"
+    let mid = "‚îÇ" . repeat(" ", width - 2) . "‚îÇ"
+    let bot = "‚ï∞" . repeat("‚îÄ", width - 2) . "‚ïØ"
+    let lines = [top] + repeat([mid], height - 2) + [bot]
+    let s:buf = nvim_create_buf(v:false, v:true)
+    call nvim_buf_set_lines(s:buf, 0, -1, v:true, lines)
+    call nvim_open_win(s:buf, v:true, opts)
+    set winhl=Normal:Floating
+    let opts.row += 1
+    let opts.height -= 2
+    let opts.col += 2
+    let opts.width -= 4
+    call nvim_open_win(nvim_create_buf(v:false, v:true), v:true, opts)
+    au BufWipeout <buffer> exe 'bw '.s:buf
+endfunction
+
+" Toggle location list
+function! LocationToggle()
+    if get(getloclist(0, {'winid':0}), 'winid', 0)
+        lclose
+    else
+        lopen
+    endif
+endfunction

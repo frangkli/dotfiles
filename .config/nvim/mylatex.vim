@@ -12,10 +12,9 @@ map <leader>w :VimtexCountWords<CR>
 
 " Vimtex config
 map <F3> :VimtexTocToggle<CR>
-map <leader>p :VimtexView<CR>
 map <leader>c :VimtexCompile<CR>
 let g:tex_flavor = 'latex'
-let g:vimtex_view_general_viewer = 'zathura'
+let g:vimtex_view_general_viewer = 'dothura'
 let g:vimtex_fold_enabled = 1
 let g:ycm_semantic_triggers.tex = g:vimtex#re#youcompleteme
 let g:vimtex_syntax_enabled = 0
