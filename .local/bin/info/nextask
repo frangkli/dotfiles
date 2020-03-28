@@ -1,7 +1,7 @@
 #!/bin/sh
 export TASKRC="$HOME/.config/task/taskrc"
 
-first=$(/usr/local/bin/task list | sed -n 4p)
+first=$(/usr/local/bin/task next | sed -n 4p)
 if [ ${first:0:2} == " " ]
 then
     first=$(echo $first | cut -d " " -f2)
