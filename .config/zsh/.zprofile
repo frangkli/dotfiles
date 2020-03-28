@@ -23,7 +23,7 @@ export READER="zathura --fork"
 export BIB="$HOME/Documents/Bibliography"
 export CLICOLOR=1
 export HOMEBREW_NO_AUTO_UPDATE=1
-export LC_ALL="en_US.UTF-8"
+export LC_ALL="C"
 
 # Clean up
 export XML_CATALOG_FILES="/usr/local/etc/xml/catalog"
@@ -47,6 +47,8 @@ export CONDA_PREFIX="$XDG_CONFIG_HOME/conda"
 export NODE_REPL_HISTORY="$XDG_DATA_HOME/node_repl_history"
 export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc" # node-gyp in XDG_DATA_HOME
 export SQLITE_HISTORY="$XDG_DATA_HOME/sqlite_history"
+export TERMINFO="$XDG_DATA_HOME/terminfo"
+export TERMINFO_DIRS="$XDG_DATA_HOME/terminfo:/usr/share/terminfo"
 
 # Vulkan config
 export VULKAN_SDK="$HOME/.local/software/vulkansdk-macos-1.1.121.1/macOS"
@@ -99,4 +101,4 @@ set -o vi
 [ -f "/usr/local/etc/profile.d/z.sh" ] && . "/usr/local/etc/profile.d/z.sh"
 
 # Start up config
-echo "Welcome, Frank Li"
+. "/Users/frank/.local/bin/info/shellstart"
