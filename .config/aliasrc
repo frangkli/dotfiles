@@ -1,14 +1,14 @@
 #!/bin/sh
 
 # Alias
-alias bash="bash --init-file $HOME/.config/bash/bashrc" \
-    rm="trash" \
+alias rm="trash" \
     dmenu_run="/usr/local/bin/dmenu_run -p 'Command >'" \
     v="$EDITOR" \
     cat="highlight --force --out-format=ansi" \
     ccat="/bin/cat" \
     ls="gls -hN --color=auto --group-directories-first" \
     grep="grep --color=auto" \
+    mail="mail && trash ~/mbox" \
     diff="colordiff" \
     fzfp="fzf --preview 'highlight --force --out-format=ansi {}'" \
     clock="tty-clock -c" \
@@ -33,6 +33,7 @@ alias bash="bash --init-file $HOME/.config/bash/bashrc" \
 # Clean up and conf
 alias w3m="w3m -config $HOME/.config/w3m/config -bookmark $HOME/.config/w3m/bookmark.html && trash -rf ~/.w3m" \
     tmux="tmux -f ~/.config/tmux/tmux.conf" \
+    bash="bash --init-file $HOME/.config/bash/bashrc" \
     calcurse="calcurse -C ~/.config/calcurse -D ~/.config/calcurse" \
     abook="abook -C ~/.config/abook/abookrc --datafile ~/.config/abook/addressbook" \
     mpd="mpd ~/.config/mpd/mpd.conf" \
@@ -41,13 +42,13 @@ alias w3m="w3m -config $HOME/.config/w3m/config -bookmark $HOME/.config/w3m/book
     skhd="skhd -c ~/.config/skhd/skhdrc" \
 
 fvim() {
-	$EDITOR "$(fzfp -m --prompt='File> ')"
+    $EDITOR "$(fzfp -m --prompt='File> ')"
 }
 fzat() {
-	zathura --fork "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | grep ".pdf$" | fzfp -m --prompt='PDF> ')" 2> /dev/null
+    zathura --fork "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | grep ".pdf$" | fzfp -m --prompt='PDF> ')" 2> /dev/null
 }
 fimg() {
-	sxiv -qb "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | awk '/jpeg/ || /png/ || /jpg/ || /gif/' | fzfp -m --prompt='Image> ')"
+    sxiv -qb "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | awk '/jpeg/ || /png/ || /jpg/ || /gif/' | fzfp -m --prompt='Image> ')"
 }
 fconfig() {
     $EDITOR "$(fd -H . ~/.config ~/.local/bin -d 2 --type f | fzfp --prompt='Config> ')"
@@ -56,20 +57,20 @@ ftex() {
     $EDITOR "$(fd . ~/OneDrive* ~/Documents ~/Repositories -e tex | fzfp --prompt='File> ')"
 }
 fbrew() {
-	inst="$(brew search | fzf -m --prompt='Package> ' --preview 'brew info {}')"
-	if [ "$inst" ]; then
-		for prog in $inst;
-    	do brew install "$prog"; done;
-  	fi
+    inst="$(brew search | fzf -m --prompt='Package> ' --preview 'brew info {}')"
+    if [ "$inst" ]; then
+        for prog in $inst;
+        do brew install "$prog"; done;
+    fi
 }
 fman() {
-	man "$(man -k . | fzf --prompt='Man> ' | sed 's/(/ /g' | awk '{print $1}')"
+    man "$(man -k . | fzf --prompt='Man> ' | sed 's/(/ /g' | awk '{print $1}')"
 }
 ftldr() {
     tldr "$(tldr --list | sed "s/ //g" | tr "," "\n" | fzf --prompt='Tldr> ' --preview 'tldr {}')"
 }
 fpass() {
-	lpass show -c --password $(lpass ls  | fzf -m --prompt='Account> ' | awk '{print $(NF)}' | sed 's/\]//g')
+    lpass show -c --password $(lpass ls  | fzf -m --prompt='Account> ' | awk '{print $(NF)}' | sed 's/\]//g')
 }
 lfcd() {
     tmp="$(mktemp)"
