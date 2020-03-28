@@ -1,19 +1,29 @@
 diff --git a/config.def.h b/config.def.h
-index 546edda..67404ca 100644
+index 546edda..234e2aa 100644
 --- a/config.def.h
 +++ b/config.def.h
-@@ -5,8 +5,8 @@
+@@ -5,8 +5,9 @@
   *
   * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
   */
 -static char *font = "Liberation Mono:pixelsize=12:antialias=true:autohint=true";
 -static int borderpx = 2;
 +static char *font = "FuraMono Nerd Font:size=8:antialias=true:autohint=true";
++static char *font2[] = {"Apple Color Emoji:size=8:antialias=true:autohint=true"};
 +static int borderpx = 20;
  
  /*
   * What program is execed by st depends of these precedence rules:
-@@ -80,46 +80,45 @@ char *termname = "st-256color";
+@@ -16,7 +17,7 @@ static int borderpx = 2;
+  * 4: value of shell in /etc/passwd
+  * 5: value of shell in config.h
+  */
+-static char *shell = "/bin/sh";
++static char *shell = "/usr/local/bin/zsh";
+ char *utmp = NULL;
+ char *stty_args = "stty raw pass8 nl -echo -iexten -cstopb 38400";
+ 
+@@ -80,46 +81,45 @@ char *termname = "st-256color";
   *
   *	stty tabs
   */
@@ -47,31 +57,31 @@ index 546edda..67404ca 100644
 -	/* more colors can be added after 255 to use with DefaultXX */
 -	"#cccccc",
 -	"#555555",
-+   /* 8 normal colors */
-+     "black",
-+     "red3",
-+     "green3",
-+     "yellow3",
-+     "blue2",
-+     "magenta3",
-+     "cyan3",
-+     "gray90",
++    /* 8 normal colors */
++    "black",
++    "red3",
++    "green3",
++    "yellow3",
++    "blue2",
++    "magenta3",
++    "cyan3",
++    "gray90",
 +
-+     /* 8 bright colors */
-+     "gray50",
-+     "red",
-+     "green",
-+     "yellow",
-+     "#5c5cff",
-+     "magenta",
-+     "cyan",
-+     "white",
++    /* 8 bright colors */
++    "gray50",
++    "red",
++    "green",
++    "yellow",
++    "#5c5cff",
++    "magenta",
++    "cyan",
++    "white",
 +
-+     [255] = 0,
++    [255] = 0,
 +
-+     /* more colors can be added after 255 to use with DefaultXX */
-+     "#cccccc",
-+     "#555555",
++    /* more colors can be added after 255 to use with DefaultXX */
++    "#cccccc",
++    "#555555",
  };
  
 -
@@ -90,6 +100,25 @@ index 546edda..67404ca 100644
  
  /*
   * Default shape of cursor
+@@ -178,13 +178,11 @@ static Shortcut shortcuts[] = {
+ 	{ ControlMask,          XK_Print,       toggleprinter,  {.i =  0} },
+ 	{ ShiftMask,            XK_Print,       printscreen,    {.i =  0} },
+ 	{ XK_ANY_MOD,           XK_Print,       printsel,       {.i =  0} },
+-	{ TERMMOD,              XK_Prior,       zoom,           {.f = +1} },
+-	{ TERMMOD,              XK_Next,        zoom,           {.f = -1} },
+-	{ TERMMOD,              XK_Home,        zoomreset,      {.f =  0} },
+-	{ TERMMOD,              XK_C,           clipcopy,       {.i =  0} },
+-	{ TERMMOD,              XK_V,           clippaste,      {.i =  0} },
+-	{ TERMMOD,              XK_Y,           selpaste,       {.i =  0} },
+-	{ ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
++	{ TERMMOD,              XK_plus,        zoom,           {.f = +1} },
++        { TERMMOD,              XK_minus,       zoom,           {.f = -1} },
++	{ TERMMOD,              XK_0,           zoomreset,      {.f =  0} },
++	{ MODKEY,               XK_c,           clipcopy,       {.i =  0} },
++	{ MODKEY,               XK_v,           clippaste,      {.i =  0} },
+ 	{ TERMMOD,              XK_Num_Lock,    numlock,        {.i =  0} },
+ };
+ 
 diff --git a/config.mk b/config.mk
 index 0cbb002..0eb5e3c 100644
 --- a/config.mk
