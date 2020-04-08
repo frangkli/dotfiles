@@ -22,8 +22,8 @@ Plug '/usr/local/opt/fzf'
 Plug 'junegunn/fzf.vim'
 
 " Completion
-Plug 'metalelf0/supertab'
-Plug 'neoclide/coc.nvim', { 'branch': 'release' }
+Plug 'ervandew/supertab'
+Plug 'Valloric/YouCompleteMe', { 'do':'./install.py' }
 
 " File tree
 Plug 'scrooloose/nerdtree'
@@ -34,7 +34,6 @@ Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'ryanoasis/vim-devicons'
 Plug 'tpope/vim-fugitive'
 Plug 'bling/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
 
 " Color schemes
 Plug 'dracula/vim', { 'as': 'dracula' }
@@ -57,14 +56,12 @@ set background=dark
 set mouse=a
 set number relativenumber
 set hlsearch
-set wrap
 set title
 set titleold=st
 set clipboard=unnamedplus
 set undodir=~/.config/nvim/undodir
 set undofile
 set encoding=UTF-8
-set noshowmode
 set expandtab
 set tabstop=8
 set softtabstop=0
@@ -72,19 +69,11 @@ set shiftwidth=4
 set smarttab
 set foldmethod=indent
 set foldlevel=99
+set completeopt-=preview
 set splitbelow splitright
 set wildmode=list,full
-set rtp+=../UltiSnips
 filetype plugin on
 syntax on
-
-" Coc settings
-set hidden
-set nobackup
-set nowritebackup
-set updatetime=300
-set signcolumn=yes
-set shortmess+=c
 
 " ==================== COLORS ====================
 color wal
@@ -93,21 +82,14 @@ highlight CursorColumn ctermbg=9
 highlight CursorLineNr ctermfg=2
 highlight WildMenu ctermfg=0 ctermbg=3
 highlight Statusline ctermfg=7 ctermbg=none cterm=none
+highlight YcmErrorSign ctermfg=12 ctermbg=0
+highlight YcmWarningSign ctermfg=14 ctermbg=0
 highlight Pmenu ctermbg=233
 highlight PmenuSel ctermfg=0 ctermbg=3
 highlight QuickScopePrimary cterm=underline ctermfg=155
 highlight QuickScopeSecondary cterm=underline ctermfg=81
-highlight CocErrorFloat ctermfg=3
-highlight Statement ctermfg=3
-highlight Identifier cterm=None
-highlight vimUserCommand ctermfg=10
 
 " ==================== PLUGIN VARIABLES =====================
-" supertab
-let g:SuperTabDefaultCompletionType = "<C-n>"
-
-" coc.nvim
-
 " vimtex
 let g:vimtex_compiler_progname = 'nvr'
 
@@ -150,6 +132,9 @@ let g:airline_left_sep = ''
 let g:airline_left_alt_sep = ''
 let g:airline_right_alt_sep = ''
 let g:airline_right_sep = ''
+let g:airline#extensions#ycm#enabled = 1
+let g:airline#extensions#ycm#error_symbol = 'E:'
+let g:airline#extensions#ycm#warning_symbol = 'W:'
 let g:airline#extensions#fugitiveline#enabled = 1
 let g:airline#extensions#wordcount#enabled= 1
 let g:airline#extensions#wordcount#filetypes=['vimwiki', 'help', 'mail', 'markdown', 'tex', 'text', 'groff', 'rmarkdown']
@@ -160,9 +145,29 @@ let g:airline#extensions#tabline#right_sep = ''
 let g:airline#extensions#tabline#right_alt_sep = ''
 let g:airline#extensions#tabline#show_splits = 1
 let g:airline#extensions#tabline#show_buffers = 1
-let g:airline#extensions#coc#enabled = 1
-let g:airline#extensions#coc#error_symbol = 'E:'
-let g:airline#extensions#coc#warning_symbol = 'W:'
+
+" YouCompleteMe
+let g:ycm_always_populate_location_list = 1
+let g:ycm_error_symbol = "✖"
+let g:ycm_warning_symbol = "⚠"
+let g:ycm_global_ycm_extra_conf = '$HOME/.config/nvim/plugged/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
+let g:ycm_confirm_extra_conf = 0
+let g:ycm_semantic_triggers =  {
+    \ 'c': ['->', '.', 're!\w{2}'],
+    \ 'objc': ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s', 're!\[.*\]\s'],
+    \ 'ocaml': ['.', '#'],
+    \ 'cpp,cuda,objcpp': ['->', '.', '::', 're!\w{2}'],
+    \ 'perl': ['->'],
+    \ 'php': ['->', '::'],
+    \ 'cs,d,elixir,go,groovy,java,javascript,julia,perl6,scala,typescript,vb': ['.'],
+    \ 'ruby,rust': ['.', '::'],
+    \ 'lua': ['.', ':'],
+    \ 'erlang': [':'],
+    \ 'python': ['.', 're!\w{2}'],
+    \ }
+let g:ycm_python_binary_path = 'python3'
+let g:ycm_autoclose_preview_window_after_completion = 1
+let g:ycm_add_preview_to_completeopt = 0
 
 " vim-instant-markdown
 let g:instant_markdown_autostart = 0
@@ -188,7 +193,7 @@ let g:goyo_width=90
 
 " fzf.vim
 let g:fzf_layout = { 'window': 'call CreateCenteredFloatingWindow()' }
-let $FZF_DEFAULT_OPTS="--reverse"
+let $FZF_DEFAULT_OPTS="--reverse "
 let g:fzf_action = {
     \ 'ctrl-t': 'tab split',
     \ 'ctrl-s': 'split',
@@ -204,6 +209,14 @@ map <Leader>m :Buffers<CR>
 
 " Goyo modes
 map <Leader>F :Goyo \| set bg=dark \| set linebreak<CR>
+
+" Ycm shortcuts
+map <Leader>d :YcmCompleter GoToDefinition<CR>
+map <Leader>g :YcmCompleter GoTo<CR>
+map <Leader>x :YcmCompleter FixIt<CR>
+
+" Vimwiki
+nmap <leader>vw <Plug>VimwikiIndex
 
 " Vim replacement for up and down
 inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
@@ -242,62 +255,12 @@ nmap + :set cursorline! cursorcolumn!<CR>
 " Fix c
 nnoremap c "_c
 
-" Coc movements
-nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-
-" Use <c-space> to trigger completion
-inoremap <silent><expr> <c-space> coc#refresh()
-
-" Symbol renaming
-nmap <leader>rn <Plug>(coc-rename)
-
-" Formatting selected code
-xmap <leader>f <Plug>(coc-format-selected)
-nmap <leader>f <Plug>(coc-format-selected)
-
-" Applying codeAction to the selected region
-xmap <leader>a <Plug>(coc-codeaction-selected)
-nmap <leader>a <Plug>(coc-codeaction-selected)
-nmap <leader>ac <Plug>(coc-codeaction)
-
-" Apply AutoFix to problem on the current line.
-nmap <leader>x <Plug>(coc-fix-current)
-
-" Coclist maps
-nnoremap <silent> <space>a :<C-u>CocList diagnostics<cr>
-nnoremap <silent> <space>e :<C-u>CocList extensions<cr>
-nnoremap <silent> <space>c :<C-u>CocList commands<cr>
-nnoremap <silent> <space>o :<C-u>CocList outline<cr>
-nnoremap <silent> <space>s :<C-u>CocList -I symbols<cr>
-nnoremap <silent> <space>j :<C-u>CocNext<CR>
-nnoremap <silent> <space>k :<C-u>CocPrev<CR>
-nnoremap <silent> <space>p :<C-u>CocListResume<CR>
-
-" Replace K with coc doc
-nnoremap <silent> K :call <SID>show_documentation()<CR>
-
-" Introduce function text object
-xmap if <Plug>(coc-funcobj-i)
-xmap af <Plug>(coc-funcobj-a)
-omap if <Plug>(coc-funcobj-i)
-omap af <Plug>(coc-funcobj-a)
-
-" Templates
-nmap <F2> :CocList templates<CR>
-
 " ==================== AUTOCMDS ====================
 " Clean tex junk on exit
 autocmd VimLeave *.tex !texclear %
 
 " Recognize files properly
 autocmd BufRead,BufNewFile /tmp/calcurse*,~/.calcurse/notes/* set filetype=markdown
-" autocmd VimEnter,BufRead,BufNewFile *.md,*.rmd set filetype=markdown
-" autocmd BufRead,BufNewFile */Vimwiki/* set filetype=vimwiki
 autocmd BufRead,BufNewFile *.ms,*.me,*.mom,*.man set filetype=groff
 autocmd BufRead,BufNewFile *.tex set filetype=tex
 autocmd BufRead,BufNewFile *.asm set syntax=nasm
@@ -321,7 +284,6 @@ autocmd BufRead,BufNewFile */Vimwiki/* map K <Plug>VimwikiPrevLink
 
 " Recognize comments in json
 autocmd FileType json syntax match Comment +\/\/.\+$+
-
 " ==================== COMMANDS OR FUNCTIONS ====================
 " Fzf add preview
 command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, {'options': ['--preview', 'preview {}']}, <bang>0)
@@ -357,31 +319,3 @@ function! LocationToggle()
         lopen
     endif
 endfunction
-
-" Use K to show documentation in preview window.
-function! s:show_documentation()
-  if (index(['vim','help','sh','bash','zsh','c','cpp'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  else
-    call CocAction('doHover')
-  endif
-endfunction
-
-" Add `:Format` command to format current buffer.
-command! -nargs=0 Format :call CocAction('format')
-
-" Add `:OR` command for organize imports of the current buffer.
-command! -nargs=0 OR :call CocAction('runCommand', 'editor.action.organizeImport')
-
-" Word processor mode
-" https://jasonheppler.org/2012/12/05/word-processor-mode-in-vim/
-function! WordProcessorMode()
-    setlocal formatoptions=t1
-    setlocal textwidth=80
-    map j gj
-    map k gk
-    setlocal smartindent
-    setlocal spell spelllang=en_us
-    setlocal noexpandtab
-endfunction
-command! WP call WordProcessorMode()
