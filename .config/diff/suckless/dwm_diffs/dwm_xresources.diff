@@ -1,17 +1,8 @@
 diff --git a/config.def.h b/config.def.h
-index 1c0b587..8ada502 100644
+index 1c0b587..f895f18 100644
 --- a/config.def.h
 +++ b/config.def.h
-@@ -5,17 +5,26 @@ static const unsigned int borderpx  = 1;        /* border pixel of windows */
- static const unsigned int snap      = 32;       /* snap pixel */
- static const int showbar            = 1;        /* 0 means no bar */
- static const int topbar             = 1;        /* 0 means bottom bar */
--static const char *fonts[]          = { "monospace:size=10" };
--static const char dmenufont[]       = "monospace:size=10";
-+static const char *fonts[]          = { "FuraMono Nerd Font:size=9" };
-+static const char dmenufont[]       = "FuraMono Nerd Font:size=9";
- static const char col_gray1[]       = "#222222";
- static const char col_gray2[]       = "#444444";
+@@ -12,10 +12,19 @@ static const char col_gray2[]       = "#444444";
  static const char col_gray3[]       = "#bbbbbb";
  static const char col_gray4[]       = "#eeeeee";
  static const char col_cyan[]        = "#005577";
@@ -79,7 +70,7 @@ index 4bcd5ad..42b04ce 100644
  /* Cursor abstraction */
  Cur *drw_cur_create(Drw *drw, int shape);
 diff --git a/dwm.c b/dwm.c
-index 4465af1..1a28cee 100644
+index 4465af1..ba8f040 100644
 --- a/dwm.c
 +++ b/dwm.c
 @@ -35,6 +35,7 @@
@@ -150,12 +141,12 @@ index 4465af1..1a28cee 100644
 +      xrdb = XrmGetStringDatabase(resm);
 +
 +      if (xrdb != NULL) {
-+        XRDB_LOAD_COLOR("*.color1", normbordercolor);
-+        XRDB_LOAD_COLOR("*.color0", normbgcolor);
-+        XRDB_LOAD_COLOR("*.color8", normfgcolor);
-+        XRDB_LOAD_COLOR("*.color2", selbordercolor);
-+        XRDB_LOAD_COLOR("*.color2", selbgcolor);
-+        XRDB_LOAD_COLOR("*.color0", selfgcolor);
++        XRDB_LOAD_COLOR("*.color2", normbordercolor);
++        XRDB_LOAD_COLOR("*.background", normbgcolor);
++        XRDB_LOAD_COLOR("*.foreground", normfgcolor);
++        XRDB_LOAD_COLOR("*.color4", selbordercolor);
++        XRDB_LOAD_COLOR("*.color4", selbgcolor);
++        XRDB_LOAD_COLOR("*.background", selfgcolor);
 +      }
 +    }
 +  }

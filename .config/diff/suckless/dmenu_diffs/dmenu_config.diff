@@ -1,5 +1,5 @@
 diff --git a/config.def.h b/config.def.h
-index 1edb647..cacdcb8 100644
+index 1edb647..aa6385f 100644
 --- a/config.def.h
 +++ b/config.def.h
 @@ -4,14 +4,15 @@
@@ -7,7 +7,7 @@ index 1edb647..cacdcb8 100644
  /* -fn option overrides fonts[0]; default X11 font or font set */
  static const char *fonts[] = {
 -	"monospace:size=10"
-+	"FuraMono Nerd Font:size=9"
++	"FuraMono Nerd Font:size=8"
  };
  static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
  static const char *colors[SchemeLast][2] = {
@@ -46,3 +46,16 @@ index 0929b4a..03a916b 100644
  # OpenBSD (uncomment)
  #FREETYPEINC = $(X11INC)/freetype2
  
+diff --git a/dmenu_path b/dmenu_path
+index 3a7cda7..29f64e2 100755
+--- a/dmenu_path
++++ b/dmenu_path
+@@ -7,7 +7,7 @@ cache="$cachedir/dmenu_run"
+ 
+ IFS=:
+ if stest -dqr -n "$cache" $PATH; then
+-	stest -flx $PATH | sort -u | tee "$cache"
++	source "$HOME/.config/aliasrc" 1>/dev/null; compgen -c | sort -u | tee "$cache"
+ else
+ 	cat "$cache"
+ fi
