@@ -1,6 +1,5 @@
 set statusbar-h-padding 0
 set statusbar-v-padding 0
-set page-padding 1
-set window-height 800
+set window-height 900
 set window-width 700
 set selection-clipboard clipboard
