@@ -23,7 +23,7 @@ export READER="zathura --fork"
 export BIB="$HOME/Documents/Bibliography"
 export CLICOLOR=1
 export HOMEBREW_NO_AUTO_UPDATE=1
-export LC_ALL="en_US.UTF-8"
+export LC_ALL="C"
 
 # Clean up
 export XML_CATALOG_FILES="/usr/local/etc/xml/catalog"
