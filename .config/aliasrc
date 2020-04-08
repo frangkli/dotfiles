@@ -6,7 +6,7 @@ alias rm="trash" \
     v="$EDITOR" \
     cat="highlight --force --out-format=ansi" \
     ccat="/bin/cat" \
-    ls="gls -hN --color=auto --group-directories-first" \
+    ls="gls -hNF --color=auto --group-directories-first" \
     grep="grep --color=auto" \
     mail="mail && trash ~/mbox" \
     diff="colordiff" \
@@ -19,6 +19,7 @@ alias rm="trash" \
     trem="transmission-remote-cli" \
     lock="/System/Library/CoreServices/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine" \
     python="python3" \
+    pip="pip3" \
     musicphp="/Users/frank/.config/composer/vendor/bin/music-php" \
     hw="task list project:School" \
     dotfiles="/usr/bin/git --git-dir=$HOME/.config/dotfiles/ --work-tree=$HOME" \
@@ -34,27 +35,26 @@ alias rm="trash" \
 alias w3m="w3m -config $HOME/.config/w3m/config -bookmark $HOME/.config/w3m/bookmark.html && trash -rf ~/.w3m" \
     tmux="tmux -f ~/.config/tmux/tmux.conf" \
     bash="bash --init-file $HOME/.config/bash/bashrc" \
-    calcurse="calcurse -C ~/.config/calcurse -D ~/.config/calcurse" \
+    calcurse="calcurse -C ~/.config/calcurse -D ~/.local/share/calcurse" \
     abook="abook -C ~/.config/abook/abookrc --datafile ~/.config/abook/addressbook" \
     mpd="mpd ~/.config/mpd/mpd.conf" \
     mbsync="mbsync -c $XDG_CONFIG_HOME/isync/mbsyncrc" \
     gpg="gpg --homedir $XDG_DATA_HOME/gnupg" \
     skhd="skhd -c ~/.config/skhd/skhdrc" \
+    zathura="~/.local/bin/tools/zathura" \
+    ranlor="wal --theme random && xrdb -merge ~/.Xresources" \
 
 fvim() {
     $EDITOR "$(fzfp -m --prompt='File> ')"
 }
 fzat() {
-    zathura --fork "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | grep ".pdf$" | fzfp -m --prompt='PDF> ')" 2> /dev/null
+    dothura "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | grep ".pdf$" | fzfp -m --prompt='PDF> ')" 2> /dev/null
 }
 fimg() {
     sxiv -qb "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | awk '/jpeg/ || /png/ || /jpg/ || /gif/' | fzfp -m --prompt='Image> ')"
 }
 fconfig() {
-    $EDITOR "$(fd -H . ~/.config ~/.local/bin -d 2 --type f | fzfp --prompt='Config> ')"
-}
-ftex() {
-    $EDITOR "$(fd . ~/OneDrive* ~/Documents ~/Repositories -e tex | fzfp --prompt='File> ')"
+    $EDITOR "$(fd -H . ~/.config ~/.local/bin -d 3 --type f | fzfp --prompt='Config> ')"
 }
 fbrew() {
     inst="$(brew search | fzf -m --prompt='Package> ' --preview 'brew info {}')"
