@@ -1,21 +1,18 @@
 #!/bin/sh
+
 export TASKRC="$HOME/.config/task/taskrc"
 
-first=$(/usr/local/bin/task next | sed -n 4p)
-if [ ${first:0:2} == " " ]
-then
-    first=$(echo $first | cut -d " " -f2)
-else
-    first=$(echo $first | cut -d " " -f1)
-fi
-name=$(/usr/local/bin/task $first info | sed -n 5p | sed "s/Description   //g")
+id="$(/usr/local/bin/task next 2>/dev/null | sed -n 's/^\s//; 4p' | cut -d ' ' -f 1)"
+context="$(/usr/local/bin/task _get rc.context)"
 
-text="Next Task: "$name
-charcount=$(echo $text | wc -m)
+[ "$context" == "home" ] && context="H"
+[ "$context" == "school" ] && context="S"
 
-if [ $charcount -gt 45 ]
+text="Task ("$context"): $(/usr/local/bin/task _get "$id".description)"
+
+if [ "${#text}" -gt 40 ]
 then
-	echo $(echo $text | cut -c -42)...
+    echo "$(echo "$text" | cut -c -37)"...
 else
-	echo $text
+    echo "$text"
 fi

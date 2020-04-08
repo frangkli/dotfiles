@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 battery="$(pmset -g batt | grep -o '[0-9]*%')"
 
 if [[ "${#battery}" -gt 4 ]] ; then

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+echo "Welcome, Frank Li"
+
+homeFileCount="$(ls -a ~ | wc -l | sed "s/ //g")"
+
+if [ "$homeFileCount" -gt 36 ]
+then
+    echo "$(tput setaf 4)$homeFileCount files in \$HOME$(tput sgr0)"
+else
+    echo "$homeFileCount files in \$HOME"
+fi

@@ -14,17 +14,18 @@
 #    fi
 #fi
 
-if [ "$(/usr/local/bin/ncmpcpp  --current-song '%t - %l' 2> /dev/null)" == "" ]
-then
-	echo ♬ No music playing
-else
-	text=$(/usr/local/bin/ncmpcpp  --current-song '%t - %l' 2> /dev/null)
-	charcount=$(echo $text | wc -m)
+[ -f "$HOME/.config/zsh/.zprofile" ] && . "$HOME/.config/zsh/.zprofile" 1>/dev/null
 
-	if [ $charcount -gt 37 ]
-	then
-		echo "♬ $(echo $text | cut -c -35)..."
-	else
-		echo "♬ $text"
-	fi
+if [ "$(/usr/local/bin/ncmpcpp  --current-song '[%l] %t' 2> /dev/null)" == "" ]
+then
+    echo ♬ No music playing
+else
+    text="$(/usr/local/bin/ncmpcpp  --current-song '[%l] %t' 2> /dev/null | cut -d "(" -f 1 | sed 's/ $//')"
+    charcount=$(echo $text | wc -m)
+    if [ $charcount -gt 37 ]
+    then
+        echo "♬ $(echo $text | cut -c -35)..."
+    else
+        echo "♬ $text"
+    fi
 fi
