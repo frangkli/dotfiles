@@ -1,7 +1,9 @@
-# Files
-mpd_music_dir = "~/Music"
+# Directories
 lyrics_directory = ~/.config/ncmpcpp/lyrics
 ncmpcpp_directory = ~/.config/ncmpcpp
+
+# Mpd settings
+mpd_music_dir = "~/Music"
 mpd_host = "localhost"
 mpd_port = "6600"
 mpd_connection_timeout = "5"
@@ -12,6 +14,7 @@ playlist_disable_highlight_delay = "0"
 playlist_display_mode = "columns"
 playlist_show_remaining_time = "yes"
 
+# Interface modifications
 browser_display_mode = "columns"
 autocenter_mode = "yes"
 follow_now_playing_lyrics = "yes"
@@ -34,7 +37,7 @@ user_interface = "alternative"
 #user_interface = "classic"
 default_place_to_search_in = "database"
 
-# visualizer
+# Music visualizer
 visualizer_fifo_path = "/tmp/mpd.fifo"
 visualizer_output_name = "my_fifo"
 visualizer_sync_interval = "12"
@@ -44,36 +47,33 @@ visualizer_in_stereo = "yes"
 #visualizer_look = "+|"
 visualizer_look = "▋▋"
 
-## Navigation ##
+# Navigation
 cyclic_scrolling = "yes"
 header_text_scrolling = "yes"
 jump_to_now_playing_song_at_start = "yes"
 lines_scrolled = "2"
 
-## Other ##
+# Strings
 system_encoding = "utf-8"
 regular_expressions = "extended"
 
-## Selected tracks ##
+# Selected tracks
 selected_item_prefix = "* "
 discard_colors_if_item_is_selected = "no"
 
-## Seeking ##
+# Seeking
 incremental_seeking = "yes"
 #seek_time = "1"
 
-## Visivility ##
+# Visibility
 header_visibility = "yes"
 statusbar_visibility = "yes"
 titles_visibility = "yes"
-
 progressbar_look = "=>-"
 #progressbar_look = "─╼─"
 progressbar_elapsed_color = "white"
-
 #now_playing_prefix = "> "
 now_playing_prefix = "$b$2▶ "
-
 song_status_format = " $2%a $4⟫$3⟫ $8%t $4⟫$3⟫ $5%b "
 centered_cursor = "yes"
 

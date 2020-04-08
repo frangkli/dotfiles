@@ -26,8 +26,8 @@ if [[ $1 ]]; then
 	[[ ! -e $1 ]] && echo "ERR: Selected config doesn't exist, exiting script." && exit 0
 else
 	# Default config path in Mac systems
-	[[ -e ${HOME}"/.config/alacritty/alacritty.yml" ]] && echo "Config found, destination ready." && CFG=${HOME}"/.config/alacritty/alacritty.yml"
-	[[ -L ${HOME}"/.config/alacritty/alacritty.yml" ]] && echo "Following symlink to config..." && CFG=$($READLINK -f ${HOME}"/.config/alacritty/alacritty.yml")
+	[[ -e ${HOME}"/.config/alacritty/alacritty.yml" ]] && echo "Config found, destination ready." && CFG=$HOME"/.config/alacritty/alacritty.yml"
+	[[ -L ${HOME}"/.config/alacritty/alacritty.yml" ]] && echo "Following symlink to config..." && CFG=$($READLINK -f $HOME"/.config/alacritty/alacritty.yml")
 	[[ ! -e $CFG ]] && echo "ERR: Alacritty config not found, exiting script." && exit 0
 fi
 

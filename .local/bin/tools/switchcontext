@@ -1,0 +1,6 @@
+#!/bin/sh
+
+export TASKRC="$HOME/.config/task/taskrc"
+
+selected=$(/usr/local/bin/task context list | cut -d " " -f 1 | /usr/local/opt/gnu-sed/bin/gsed -n "$ d; 4,$ p" | dmenu -p "Context >")
+task context "$selected" 1>/dev/null
