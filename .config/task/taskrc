@@ -31,7 +31,8 @@ include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-256.theme
 
 uda.reviewed.type=date
 uda.reviewed.label=Reviewed
-verbose=blank,footnote,label,new-id,affected,edit,special,project,sync,unwait
+uda.priority.values=H,M,,L
+urgency.uda.priority.L.coefficient=-0.3
 
 taskd.certificate=~/.config/task/private.certificate.pem
 taskd.key=~/.config/task/private.key.pem
@@ -42,3 +43,7 @@ taskd.trust=ignore hostname
 
 color=on
 report.next.columns=id,start.age,entry.age,depends,priority,project,tags,recur,scheduled.countdown,due,until.remaining,description,urgency
+verbose=blank,footnote,label,new-id,affected,edit,special,project,sync,unwait
+context.school=+homework or +elearning or +school or pri:H
+context.home=+homework or +study or +programming or +home or +config or pri:H
+context=home
