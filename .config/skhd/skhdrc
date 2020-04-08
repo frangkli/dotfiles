@@ -146,9 +146,9 @@ ctrl + alt - t : yabai -m space --layout float
 alt - z : /System/Library/CoreServices/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine
 
 # mpc binds
-alt - m : mpc toggle 1>/dev/null
-alt - n : mpc next
-shift + alt - n : mpc prev
+alt - m : mpc -q toggle
+alt - n : mpc -q next
+shift + alt - n : mpc -q prev
 
 # close window
 alt - q : yabai -m window --close
