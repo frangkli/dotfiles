@@ -1,0 +1,5 @@
+#!/bin/bash
+
+themes="$(/usr/local/bin/wal --theme | gsed -n '/random/d; /-/{s/ - //; p}')"
+choice="$(echo "$themes" | dmenu)"
+/usr/local/bin/wal --theme "$choice" && xrdb ~/.Xresources
