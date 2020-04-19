@@ -1,0 +1,54 @@
+#!/bin/bash
+# Uses taskwarrior annotation to open stuff
+
+export TASKRC="$HOME/.config/task/taskrc"
+
+# Error throw
+if [ -z "$1" ] && [ -z "$2" ]; then
+    echo "Please provide a task number."
+    exit
+fi
+
+# Get annotation and uuid
+number="$(/usr/local/bin/task "$1" ls 2>/dev/null | cut -d '[' -f 2 | sed -n '4s/]//gp')"
+uuid="$(/usr/local/bin/task _get "$1".uuid)"
+references=()
+while [ $number -gt 0 ]; do
+    annotation=("$(/usr/local/bin/task _get "$1".annotations.$number.description)")
+    references+=("$annotation")
+    number=$(($number-1))
+done
+
+# If specified already
+if [ -z "$2" ]; then
+    # Choose
+    selected="$(printf '%s\n' "${references[@]}"  | awk '{print NR  "> " $s}' | fzf -m | sed 's/[0-9]*> //')"
+else
+    option="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
+    if [[ "$option" == "note"* ]]; then
+        selected="$option"
+    elif [[ "$option" == "link"* ]]; then
+        selected="$(printf '%s\n' "${references[@]}" | sed -n '/http/p')"
+    elif [[ "$option" == "file"* ]]; then
+        selected="$(printf '%s\n' "${references[@]}" | sed -n '/http/d; /\//p')"
+    elif [[ "$option" == "copy" ]]; then
+        selected="$(printf '%s\n' "${references[@]}" | sed -n '/Copy:/{s/ /-/g; p}')"
+    else
+        selected="other"
+    fi
+fi
+
+# Parse annotation
+for thing in $selected; do
+    if [[ "$thing" == "http://"* ]] || [[ "$thing" == "https://"* ]]; then
+        open "$thing"
+    elif [ -f "$thing" ] || [ -d "$thing" ]; then
+        myopen "$thing"
+    elif [ "$thing" == "Notes" ] || [ "$thing" == "notes" ]; then
+        $EDITOR $XDG_DATA_HOME/task/notes/"$uuid".md
+    elif [[ "$thing" == "Copy:"* ]]; then
+        echo "$thing" | sed 's/Copy://' | pbcopy
+    else
+        echo "$thing"
+    fi
+done
