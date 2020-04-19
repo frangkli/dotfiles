@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # aliases and functions
 tmp_deck="/tmp/tmpdeck"

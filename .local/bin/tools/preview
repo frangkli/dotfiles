@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 case $(file --mime-type -b "$1") in
     */x-tar) tar -tf "$1";;

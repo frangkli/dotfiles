@@ -1,6 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
-echo "Welcome, Frank Li"
+$HOME/.local/bin/info/quotegen
+echo ""
+
+width=$(tput cols)
+welcome="Welcome, Frank Li"
+printf "%*s\n" $(((${#welcome}+$width)/2)) "$welcome"
 
 homeFileCount="$(ls -a ~ | wc -l | sed "s/ //g")"
 

@@ -1,4 +1,25 @@
-#!/bin/sh
+#!/bin/bash
 
-dir="$(pwd)/$(dirname '$1')"
-docker run -v "$dir":/mnt/frank zathura /bin/bash -c "export DISPLAY=docker.for.mac.host.internal:0; zathura /mnt/frank/'$1'"
+# Build a temporary config directory
+zathura_tmp=$(mktemp -d)
+
+# Generate a config file
+echo "# temporary zathura config" > "$zathura_tmp/zathurarc"
+
+# Get original options
+[ -f $XDG_CONFIG_HOME/zathura/zathurarc ] && cat "$XDG_CONFIG_HOME/zathura/zathurarc" >> "$zathura_tmp/zathurarc" || \
+[ -f $HOME/.config/zathura/zathurarc ] && cat "$HOME/.config/zathura/zathurarc" >> "$zathura_tmp/zathurarc"
+
+# Add the colors
+~/.local/bin/tools/genzathurarc >> "$zathura_tmp/zathurarc"
+PATH="/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/"
+
+# Docker run zathura
+if [[ "$1" == "/Users/frank"* ]]; then
+    dir="$(dirname "$1")"
+else
+    dir="$(pwd)/$(dirname "$1")"
+fi
+
+file=$(echo "$1" | sed 's/.*\///g')
+docker run -v "$dir":/mnt/frank -v "/private$zathura_tmp":/mnt/zat zathura /bin/bash -c "export DISPLAY=docker.for.mac.host.internal:0; zathura --config-dir='/mnt/zat' /mnt/frank/'$file'" &

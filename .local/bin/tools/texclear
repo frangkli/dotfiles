@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Clears the build files of a LaTeX/XeLaTeX build.
 # I have vim run this file whenever I exit a .tex file.

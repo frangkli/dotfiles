@@ -1,18 +1,20 @@
-#!/bin/sh
+#!/bin/bash
 
 export TASKRC="$HOME/.config/task/taskrc"
 
 id="$(/usr/local/bin/task next 2>/dev/null | sed -n 's/^\s//; 4p' | cut -d ' ' -f 1)"
-context="$(/usr/local/bin/task _get rc.context)"
+[ ${#id} -lt 1 ] && exit
 
+context="$(/usr/local/bin/task _get rc.context)"
 [ "$context" == "home" ] && context="H"
 [ "$context" == "school" ] && context="S"
+[ "$context" == "" ] && context="N"
 
-text="Task ("$context"): $(/usr/local/bin/task _get "$id".description)"
+text=" |  ("$context") $(/usr/local/bin/task _get "$id".description)"
 
-if [ "${#text}" -gt 40 ]
+if [ "${#text}" -gt 35 ]
 then
-    echo "$(echo "$text" | cut -c -37)"...
+    echo "$(echo "$text" | cut -c -32)"...
 else
     echo "$text"
 fi

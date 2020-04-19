@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 open /Applications/Popterm.app
 focused=$(yabai -m query --windows | jq ".[].focused")

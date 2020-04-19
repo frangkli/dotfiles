@@ -1,7 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 output="$(/usr/local/bin/calcurse -C $HOME/.config/calcurse -D $HOME/.local/share/calcurse -n | /usr/local/opt/gnu-sed/bin/gsed -n 's/^\s\s\s//; s/\[/\[+/; 2p')"
-text="Appointment: $output"
+[ "${#output}" -lt 1 ] && exit
+text=" |  $output"
 
 if [ "${#text}" -gt 40 ]
 then

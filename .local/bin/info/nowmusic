@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #if [ "$(pgrep -x cmus)" == "" ]
 #then
 #    echo ♬ No music playing
@@ -18,14 +19,16 @@
 
 if [ "$(/usr/local/bin/ncmpcpp  --current-song '[%l] %t' 2> /dev/null)" == "" ]
 then
-    echo ♬ No music playing
+    echo " No music playing"
 else
     text="$(/usr/local/bin/ncmpcpp  --current-song '[%l] %t' 2> /dev/null | cut -d "(" -f 1 | sed 's/ $//')"
+
+    # Make output shorter
     charcount=$(echo $text | wc -m)
-    if [ $charcount -gt 37 ]
-    then
-        echo "♬ $(echo $text | cut -c -35)..."
-    else
-        echo "♬ $text"
-    fi
+    [ $charcount -gt 37 ] && text=" $(echo $text | cut -c -35)..."
+
+    # Status icon
+    status="$(/usr/local/bin/mpc | sed -n '2p')"
+    [[ $status == *"paused"* ]] && echo " $text"
+    [[ $status == *"playing"* ]] && echo " $text"
 fi

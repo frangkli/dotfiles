@@ -1,9 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 # build a temporary config directory
 zathura_tmp=$(mktemp -d)
-export ZATHURATMP=$zathura_tmp
-# build the zathura directory
 
 # generate a config file
 echo "# temporary zathura config" > "$zathura_tmp/zathurarc"

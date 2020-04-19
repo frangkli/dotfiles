@@ -1,5 +1,4 @@
-#!/bin/sh
-
+#!/bin/bash
 # Generates zathura configuration file
 
 . $HOME/.cache/wal/colors.sh

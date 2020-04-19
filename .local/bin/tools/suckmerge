@@ -1,4 +1,5 @@
 #!/bin/bash
+
 suckdiff &&
 git reset --hard origin/master &&
 for branch in $(git for-each-ref --format='%(refname)' refs/heads/ | cut -d'/' -f3);

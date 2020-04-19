@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # opout: "open output": A general handler for opening a file's intended output.
 # I find this useful especially running from vim.
 
