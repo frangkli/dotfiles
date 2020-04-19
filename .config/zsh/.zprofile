@@ -7,18 +7,18 @@ export PATH="$PATH:/Library/Frameworks/Python.framework/Versions/3.7/bin"
 export PATH="$PATH:/usr/local/opt/gettext/bin:/usr/local/opt/openssl/bin:/usr/local/opt/ncurses/bin"
 export PATH="$PATH:/opt/local/bin:/opt/local/sbin"
 export PATH="$PATH:$(du "$HOME/.local/bin" | cut -f2 | tr '\n' ':' | sed 's/:*$//')"
+export PATH="$PATH:/usr/local/opt/llvm/bin"
 
 # Replace mac BSD commands with GNU
 export PATH="$(echo /usr/local/opt/{coreutils,findutils,gnu-sed,gnu-indent,gnu-tar,grep,gawk,gnutls,gnu-getopt}/libexec/gnubin: | sed 's/ //g' | sed 's/.$//'):$PATH"
 export MANPATH="$(echo /usr/local/opt/{findutils,gnu-sed,gnu-indent,gnu-tar,grep,gawk,gnutls,gnu-getopt}/libexec/gnuman: | sed 's/ //g' | sed 's/.$//'):$MANPATH"
-
 
 # Personalize env
 export EDITOR="nvim"
 export VISUAL="nvim"
 export BROWSER="open"
 export TERM="st-256color"
-export READER="zathura --fork"
+export READER="dothura"
 export BIB="$HOME/Documents/Bibliography"
 export CLICOLOR=1
 export HOMEBREW_NO_AUTO_UPDATE=1
@@ -49,6 +49,10 @@ export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc" # node-gyp in XDG_DATA
 export SQLITE_HISTORY="$XDG_DATA_HOME/sqlite_history"
 export TERMINFO="$XDG_DATA_HOME/terminfo"
 export TERMINFO_DIRS="$XDG_DATA_HOME/terminfo:/usr/share/terminfo"
+export WGETRC="$XDG_CONFIG_HOME/wgetrc"
+export CONAN_USER_HOME="$XDG_DATA_HOME"
+export DOCKER_CONFIG="$XDG_CONFIG_HOME/docker"
+export PYLINTHOME="$XDG_CACHE_HOME/pylint"
 
 # Vulkan config
 export VULKAN_SDK="$HOME/.local/software/vulkansdk-macos-1.1.121.1/macOS"
@@ -68,6 +72,10 @@ export PKG_CONFIG_PATH="/usr/local/opt/openblas/lib/pkgconfig"
 export LDFLAGS="$LDFLAGS -L/usr/local/opt/openssl/lib"
 export CPPFLAGS="$CPPFLAGS -I/usr/local/opt/openssl/include"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl/lib/pkgconfig"
+
+# Llvm
+export LDFLAGS="$LDFLAGS -L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
+export CPPFLAGS="$CPPFLAGS -I/usr/local/opt/llvm/include -I/usr/local/opt/llvm/include/c++/v1/"
 
 # C packages path
 export LDFLAGS="$LDFLAGS -L/usr/local/opt/libffi/lib"
@@ -250,10 +258,10 @@ ex=:\
 *.aac=:\
 *.au=:\
 *.flac=:\
-*.m4a=:\
-*.mid=:\
-*.midi=:\
-*.mka=:\
+*.m4a=:\
+*.mid=:\
+*.midi=:\
+*.mka=:\
 *.mp3=:\
 *.mpc=:\
 *.ogg=:\
@@ -279,4 +287,4 @@ ex=:\
 set -o vi
 
 # Start up script
-#. "/Users/frank/.local/bin/info/shellstart"
+. "/Users/frank/.local/bin/info/shellstart"
