@@ -11,7 +11,7 @@
 # Use the command 'task show' to see all defaults and overrides
 
 # Files
-data.location=~/.config/task/
+data.location=~/.local/share/task
 
 # Color theme (uncomment one to use)
 #include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/light-16.theme
@@ -34,9 +34,9 @@ uda.reviewed.label=Reviewed
 uda.priority.values=H,M,,L
 urgency.uda.priority.L.coefficient=-0.3
 
-taskd.certificate=~/.config/task/private.certificate.pem
-taskd.key=~/.config/task/private.key.pem
-taskd.ca=~/.config/task/ca.cert.pem
+taskd.certificate=~/.local/share/task/private.certificate.pem
+taskd.key=~/.local/share/task/private.key.pem
+taskd.ca=~/.local/share/task/ca.cert.pem
 taskd.server=taskwarrior.inthe.am:53589
 taskd.credentials=inthe_am/liang20040203/72fd7f58-9bd2-477f-8525-8d7e1adfb50e
 taskd.trust=ignore hostname
@@ -46,4 +46,8 @@ report.next.columns=id,start.age,entry.age,depends,priority,project,tags,recur,s
 verbose=blank,footnote,label,new-id,affected,edit,special,project,sync,unwait
 context.school=+homework or +elearning or +school or pri:H
 context.home=+homework or +study or +programming or +home or +config or pri:H
+report.copyout.columns=description.combined
+report.copyout.filter=status:pending
+report.copyout.description=Info for taskcopy
+report.copyout.sort=urgency-
 context=home
