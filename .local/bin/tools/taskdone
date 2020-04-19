@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Set taskrc
+export TASKRC="$HOME/.config/task/taskrc"
+
+# Source from taskwarrior
+tasks="$(/usr/local/bin/task copyout 2>/dev/null | sed -n '$d; 4,$p')"
+
+# Select from dmenu
+selected="$(echo "$tasks" | dmenu -i -l 5 -p "Which task to complete?")"
+if [ ${#selected} -gt 3 ]
+then
+    /usr/local/bin/task $selected done &>/dev/null
+    osascript -e "display notification \"$selected\" with title \"Completed Task\""
+fi
