@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Notification
+output="$(/usr/local/bin/calcurse -C $HOME/.config/calcurse -D $HOME/.local/share/calcurse -n)"
+text="$(echo $output | cut -d ']' -f 2 | sed 's/^\s//')"
+hour="$(echo $output | cut -d ']' -f 1 | cut -d ':' -f 2 | sed 's/\[//')"
+minute="$(echo $output | cut -d ']' -f 1 | cut -d ':' -f 3)"
+
+[ $hour -lt 1 ] && [ $minute -lt 6 ] && osascript -e "display notification \"In $minute minutes\" with title \"Almost next appointment\" subtitle \"$text\""
