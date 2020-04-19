@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Set taskrc
+export TASKRC="$HOME/.config/task/taskrc"
+
+# Source from calcurse notes
+note=$(/usr/local/bin/calcurse -C $HOME/.config/calcurse -D $HOME/.local/share/calcurse -Q --format-apt "%m:%N+")
+note=$(echo $note | sed 's/..\/..\/..: //; s/ +/\\n/g; s/Copy: //g')
+note=$(echo "$note" | sed '$d')
+
+# Source from taskwarrior annotation
+annotated=$(/usr/local/bin/task minimal Copy 2>/dev/null | grep "\[.\]$" | sed 's/^ //' | cut -d ' ' -f 1)
+ids=$(echo $annotated | sed 's/ /,/g')
+if [ ${#ids} -gt 0 ]
+then
+    description=$(/usr/local/bin/task copyout $ids 2>/dev/null | sed '1,3d; $d; $d; s/.*Copy: /+/g; s/.*....-..-..*//g; /+.*/s/$/%/g')
+    description=$(echo $description | sed 's/% /\\n/g; s/%//g; s/ +/: /g')
+fi
+
+# Copy from dmenu
+output=$(echo "$note"; echo "$description")
+echo "$output" | awk '{print NR  "> " $s}' | dmenu -i -l 10 -p "Copy from which task/appointment?" | sed 's/^.*: //g' | pbcopy
