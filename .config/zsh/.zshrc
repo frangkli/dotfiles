@@ -17,6 +17,13 @@ zstyle ':completion:*:killall:*' command 'ps -u $USER -o cmd'
 # Complete case-insensitive, partial-word, and then substring
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
+# Ignore certain file extension for each program
+# https://www.reddit.com/r/zsh/comments/5ghouo/is_there_a_way_to_have_zsh_ignore_certain_file/
+# http://zsh.sourceforge.net/Doc/Release/Expansion.html#Glob-Operators
+zstyle ':completion:*:*:dothura:*' file-patterns '*.pdf:source-files' '*:all-files'
+zstyle ':completion:*:*:zathura:*' file-patterns '*.pdf:source-files' '*:all-files'
+zstyle ':completion:*:*:nvim:*' file-patterns '^*.(pdf|o|png|jpg|jpeg|gif):source-files' '*:all-files'
+
 # Launch compinit
 zmodload zsh/complist
 compinit -d $XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION
@@ -107,7 +114,7 @@ bindkey -M vicmd "^B" history-incremental-search-backward
 
 # Prompt styling
 setopt PROMPT_SUBST
-PROMPT="%{$fg[red]%}[%{$fg[yellow]%}%n%{$fg[green]%}@%{$fg[blue]%}%M:%{$fg[magenta]%}%c%{$fg[red]%}]%{$reset_color%}$ "
+PROMPT="%(?.%F{green}%?.%F{red}%?)%F{black}-%F{red}%B[%b%F{yellow}%n%F{green}@%F{blue}%M:%F{magenta}%c%F{red}%B]%f%#%b "
 RPROMPT='${vim_mode} ${vcs_info_msg_0_}'
 
 # Expand aliases to actual commands
