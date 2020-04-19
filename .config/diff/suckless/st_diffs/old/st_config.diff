@@ -1,8 +1,8 @@
 diff --git a/config.def.h b/config.def.h
-index 546edda..96b0987 100644
+index 546edda..e47f6c5 100644
 --- a/config.def.h
 +++ b/config.def.h
-@@ -5,8 +5,11 @@
+@@ -5,8 +5,12 @@
   *
   * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
   */
@@ -11,12 +11,13 @@ index 546edda..96b0987 100644
 +static char *font = "FuraMono Nerd Font:size=8:antialias=true:autohint=true";
 +static char *font2[] = {
 +    "Source Code Pro:size=8:antialias=true:autohint=true",
++    "Apple Color Emoji:size=8:antialias=true:autohint=true"
 +};
 +static int borderpx = 20;
  
  /*
   * What program is execed by st depends of these precedence rules:
-@@ -16,7 +19,7 @@ static int borderpx = 2;
+@@ -16,7 +20,7 @@ static int borderpx = 2;
   * 4: value of shell in /etc/passwd
   * 5: value of shell in config.h
   */
@@ -25,7 +26,7 @@ index 546edda..96b0987 100644
  char *utmp = NULL;
  char *stty_args = "stty raw pass8 nl -echo -iexten -cstopb 38400";
  
-@@ -80,47 +83,51 @@ char *termname = "st-256color";
+@@ -80,47 +84,51 @@ char *termname = "st-256color";
   *
   *	stty tabs
   */
@@ -108,7 +109,7 @@ index 546edda..96b0987 100644
  /*
   * Default shape of cursor
   * 2: Block ("█")
-@@ -178,13 +185,11 @@ static Shortcut shortcuts[] = {
+@@ -178,13 +186,11 @@ static Shortcut shortcuts[] = {
  	{ ControlMask,          XK_Print,       toggleprinter,  {.i =  0} },
  	{ ShiftMask,            XK_Print,       printscreen,    {.i =  0} },
  	{ XK_ANY_MOD,           XK_Print,       printsel,       {.i =  0} },
@@ -120,7 +121,7 @@ index 546edda..96b0987 100644
 -	{ TERMMOD,              XK_Y,           selpaste,       {.i =  0} },
 -	{ ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
 +	{ TERMMOD,              XK_plus,        zoom,           {.f = +1} },
-+    { TERMMOD,              XK_minus,       zoom,           {.f = -1} },
++        { TERMMOD,              XK_minus,       zoom,           {.f = -1} },
 +	{ TERMMOD,              XK_0,           zoomreset,      {.f =  0} },
 +	{ MODKEY,               XK_c,           clipcopy,       {.i =  0} },
 +	{ MODKEY,               XK_v,           clippaste,      {.i =  0} },

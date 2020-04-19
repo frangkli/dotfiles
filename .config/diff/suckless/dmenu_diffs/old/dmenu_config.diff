@@ -1,0 +1,61 @@
+diff --git a/config.def.h b/config.def.h
+index 1edb647..aa6385f 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -4,14 +4,15 @@
+ static int topbar = 1;                      /* -b  option; if 0, dmenu appears at bottom     */
+ /* -fn option overrides fonts[0]; default X11 font or font set */
+ static const char *fonts[] = {
+-	"monospace:size=10"
++	"FuraMono Nerd Font:size=8"
+ };
+ static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
+ static const char *colors[SchemeLast][2] = {
+ 	/*     fg         bg       */
+-	[SchemeNorm] = { "#bbbbbb", "#222222" },
+-	[SchemeSel] = { "#eeeeee", "#005577" },
+-	[SchemeOut] = { "#000000", "#00ffff" },
++ 	[SchemeNorm] = { "#bbbbbb", "#222222" },
++ 	[SchemeSel]  = { "#eeeeee", "#005577" },
++ 	[SchemeOut]  = { "#000000", "#00ffff" },
++
+ };
+ /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
+ static unsigned int lines      = 0;
+diff --git a/config.mk b/config.mk
+index 0929b4a..03a916b 100644
+--- a/config.mk
++++ b/config.mk
+@@ -5,8 +5,8 @@ VERSION = 4.9
+ PREFIX = /usr/local
+ MANPREFIX = $(PREFIX)/share/man
+ 
+-X11INC = /usr/X11R6/include
+-X11LIB = /usr/X11R6/lib
++X11INC = /usr/X11/include
++X11LIB = /usr/X11/lib
+ 
+ # Xinerama, comment if you don't want it
+ XINERAMALIBS  = -lXinerama
+@@ -14,7 +14,7 @@ XINERAMAFLAGS = -DXINERAMA
+ 
+ # freetype
+ FREETYPELIBS = -lfontconfig -lXft
+-FREETYPEINC = /usr/include/freetype2
++FREETYPEINC = /usr/local/Cellar/freetype/2.10.1/include/freetype2
+ # OpenBSD (uncomment)
+ #FREETYPEINC = $(X11INC)/freetype2
+ 
+diff --git a/dmenu_path b/dmenu_path
+index 3a7cda7..29f64e2 100755
+--- a/dmenu_path
++++ b/dmenu_path
+@@ -7,7 +7,7 @@ cache="$cachedir/dmenu_run"
+ 
+ IFS=:
+ if stest -dqr -n "$cache" $PATH; then
+-	stest -flx $PATH | sort -u | tee "$cache"
++	source "$HOME/.config/aliasrc" 1>/dev/null; compgen -c | sort -u | tee "$cache"
+ else
+ 	cat "$cache"
+ fi
