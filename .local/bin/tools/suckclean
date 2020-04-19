@@ -1,0 +1,16 @@
+#!/bin/bash
+
+branchnow="$(git branch --show-current)"
+directorynow="$(pwd | sed 's/.*\///')"
+
+if [ $branchnow == "master" ]
+then
+    if [ "$directorynow" == "st" ] || [ "$directorynow" == "dwm" ] || [ "$directorynow" == "dmenu" ] || [ "$directorynow" == "st-sixel" ]
+    then
+        make clean && rm config.h && git reset --hard origin/master
+    else
+        echo "Wrong repository"
+    fi
+else
+    echo "Wrong branch to clean"
+fi
