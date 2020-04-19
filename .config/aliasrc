@@ -21,19 +21,21 @@ alias rm="trash" \
     python="python3" \
     pip="pip3" \
     musicphp="/Users/frank/.config/composer/vendor/bin/music-php" \
+    t="task" \
     hw="task list project:School" \
     dotfiles="/usr/bin/git --git-dir=$HOME/.config/dotfiles/ --work-tree=$HOME" \
     cpr="compiler" \
     r="/usr/local/bin/r" \
+    dict="osx-dictionary -d 'American English'" \
+    dictd="osx-dictionary -d 'American English Thesaurus'" \
     bookmarks="buku --colors oKlxm -p | less" \
     ycom="unlink conan_ycm_flags.json && rm .ycm_extra_conf.py && cp build/conan_ycm_extra_conf.py .ycm_extra_conf.py && ln -s build/conan_ycm_flags.json conan_ycm_flags.json" \
     sf="surfraw google" \
     newsboat="newsboat -q" \
-    suckclean="make clean && rm config.h && git reset --hard origin/master" \
+    ranlor="wal --theme random && xrdb ~/.Xresources" \
 
 # Clean up and conf
-alias w3m="w3m -config $HOME/.config/w3m/config -bookmark $HOME/.config/w3m/bookmark.html && trash -rf ~/.w3m" \
-    tmux="tmux -f ~/.config/tmux/tmux.conf" \
+alias tmux="tmux -f ~/.config/tmux/tmux.conf" \
     bash="bash --init-file $HOME/.config/bash/bashrc" \
     calcurse="calcurse -C ~/.config/calcurse -D ~/.local/share/calcurse" \
     abook="abook -C ~/.config/abook/abookrc --datafile ~/.config/abook/addressbook" \
@@ -42,16 +44,13 @@ alias w3m="w3m -config $HOME/.config/w3m/config -bookmark $HOME/.config/w3m/book
     gpg="gpg --homedir $XDG_DATA_HOME/gnupg" \
     skhd="skhd -c ~/.config/skhd/skhdrc" \
     zathura="~/.local/bin/tools/zathura" \
-    ranlor="wal --theme random && xrdb -merge ~/.Xresources" \
+    wget="wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"" \
 
 fvim() {
     $EDITOR "$(fzfp -m --prompt='File> ')"
 }
 fzat() {
     dothura "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | grep ".pdf$" | fzfp -m --prompt='PDF> ')" 2> /dev/null
-}
-fimg() {
-    sxiv -qb "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | awk '/jpeg/ || /png/ || /jpg/ || /gif/' | fzfp -m --prompt='Image> ')"
 }
 fconfig() {
     $EDITOR "$(fd -H . ~/.config ~/.local/bin -d 3 --type f | fzfp --prompt='Config> ')"
