@@ -36,9 +36,10 @@ map X !$f
 # text files and a file opener for the rest.
 cmd open ${{
     case $(file --mime-type $f -b) in
-        text/*) st -e $EDITOR $fx &;;
+        text/*) st -e $EDITOR $fx 2>/dev/null &;;
+        inode/*) st -e $EDITOR $fx 2>/dev/null &;;
         image/*) sxiv $fx &;;
-        */pdf) ~/.local/bin/zathura --fork $fx 2>/dev/null;;
+        */pdf) ~/.local/bin/tools/dothura $fx 2>/dev/null &;;
         audio/*) ffplay -autoexit $fx 2>/dev/null &;;
         video/*) ffplay -autoexit $fx 2>/dev/null &;;
         */x-mach-binary) st -e $fx &;;
@@ -46,29 +47,9 @@ cmd open ${{
     esac
 }}
 
-# define a custom 'rename' command without prompt for overwrite
-# cmd rename %[ -e $1 ] && printf "file exists" || mv $f $1
-# map r push :rename<space>
-
-# make sure trash folder exists
-# %mkdir -p ~/.trash
-
 # move current file or selected files to trash folder
 # (also see 'man mv' for backup/overwrite options)
 cmd trash %set -f; mv $fx ~/.trash
-
-# define a custom 'delete' command
-# cmd delete ${{
-#     set -f
-#     printf "$fx\n"
-#     printf "delete?[y/n]"
-#     read ans
-#     [ $ans = "y" ] && rm -rf $fx
-# }}
-
-# use '<delete>' key for either 'trash' or 'delete' command
-# map <delete> trash
-# map <delete> delete
 map DD trash
 
 # extract the current file with the right command
@@ -103,9 +84,14 @@ cmd zip ${{
     rm -rf $1
 }}
 
+# bulk rename
+cmd bulk-rename ${{
+    massren $fx
+}}
+
 # wal color
 map bg $wal -st -i $f
-map bG $wal -sq -i $f && recolor 2> /dev/null && /Users/frank/Library/Application\ Support/Übersicht/widgets/pecan/wal-set && xrdb -merge ~/.Xresources
+map bG $wal -sq -i $f && recolor 2> /dev/null && /Users/frank/Library/Application\ Support/Übersicht/widgets/pecan/wal-set && xrdb ~/.Xresources
 
 # fzf find
 map f $nvim $(fzf --preview 'highlight --force --out-format=ansi {}')
@@ -121,6 +107,7 @@ map gd cd "~/Documents"
 map gD cd "~/Downloads"
 map gc cd "~/.config"
 map gb cd "~/.local/bin"
+map gn cd "~/Documents/Notebooks"
 
 # alter defaults
 set hidden on
