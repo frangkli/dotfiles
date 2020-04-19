@@ -1,0 +1,14 @@
+#!/bin/bash
+# My own open script
+
+case $(file --mime-type $1 -b) in
+    text/*) st -e $EDITOR $1 2>/dev/null &;;
+    inode/directory) st -e lf $1 &;;
+    inode/*) st -e $EDITOR $1 2>/dev/null &;;
+    image/*) sxiv $1 &;;
+    */pdf) ~/.local/bin/tools/dothura $1 2>/dev/null &;;
+    audio/*) ffplay -autoexit $1 2>/dev/null &;;
+    video/*) ffplay -autoexit $1 2>/dev/null &;;
+    */x-mach-binary) st -e $1 &;;
+    *) for f in $1; do open $1> /dev/null 2> /dev/null & done;;
+esac
