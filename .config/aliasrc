@@ -49,10 +49,10 @@ alias tmux="tmux -f ~/.config/tmux/tmux.conf" \
 fvim() {
     $EDITOR "$(fzfp -m --prompt='File> ')"
 }
-fzat() {
+fdot() {
     dothura "$(du -a . | awk '{$1 = ""; print $0}' | sed 's/^ //g' | grep ".pdf$" | fzfp -m --prompt='PDF> ')" 2> /dev/null
 }
-fconfig() {
+fconf() {
     $EDITOR "$(fd -H . ~/.config ~/.local/bin -d 3 --type f | fzfp --prompt='Config> ')"
 }
 fbrew() {
