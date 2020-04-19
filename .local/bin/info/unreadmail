@@ -1,0 +1,10 @@
+#!/bin/bash
+
+. "$HOME/.config/zsh/.zprofile" &>/dev/null
+
+num="$(find $XDG_DATA_HOME/mail/*/INBOX/new/* -type f | wc -l 2>/dev/null)"
+
+if [ $num != 0 ]
+then
+    echo " |"  $num
+fi
