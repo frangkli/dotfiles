@@ -1,4 +1,0 @@
-#!/bin/bash
-
-num=$(/usr/local/bin/newsboat -x print-unread | cut -d " " -f 1)
-echo ✎ $num
