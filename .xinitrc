@@ -11,7 +11,7 @@ xset b off
 
 while true
 do
-    xsetroot -name "  `$HOME/.local/bin/info/nowmusic``$HOME/.local/bin/info/nextappo``$HOME/.local/bin/info/nextask``$HOME/.local/bin/info/unreadmail` |  `date +'[%H:%M] %Y-%m-%d'` | `$HOME/.local/bin/info/battery` "
+    xsetroot -name "  `$HOME/.local/bin/info/nowmusic``$HOME/.local/bin/info/nextappo``$HOME/.local/bin/info/nextask``$HOME/.local/bin/info/unreadmail` `$HOME/.local/bin/info/unreadnews` |  `date +'[%H:%M] %Y-%m-%d'` | `$HOME/.local/bin/info/battery` "
     sleep 2
 done &
 
