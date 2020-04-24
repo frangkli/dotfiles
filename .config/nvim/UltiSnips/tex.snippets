@@ -1,0 +1,120 @@
+extends texmath
+extends texscience
+
+global !p
+endglobal
+
+snippet template "Basic template" b
+\documentclass[a4paper]{article}
+
+% Source preamble
+\input{/Users/frank/Repositories/Document-Templates/LaTeX/$1.tex}
+
+% Metadata
+\title{\textit{${2:${VISUAL:Course Name}}}\\\\\vspace{0.5em}\huge ${3:${VISUAL:Topic Name}}}
+\date{Last Updated: $4}
+\hypersetup{
+	pdftitle={$3},
+	pdfsubject={$2: ${5:$3}},
+	pdfkeywords={$6}
+}
+\fancyfoot[L]{$3}
+\addbibresource{/Users/frank/Documents/Bibliography/$7.bib}
+
+\begin{document}
+
+\maketitle
+\begingroup
+	\renewcommand*{\IgnoreToc}[1]{}%
+	\tableofcontents
+\endgroup
+\listoffigures
+\pagebreak
+
+$0
+
+\printbibliography
+
+\end{document}
+endsnippet
+
+snippet beg "Any environment" bA
+\begin{$1}
+	$0
+\end{$1}
+endsnippet
+
+snippet lec "Lecture" bA
+\lecture{$1}{$2}{$3}
+endsnippet
+
+snippet @@ "Citation" A
+\cite{$1} $0
+endsnippet
+
+snippet @) "Citation" A
+\parencite{$1} $0
+endsnippet
+
+snippet table "Table" b
+\begin{table}[${1:htpb}]
+	\centering
+	\caption{${2:caption}}
+	\begin{tabular}{${5:c}}
+		$0${5/((?<=.)c|l|r)|./(?1: & )/g}
+	\end{tabular}
+	\label{tab:${3:label}}
+\end{table}
+endsnippet
+
+snippet fig "Figure" b
+\begin{figure}[${1:htpb}]
+	\centering
+	${2:\includegraphics[width=0.8\textwidth]{$3}}
+	\caption{${4:$3}}
+	\label{fig:${5:${3/\W+/-/g}}}
+\end{figure}
+endsnippet
+
+snippet wrap "Wrap figure" b
+\begin{wrapfigure}{${1:R}}{0.5\textwidth}
+	\centering
+	${2:\includegraphics[width=0.8\textwidth]{$3}}
+	\caption{${4:$3}}
+	\label{fig:${5:${3/\W+/-/g}}}
+\end{wrapfigure}
+endsnippet
+
+snippet enum "Enumerate" bA
+\begin{enumerate}
+	\item $0
+\end{enumerate}
+endsnippet
+
+snippet item "Itemize" bA
+\begin{itemize}
+	\item $0
+\end{itemize}
+endsnippet
+
+snippet desc "Description" bA
+\begin{description}
+	\item[$1] $0
+\end{description}
+endsnippet
+
+snippet col "Column" bA
+\begin{multicol}{$1}
+	$0
+\end{multicol}
+endsnippet
+
+snippet prog "Program listing" bA
+\begin{lstlisting}[language=${1:${VISUAL:Python}}]
+$0
+\end{lstlisting}
+endsnippet
+
+snippet verb "Inline verbatim" i
+\verb|$1|$0
+endsnippet
