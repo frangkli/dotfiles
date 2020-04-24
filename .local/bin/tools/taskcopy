@@ -4,9 +4,9 @@
 export TASKRC="$HOME/.config/task/taskrc"
 
 # Source from calcurse notes
-note=$(/usr/local/bin/calcurse -C $HOME/.config/calcurse -D $HOME/.local/share/calcurse -Q --format-apt "%m:%N+")
-note=$(echo $note | sed 's/..\/..\/..: //; s/ +/\\n/g; s/Copy: //g')
-note=$(echo "$note" | sed '$d')
+note=$(/usr/local/bin/calcurse -C $HOME/.config/calcurse -D $HOME/.local/share/calcurse -Q --format-apt "%m:%N+" | sed '1d; $d')
+note=$(echo $note | sed 's/ +/\\n/g')
+note=$(echo -e "$note" | sed 's/Copy: //g')
 
 # Source from taskwarrior annotation
 annotated=$(/usr/local/bin/task minimal Copy 2>/dev/null | grep "\[.\]$" | sed 's/^ //' | cut -d ' ' -f 1)
