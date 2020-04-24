@@ -82,7 +82,7 @@ set backspace=2                                         " Allow <BS> for indent,
 set dictionary=~/.config/nvim/spell/en.utf-8.add        " User-defined spelling file
 set viminfo+='1000,n$XDG_DATA_HOME/vim/viminfo          " Move viminfo to XDG
 set foldmethod=indent                                   " Indent as primary foldmethod
-set foldlevel=99                                        " Open all folds by default
+set foldlevel=1                                         " Open all folds by default
 set splitbelow                                          " Horizontal split to the bottom
 set splitright                                          " Vertical split to the right
 set conceallevel=2                                      " Completely hide concealed
@@ -132,10 +132,10 @@ let g:SuperTabDefaultCompletionType = "<C-n>"
 let g:vimtex_compiler_progname = 'nvr'
 let g:vimtex_view_general_viewer = 'dothura'
 let g:vimtex_fold_enabled = 1
-let g:vimtex_syntax_enabled = 1
 let g:vimtex_matchparen_enabled = 0
-let g:tex_fast = "bcmMrsSvV"
-" TODO: figure this out
+" TODO: figure this out and synctex
+let g:vimtex_syntax_enabled = 1
+let g:vimtex_quickfix_open_on_warning = 0
 
 " vim-tex-conceal {{{2
 let g:tex_conceal = "abdgms"
@@ -247,6 +247,11 @@ inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
 " Tmux compatibility {{{2
 map <C-q> <C-a>
 
+" Open file path from buffer in splits
+" https://stackoverflow.com/questions/7672783/how-can-i-do-something-like-gf-but-in-a-new-vertical-split/7672839
+map gs :above wincmd f<CR>
+map gv :vertical wincmd f<CR>
+
 " Toggle interface {{{2
 map <Leader>l :call LocationToggle()<CR>
 map <Leader>n :NERDTreeToggle<CR>
@@ -334,7 +339,7 @@ nmap <Leader>L :Limelight<CR>
 
 " ==================== AUTOCMDS ==================== {{{1
 " Clean tex junk on exit {{{2
-autocmd VimLeave *.tex !texclear %
+autocmd VimLeave *.tex !texclear "%"
 
 " Recognize files properly {{{2
 autocmd BufRead,BufNewFile /tmp/calcurse*,~/.calcurse/notes/* set filetype=markdown
