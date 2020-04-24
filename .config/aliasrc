@@ -55,6 +55,9 @@ fdot() {
 fconf() {
     $EDITOR "$(fd -H . ~/.config ~/.local/bin -d 3 --type f | fzfp --prompt='Config> ')"
 }
+ftem() {
+    $EDITOR "$(fd . ~/Repositories/Document-Templates -d 3 --type f | fzfp --prompt='Template> ')"
+}
 fbrew() {
     inst="$(brew search | fzf -m --prompt='Package> ' --preview 'brew info {}')"
     if [ "$inst" ]; then
