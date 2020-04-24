@@ -2,9 +2,6 @@
 
 . "$HOME/.config/zsh/.zprofile" &>/dev/null
 
-num="$(find $XDG_DATA_HOME/mail/*/INBOX/new/* -type f | wc -l 2>/dev/null)"
+num="$(find $XDG_DATA_HOME/mail/*/INBOX/new/* -type f 2>/dev/null | wc -l)"
 
-if [ $num != 0 ]
-then
-    echo " |"  $num
-fi
+[ $num != 0 ] && echo " |"  $num
