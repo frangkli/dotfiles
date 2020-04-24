@@ -8,7 +8,7 @@ case "$1" in
 	file=$(greadlink -f "$1")
 	dir=$(dirname "$file")
 	base="${file%.*}"
-	rm "$base".aux "$base".idx "$base".log "$base".out "$base".toc ;;
+    rm "$base"{.aux,.log,.out,.toc,.fls,.fdb_latexmk,.synctex.gz,.bbl,.bcf,.blg,.run.xml,.lof};;
 	*) printf "Give .tex file as argument.\\n" ;;
 esac
 
