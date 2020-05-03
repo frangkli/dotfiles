@@ -1,3 +1,11 @@
 {
-    "coc.source.file.ignoreHidden": false
+    "coc.source.file.ignoreHidden": false,
+    "coc.preferences.jumpCommand": "vsp",
+    "diagnostic.errorSign": "✘",
+    "diagnostic.warningSign": "",
+    "diagnostic.infoSign": "",
+    "diagnostic.hintSign": "",
+    "clangd.arguments": [
+        "-compile-commands-dir=/Users/frank/.config/nvim"
+    ]
 }
