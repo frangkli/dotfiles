@@ -13,8 +13,9 @@ map <Leader>c :VimtexCompile<CR>
 map <leader>w :VimtexCountWords<CR>
 
 " Templates commands {{{2
-command! -bang Templates call fzf#vim#files('~/Documents/Document-Templates/LaTeX', <bang>0)
-map <F2> :Templates<CR>
+" Replaced with CocList
+"command! -bang Templates call fzf#vim#files('~/Documents/Document-Templates/LaTeX', <bang>0)
+"map <F2> :Templates<CR>
 
 " Automatically enter stuff {{{2
 function CR()
