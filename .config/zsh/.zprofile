@@ -16,6 +16,7 @@ export MANPATH="$(echo /usr/local/opt/{findutils,gnu-sed,gnu-indent,gnu-tar,grep
 # Personalize env
 export EDITOR="nvim"
 export VISUAL="nvim"
+export PAGER="less"
 export BROWSER="open"
 export TERM="st-256color"
 export READER="dothura"
