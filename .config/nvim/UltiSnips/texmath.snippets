@@ -191,6 +191,11 @@ snippet nnn "bigcap" iA
 endsnippet
 
 context "math()"
+snippet mrm "mathrm" iA
+\mathrm{$1}$0
+endsnippet
+
+context "math()"
 snippet '(?<!i)sts' "text subscript" irA
 _\text{$1} $0
 endsnippet
@@ -409,8 +414,13 @@ snippet AA "forall" iA
 endsnippet
 
 context "math()"
-snippet inn "in " iA
+snippet inn "in" iA
 \in
+endsnippet
+
+context "math()"
+snippet nin "not in" iA
+\notin
 endsnippet
 
 snippet NN "cap" iA

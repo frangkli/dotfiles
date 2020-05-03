@@ -1,5 +1,6 @@
 extends texmath
 extends texscience
+extends texbeamer
 
 global !p
 endglobal
@@ -11,24 +12,23 @@ snippet template "Basic template" b
 \input{/Users/frank/Repositories/Document-Templates/LaTeX/$1.tex}
 
 % Metadata
-\title{\textit{${2:${VISUAL:Course Name}}}\\\\\vspace{0.5em}\huge ${3:${VISUAL:Topic Name}}}
-\date{Last Updated: $4}
+\title{\textit{${2:${VISUAL:Course Name}}}\\\\\vspace{0.5em}\textbf{\huge ${3:${VISUAL:Topic Name}}}}
 \hypersetup{
 	pdftitle={$3},
-	pdfsubject={$2: ${5:$3}},
-	pdfkeywords={$6}
+	pdfsubject={$2: ${4:$3}},
+	pdfkeywords={$5}
 }
 \fancyfoot[L]{$3}
-\addbibresource{/Users/frank/Documents/Bibliography/$7.bib}
+\addbibresource{/Users/frank/Documents/Bibliography/$6.bib}
 
 \begin{document}
 
 \maketitle
 \begingroup
-	\renewcommand*{\IgnoreToc}[1]{}%
+	\renewcommand*{\IgnoreToc}[1]{}
 	\tableofcontents
 \endgroup
-\listoffigures
+${7:\listoffigures}
 \pagebreak
 
 $0
@@ -49,11 +49,11 @@ snippet lec "Lecture" bA
 endsnippet
 
 snippet @@ "Citation" A
-\cite{$1} $0
+\cite{$1}$0
 endsnippet
 
 snippet @) "Citation" A
-\parencite{$1} $0
+\parencite{$1}$0
 endsnippet
 
 snippet table "Table" b
@@ -103,18 +103,34 @@ snippet desc "Description" bA
 \end{description}
 endsnippet
 
-snippet col "Column" bA
+snippet col "Column" b
 \begin{multicol}{$1}
 	$0
 \end{multicol}
 endsnippet
 
-snippet prog "Program listing" bA
-\begin{lstlisting}[language=${1:${VISUAL:Python}}]
+snippet prog "Program listing" b
+\begin{lstlisting}[language=${1:${VISUAL:C++}}, style=${2:${VISUAL:program}}, caption={$3}]
 $0
 \end{lstlisting}
 endsnippet
 
+snippet output "Program listing" b
+\begin{lstlisting}[style=${1:output}, caption={$2}]
+$0
+\end{lstlisting}
+endsnippet
+
+snippet inprog "Input program listing" bA
+\lstinputlisting[language=${1:${VISUAL:C++}}, style=${2:${VISUAL:program}}, caption={$3}]{$0}
+endsnippet
+
 snippet verb "Inline verbatim" i
 \verb|$1|$0
+endsnippet
+
+snippet END "End text" b
+\vfill\centering
+\textbf{\huge END}
+\vspace{1cm}
 endsnippet
