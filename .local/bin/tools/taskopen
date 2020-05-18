@@ -5,28 +5,39 @@ export TASKRC="$HOME/.config/task/taskrc"
 
 # Error throw
 if [ -z "$1" ] && [ -z "$2" ]; then
-    echo "Please provide a task number."
-    exit
+    echo "Please provide a task number." && exit
 fi
 
-# Get annotation and uuid
+# Get number of annotations and uuid
 number="$(/usr/local/bin/task "$1" ls 2>/dev/null | cut -d '[' -f 2 | sed -n '4s/]//gp')"
 uuid="$(/usr/local/bin/task _get "$1".uuid)"
-references=()
-while [ $number -gt 0 ]; do
-    annotation=("$(/usr/local/bin/task _get "$1".annotations.$number.description)")
+
+# Quit if no annotation
+[ -z "$number" ] && [ -z "$2" ] && exit
+
+# Loop and store annotations
+references+=()
+while [ ! -z "$number" ] && [ $number -gt 0 ]; do
+    annotation=("$(/usr/local/bin/task _get "$1".annotations.$number.description | sed 's/notes/Notes/g')")
     references+=("$annotation")
     number=$(($number-1))
 done
 
-# If specified already
+# Check if $2 is empty
 if [ -z "$2" ]; then
-    # Choose
+    # Choose what to open
     selected="$(printf '%s\n' "${references[@]}"  | awk '{print NR  "> " $s}' | fzf -m | sed 's/[0-9]*> //')"
 else
+    # If specified as option
     option="$(echo "$2" | tr '[:upper:]' '[:lower:]')"
     if [[ "$option" == "note"* ]]; then
         selected="$option"
+        # Add "note" annotation if not present
+        # https://stackoverflow.com/questions/3685970/check-if-a-bash-array-contains-a-value
+        if [[ ! "${references[@]}" =~ "${Notes}" ]]; then
+            task "$1" annotate Notes
+            echo "Added annotation \"Notes\""
+        fi
     elif [[ "$option" == "link"* ]]; then
         selected="$(printf '%s\n' "${references[@]}" | sed -n '/http/p')"
     elif [[ "$option" == "file"* ]]; then
