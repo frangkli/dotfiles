@@ -23,7 +23,7 @@ alias rm="trash" \
     musicphp="/Users/frank/.config/composer/vendor/bin/music-php" \
     t="task" \
     hw="task list project:School" \
-    dotfiles="/usr/bin/git --git-dir=$HOME/.config/dotfiles/ --work-tree=$HOME" \
+    dt="/usr/bin/git --git-dir=$HOME/.config/dotfiles/ --work-tree=$HOME" \
     cpr="compiler" \
     r="/usr/local/bin/r" \
     dict="osx-dictionary -d 'American English'" \
@@ -41,7 +41,6 @@ alias tmux="tmux -f ~/.config/tmux/tmux.conf" \
     abook="abook -C ~/.config/abook/abookrc --datafile ~/.config/abook/addressbook" \
     mpd="mpd ~/.config/mpd/mpd.conf" \
     mbsync="mbsync -c $XDG_CONFIG_HOME/isync/mbsyncrc" \
-    gpg="gpg --homedir $XDG_DATA_HOME/gnupg" \
     skhd="skhd -c ~/.config/skhd/skhdrc" \
     zathura="~/.local/bin/tools/zathura" \
     wget="wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"" \
