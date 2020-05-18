@@ -9,7 +9,7 @@ snippet template "Basic template" b
 \documentclass[a4paper]{article}
 
 % Source preamble
-\input{/Users/frank/Repositories/Document-Templates/LaTeX/$1.tex}
+\input{/Users/frank/Repositories/Document-Templates/LaTeX/$1}
 
 % Metadata
 \title{\textit{${2:${VISUAL:Course Name}}}\\\\\vspace{0.5em}\textbf{\huge ${3:${VISUAL:Topic Name}}}}
@@ -46,6 +46,7 @@ endsnippet
 
 snippet lec "Lecture" bA
 \lecture{$1}{$2}{$3}
+$0
 endsnippet
 
 snippet @@ "Citation" A
@@ -125,7 +126,7 @@ snippet inprog "Input program listing" bA
 \lstinputlisting[language=${1:${VISUAL:C++}}, style=${2:${VISUAL:program}}, caption={$3}]{$0}
 endsnippet
 
-snippet verb "Inline verbatim" i
+snippet vb "Inline verbatim" i
 \verb|$1|$0
 endsnippet
 
