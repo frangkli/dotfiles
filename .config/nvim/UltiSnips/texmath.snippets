@@ -20,9 +20,7 @@ endglobal
 
 snippet plot "Plot" b
 \begin{figure}[${1:htpb}]
-	\centering
-	\begin{tikzpicture}
-		\begin{axis}[
+	\centering \begin{tikzpicture} \begin{axis}[
 			xmin=${2:-10}, xmax=${3:10},
 			ymin=${4:-10}, ymax=${5:10},
 			axis lines = middle,
@@ -39,18 +37,13 @@ snippet plot "Plot" b
 endsnippet
 
 snippet mk "Inline math" wA
-$${1}$<++>`!p
-if t[2] and t[2][0] not in [',', '.', '?', '-', ' ']:
-	snip.rv = ' '
-else:
-	snip.rv = ''
-`$2
+$$1$${0}
 endsnippet
 
 snippet dm "Display math" wA
 \[
 $1
-\] $0
+\]$0
 endsnippet
 
 snippet bigfun "Big function" iA
@@ -197,11 +190,10 @@ endsnippet
 
 context "math()"
 snippet '(?<!i)sts' "text subscript" irA
-_\text{$1} $0
+_\textrm{$1} $0
 endsnippet
 
-context "math()"
-snippet tt "text" iA
+snippet mtt "text" iA
 \text{$1}$0
 endsnippet
 
@@ -354,6 +346,26 @@ snippet || "mid" iA
 endsnippet
 
 context "math()"
+snippet \R "mathbb R" iA
+\mathbb{R}$0
+endsnippet
+
+context "math()"
+snippet \Z "mathbb Z" iA
+\mathbb{Z}$0
+endsnippet
+
+context "math()"
+snippet \Q "mathbb Q" iA
+\mathbb{Q}$0
+endsnippet
+
+context "math()"
+snippet \C "mathbb C" iA
+\mathbb{C}$0
+endsnippet
+
+context "math()"
 snippet xnn "xn" iA
 x_{n}
 endsnippet
@@ -442,6 +454,11 @@ snippet xx "cross" iA
 endsnippet
 
 context "math()"
-snippet mcal "mathcal" iA
+snippet cal "mathcal" iA
 \mathcal{$1}$0
+endsnippet
+
+context "math()"
+snippet bb "mathcal" iA
+\mathbb{$1}$0
 endsnippet
