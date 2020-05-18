@@ -37,7 +37,12 @@ snippet plot "Plot" b
 endsnippet
 
 snippet mk "Inline math" wA
-$$1$${0}
+$${1}$`!p
+if t[2] and t[2][0] not in [',', '.', '?', '-', ' ']:
+	snip.rv = ' '
+else:
+	snip.rv = ''
+`$2
 endsnippet
 
 snippet dm "Display math" wA
