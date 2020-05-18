@@ -39,10 +39,11 @@ Plug 'vim-airline/vim-airline-themes'
 " Git {{{3
 Plug 'tpope/vim-fugitive'
 
-" Color schemes {{{3
+" Color and highlights {{{3
 Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'dylanaraps/wal.vim'
 Plug 'octol/vim-cpp-enhanced-highlight', { 'for': ['c', 'cpp'] }
+Plug 'ap/vim-css-color'
 
 " Note taking {{{3
 Plug 'vimwiki/vimwiki'
@@ -117,6 +118,9 @@ highlight vimUserCommand ctermfg=10
 highlight htmlItalic cterm=italic ctermfg=5
 
 " ==================== PLUGIN VARIABLES ===================== {{{1
+" limelight.vim
+let g:limelight_priority = -1
+
 " ultisnips {{{2
 let g:UltiSnipsEditSplit = "vertical"
 let g:UltiSnipsExpandTrigger = "<Tab>"
@@ -215,7 +219,7 @@ let g:closetag_shortcut = '>'
 let g:closetag_close_shortcut = '<Leader>>'
 
 " goyo.vim {{{2
-let g:goyo_width = 110
+let g:goyo_width = 120
 
 " fzf.vim {{{2
 let g:fzf_layout = { 'window': 'call CreateCenteredFloatingWindow()' }
@@ -228,6 +232,10 @@ let g:fzf_action = {
     \ }
 
 " ==================== MAPS ==================== {{{1
+" Better tabbing
+vnoremap < <gv
+vnoremap > >gv
+
 " Quick fzf commands {{{2
 map <Leader>. :Files<CR>
 map <Leader> :Maps<CR>,
@@ -436,6 +444,5 @@ function! WordProcessorMode()
     nmap K "dyiw:!osx-dictionary -d "American English" <C-r>d<CR>
     nmap <Leader>t "dyiw:!osx-dictionary -d "American English Thesaurus" <C-r>d<CR>
     Goyo
-    Limelight
 endfunction
 command! WP call WordProcessorMode()
