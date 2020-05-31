@@ -2,4 +2,7 @@
 
 themes="$(/usr/local/bin/wal --theme | gsed -n '/random/d; /-/{s/ - //; p}')"
 choice="$(echo "$themes" | dmenu)"
-/usr/local/bin/wal --theme "$choice" && xrdb ~/.Xresources
+settheme="$(/usr/local/bin/wal --theme "$choice")"
+settheme="$(echo "$settheme" | cut -d ':' -f 2 | sed -n 's/\[1\;37m//; s/\[0m//; 1p')"
+osascript -e "display notification \"$settheme\" with title \"Theme Changed\""
+xrdb ~/.Xresources
