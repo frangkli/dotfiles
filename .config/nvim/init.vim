@@ -25,6 +25,7 @@ Plug 'junegunn/goyo.vim'
 " Completion {{{3
 Plug 'metalelf0/supertab'
 Plug 'neoclide/coc.nvim', { 'branch': 'release' }
+Plug 'Pablo1107/codi.vim'
 
 " File tree {{{3
 Plug 'scrooloose/nerdtree'
@@ -47,12 +48,11 @@ Plug 'ap/vim-css-color'
 
 " Note taking {{{3
 Plug 'vimwiki/vimwiki'
-Plug 'suan/vim-instant-markdown', { 'for': 'markdown' }
 Plug 'lervag/vimtex', { 'for': ['tex', 'bib'] }
 Plug 'KeitaNakamura/tex-conceal.vim', { 'for': ['tex'] }
 Plug 'rhysd/vim-grammarous', { 'on': 'GrammarousCheck' }
 
-" Frontend development {{{3
+" Web development {{{3
 Plug 'maxmellon/vim-jsx-pretty', { 'for': ['javascript', 'jsx', 'javascriptreact'] }
 Plug 'alvan/vim-closetag', { 'for': ['javascript', 'jsx', 'javascriptreact', 'html', 'xml'] }
 call plug#end()
@@ -78,7 +78,6 @@ set lazyredraw                                          " Prevent screen redraw 
 set expandtab                                           " Change tabs into spaces
 set tabstop=4                                           " Number of spaces of <Tab>
 set shiftwidth=4                                        " Indent size
-set smarttab                                            " Change tab size based on context
 set backspace=2                                         " Allow <BS> for indent, eol, start
 set dictionary=~/.config/nvim/spell/en.utf-8.add        " User-defined spelling file
 set viminfo+='1000,n$XDG_DATA_HOME/vim/viminfo          " Move viminfo to XDG
@@ -100,7 +99,7 @@ set signcolumn=auto                                     " Show signcolumn on dem
 set shortmess+=c                                        " Don't show completion log
 
 " ==================== COLORS ==================== {{{1
-color wal
+colorscheme wal
 highlight CursorLine ctermbg=9 cterm=none
 highlight CursorColumn ctermbg=9
 highlight CursorLineNr ctermfg=2
@@ -157,6 +156,7 @@ let g:qs_max_chars = 150
 " vimwiki {{{2
 let g:vimwiki_ext2syntax = {'.Rmd': 'markdown', '.rmd': 'markdown', '.md': 'markdown', '.markdown': 'markdown'}
 let g:vimwiki_list = [{'path': '~/Documents/Notebooks/Vimwiki', 'syntax': 'markdown', 'ext': '.rmd'}]
+let g:vimwiki_folding = 'list'
 
 " nerdtree/nerdtree-git-plugin/vim-nerdtree-syntax-highlight {{{2
 let g:WebDevIconsUnicodeDecorateFolderNodes = 1
@@ -219,7 +219,7 @@ let g:closetag_shortcut = '>'
 let g:closetag_close_shortcut = '<Leader>>'
 
 " goyo.vim {{{2
-let g:goyo_width = 120
+let g:goyo_width = 140
 
 " fzf.vim {{{2
 let g:fzf_layout = { 'window': 'call CreateCenteredFloatingWindow()' }
@@ -389,9 +389,9 @@ function! CreateCenteredFloatingWindow()
     let top = ((&lines - height) / 2) - 1
     let left = (&columns - width) / 2
     let opts = {'relative': 'editor', 'row': top, 'col': left, 'width': width, 'height': height, 'style': 'minimal'}
-    let top = "╭" . repeat("─", width - 2) . "╮"
+    let top = "┌" . repeat("─", width - 2) . "┐"
     let mid = "│" . repeat(" ", width - 2) . "│"
-    let bot = "╰" . repeat("─", width - 2) . "╯"
+    let bot = "└" . repeat("─", width - 2) . "┘"
     let lines = [top] + repeat([mid], height - 2) + [bot]
     let s:buf = nvim_create_buf(v:false, v:true)
     call nvim_buf_set_lines(s:buf, 0, -1, v:true, lines)
@@ -435,7 +435,7 @@ command! -nargs=0 OR :call CocAction('runCommand', 'editor.action.organizeImport
 " https://jasonheppler.org/2012/12/05/word-processor-mode-in-vim/
 function! WordProcessorMode()
     setlocal formatoptions=t1
-    setlocal textwidth=100
+    setlocal textwidth=140
     map j gj
     map k gk
     setlocal smartindent
