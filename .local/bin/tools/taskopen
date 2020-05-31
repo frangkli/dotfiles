@@ -18,7 +18,7 @@ uuid="$(/usr/local/bin/task _get "$1".uuid)"
 # Loop and store annotations
 references+=()
 while [ ! -z "$number" ] && [ $number -gt 0 ]; do
-    annotation=("$(/usr/local/bin/task _get "$1".annotations.$number.description | sed 's/notes/Notes/g')")
+    annotation="$(/usr/local/bin/task _get "$1".annotations.$number.description | sed 's/notes/Notes/g')"
     references+=("$annotation")
     number=$(($number-1))
 done
@@ -34,7 +34,7 @@ else
         selected="$option"
         # Add "note" annotation if not present
         # https://stackoverflow.com/questions/3685970/check-if-a-bash-array-contains-a-value
-        if [[ ! "${references[@]}" =~ "${Notes}" ]]; then
+        if [[ ! "${references[@]}" =~ "Notes" ]]; then
             task "$1" annotate Notes
             echo "Added annotation \"Notes\""
         fi
