@@ -25,7 +25,7 @@ Plug 'junegunn/goyo.vim'
 " Completion {{{3
 Plug 'metalelf0/supertab'
 Plug 'neoclide/coc.nvim', { 'branch': 'release' }
-Plug 'Pablo1107/codi.vim'
+Plug 'metakirby5/codi.vim'
 
 " File tree {{{3
 Plug 'scrooloose/nerdtree'
@@ -41,7 +41,6 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'tpope/vim-fugitive'
 
 " Color and highlights {{{3
-Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'dylanaraps/wal.vim'
 Plug 'octol/vim-cpp-enhanced-highlight', { 'for': ['c', 'cpp'] }
 Plug 'ap/vim-css-color'
@@ -274,7 +273,7 @@ map <C-k> <C-w>k
 map <C-l> <C-w>l
 
 " Run shell scripts {{{2
-map <Leader>s :!clear && shellcheck %<CR>
+" map <Leader>s :!clear && shellcheck %<CR>
 map <Leader>c :w! \| !compiler "<c-r>%"<CR>
 map <Leader>p :!opout "<c-r>%" &<CR><CR>
 map <Leader>w :w !detex \| wc -w<CR>
@@ -434,6 +433,7 @@ command! -nargs=0 OR :call CocAction('runCommand', 'editor.action.organizeImport
 " Word processor mode {{{2
 " https://jasonheppler.org/2012/12/05/word-processor-mode-in-vim/
 function! WordProcessorMode()
+    setlocal ic
     setlocal formatoptions=t1
     setlocal textwidth=140
     map j gj
