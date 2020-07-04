@@ -154,4 +154,4 @@ shift + alt - n : mpc -q prev
 alt - q : yabai -m window --close
 
 # drop down window
-alt - v : ~/.local/bin/tools/popterm
+# alt - v : ~/.local/bin/tools/popterm
