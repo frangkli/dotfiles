@@ -33,6 +33,8 @@ alias rm="trash" \
     sf="surfraw google" \
     newsboat="newsboat -q" \
     ranlor="wal --theme random && xrdb ~/.Xresources" \
+    gcm="git checkout master" \
+    scratchpad="st -t 'scratchpad' -g 120x34 2>/dev/null &" \
 
 # Clean up and conf
 alias tmux="tmux -f ~/.config/tmux/tmux.conf" \
