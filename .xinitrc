@@ -8,6 +8,7 @@ xset fp rehash
 xrdb ~/.Xresources
 xset r rate 250 30
 xset b off
+xhost +localhost
 
 while true
 do
