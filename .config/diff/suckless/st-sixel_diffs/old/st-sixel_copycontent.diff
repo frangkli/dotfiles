@@ -1,5 +1,5 @@
 diff --git a/config.def.h b/config.def.h
-index 546edda..398e26b 100644
+index 546edda..6dbff75 100644
 --- a/config.def.h
 +++ b/config.def.h
 @@ -172,6 +172,16 @@ static MouseShortcut mshortcuts[] = {
@@ -23,7 +23,7 @@ index 546edda..398e26b 100644
  	{ TERMMOD,              XK_Y,           selpaste,       {.i =  0} },
  	{ ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
  	{ TERMMOD,              XK_Num_Lock,    numlock,        {.i =  0} },
-+    { MODKEY,               XK_o,           externalpipe,   {.v = openurlcmd } },
++        { MODKEY,               XK_o,           externalpipe,   {.v = openurlcmd } },
 +	{ MODKEY,               XK_u,           externalpipe,   {.v = copyurlcmd } },
 +	{ MODKEY,               XK_y,           externalpipe,   {.v = copyoutput } },
  };

@@ -1,5 +1,5 @@
 diff --git a/config.def.h b/config.def.h
-index 546edda..96b0987 100644
+index 546edda..5e7b681 100644
 --- a/config.def.h
 +++ b/config.def.h
 @@ -5,8 +5,11 @@
@@ -10,7 +10,7 @@ index 546edda..96b0987 100644
 -static int borderpx = 2;
 +static char *font = "FuraMono Nerd Font:size=8:antialias=true:autohint=true";
 +static char *font2[] = {
-+    "Source Code Pro:size=8:antialias=true:autohint=true",
++    "Symbola:size=8:antialias=true:autohint=true",
 +};
 +static int borderpx = 20;
  
