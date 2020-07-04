@@ -22,4 +22,4 @@ else
 fi
 
 file=$(echo "$1" | sed 's/.*\///g')
-docker run -v "$dir":/mnt/frank -v "/private$zathura_tmp":/mnt/zat zathura /bin/bash -c "export DISPLAY=docker.for.mac.host.internal:0; zathura --config-dir='/mnt/zat' /mnt/frank/\"$file\"" &
+docker run -d -v "$dir":/mnt/frank -v "/private$zathura_tmp":/mnt/zat zathura /bin/bash -c "export DISPLAY=docker.for.mac.host.internal:0; zathura --config-dir='/mnt/zat' /mnt/frank/\"$file\"" &
