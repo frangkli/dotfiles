@@ -60,10 +60,10 @@ endsnippet
 snippet table "Table" b
 \begin{table}[${1:htpb}]
 	\centering
-	\caption{${2:caption}}
-	\begin{tabular}{${5:c}}
-		$0${5/((?<=.)c|l|r)|./(?1: & )/g}
+	\begin{tabular}{${4:c}}
+		$0${4/((?<=.)c|l|r)|./(?1: & )/g}
 	\end{tabular}
+	\caption{${2:caption}}
 	\label{tab:${3:label}}
 \end{table}
 endsnippet
@@ -92,6 +92,18 @@ snippet enum "Enumerate" bA
 \end{enumerate}
 endsnippet
 
+snippet enam "Enumerate alphabets" bA
+\begin{enumerate}[label=(\alph*)]
+	\item $0
+\end{enumerate}
+endsnippet
+
+snippet enom "Enumerate noindent" bA
+\begin{enumerate}[wide, labelindent=0pt]
+	\item $0
+\end{enumerate}
+endsnippet
+
 snippet item "Itemize" bA
 \begin{itemize}
 	\item $0
@@ -105,9 +117,9 @@ snippet desc "Description" bA
 endsnippet
 
 snippet col "Column" b
-\begin{multicol}{$1}
+\begin{multicols}{$1}
 	$0
-\end{multicol}
+\end{multicols}
 endsnippet
 
 snippet prog "Program listing" b
