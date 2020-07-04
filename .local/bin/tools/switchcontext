@@ -1,7 +1,0 @@
-#!/bin/bash
-
-export TASKRC="$HOME/.config/task/taskrc"
-
-options=$(/usr/local/bin/task context list | cut -d " " -f 1 | /usr/local/opt/gnu-sed/bin/gsed -n "$ d; 4,$ p")
-selected=$(echo -e "$options\nnone" | dmenu -p "Switch to which context?")
-task context "$selected" 1>/dev/null
