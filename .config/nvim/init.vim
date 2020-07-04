@@ -154,7 +154,7 @@ let g:qs_max_chars = 150
 
 " vimwiki {{{2
 let g:vimwiki_ext2syntax = {'.Rmd': 'markdown', '.rmd': 'markdown', '.md': 'markdown', '.markdown': 'markdown'}
-let g:vimwiki_list = [{'path': '~/Documents/Notebooks/Vimwiki', 'syntax': 'markdown', 'ext': '.rmd'}]
+let g:vimwiki_list = [{'path': '~/Documents/Notebooks/Vimwiki', 'syntax': 'markdown', 'ext': '.md'}]
 let g:vimwiki_folding = 'list'
 
 " nerdtree/nerdtree-git-plugin/vim-nerdtree-syntax-highlight {{{2
@@ -368,7 +368,7 @@ autocmd VimLeave * call system("tmux setw automatic-rename")
 autocmd Bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
 " Disable auto commenting new lines {{{2
-autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+" autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
 " Recognize comments in json {{{2
 autocmd FileType json syntax match Comment +\/\/.\+$+
@@ -376,6 +376,9 @@ autocmd FileType json syntax match Comment +\/\/.\+$+
 " Use limelight.vim automatically with goyo {{{2
 autocmd! User GoyoEnter Limelight
 autocmd! User GoyoLeave Limelight!
+
+" LaTeX auto iteming
+autocmd BufRead,BufNewFile *.tex set comments+=b:\\item
 
 " ==================== COMMANDS OR FUNCTIONS ==================== {{{1
 " Fzf add preview {{{2
