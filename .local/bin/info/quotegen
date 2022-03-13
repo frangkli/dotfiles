@@ -1,0 +1,60 @@
+#!/bin/zsh
+
+# Quote array
+quotes=(
+    "By Friedrich Wilhelm Nietzsche^Was ist schlecht? - Alles, was aus der Schwäche stammt.^What is evil? Whatever springs from weakness."
+    "By François de La Rochefoucauld^C'est une grande habileté que de savoir cacher son habileté.^It takes a great deal of talent and skill to conceal one's talent and skill."
+    "By Adam Smith^Man is an only animal that makes bargains: no dog exchanges bones with another."
+    "By François de La Rochefoucauld^Il ne faut pas s'offenser que les autres nous chachent la vérité. puisque nous nous la cachons si souvent à nous-mêmes.^We should not be upset that others hide the truth from us, when we hide it from ourselves."
+    "By Jean-Paul Sartre^l'enfer, c'est les autres.^Hell is other people."
+    "By Jean-Jacques Rousseau^Il y a deux sortes de mensonges: celui de fait qui regarde le passé, celui de droit qui regarde l' avenir.^There are two kinds of lies; one concerns an accomplished fact, the other concerns a future duty."
+    "By Jean de La Fontaine^Rien n'est si dangereux qu'un ignorant ami; Mieux vaudrait un sage ennemi.^Nothing is as dangerous as an ignorant friend; a wise enemy is to be preferred."
+    "By Dante Alighieri^Lasciate ogni speranza, voi ch'entrate.^Abandon all hope, ye who enter here."
+    "By Jean-Paul Sartre^L' homme est condamné à être libre.^Man is condemned to be free."
+    "By Søren Kierkegaard^Den farligste Forræder blandt alle er den, ethvert Menneske har i sig selv.^Every man has in himself the most dangerous traitor of all."
+    "By Arthur Schopenhauer^Was aber die Leute gemeiniglich das Schicksal nennen sind meistens nur ihre eigenen dummen Streiche.^What people commonly call fate is mostly their own stupidity."
+    "By Arthur Schopenhauer^Das Genie wohnt nur eine Etage höher als der Wahnsinn.^A genius lives only one storey above madness."
+    "By Socrates^One thing I know, that I know nothing. This is the source of my wisdom."
+    "By Plato^Good people do not need law to tell them to act responsibly, while bad people will find a way around the laws."
+    "By Heraclitus^There is nothing permanent except change."
+    "By Socrates^By all means, get married: if you find a good wife, you'll be happy; if not, you'll become a philosopher."
+    "By Alexander the Great^I am indebted to my father for living, but to my teacher for living well."
+    "By Plutarch^The real destroyer of the liberties of the people is he who spreads among them bounties, donations and benefits."
+    "By Democritus^Nothing exists except atoms and empty space; everything else is just opinion."
+    "By Aristotle^Love is composed of a single soul inhabiting two bodies."
+    "By Socrates^All men's souls are immortal, but the souls of the righteous are immortal and divine."
+    "By Plato^He who steals a little steals with the same wish as he who steals much, but with less power."
+    "By Epicurus^Death does not concern us, because as long as we exist, death is not here. And when it does come, we no longer exist."
+    "By Solon^Let no man be called happy before his death. Till then, he is not happy, only lucky."
+    "By Xenophon^Excess of grief for the dead is madness; for it is an injury to the living, and the dead know it not."
+    "By Thucydides^It is frequently a misfortune to have very brilliant men in charge of affairs. They expect too much of ordinary men."
+    "By Socrates^By all means, get married: if you find a good wife, you'll be happy; if not, you'll become a philosopher."
+    "By Demosthenes^Small opportunities are often the beginning of great enterprises."
+    "By Pericles^Wait for the wisest of all counselors, time."
+    "By Aristotle^At his best, man is the noblest of all animals; separated from law and justice he is the worst."
+    "By Plato^Man: a being in search of meaning."
+    "By Plutarch^I don't need a friend who changes when I change and who nods when I nod; my shadow does that much better."
+    "By Herodotus^Whatever comes from God is impossible for a man to turn back."
+    "By Thucydides^History is Philosophy teaching by examples."
+    "By Alexander the Great^I am not afraid of an army of lions led by a sheep; I am afraid of an army of sheep led by a lion."
+    "By Xenophon^Fast is fine, but accuracy is everything."
+    "By Nikos Kazantzakis^Since we cannot change reality, let us change the eyes which see reality."
+    "By Aristotle Onassis^If women didn't exist, all the money in the world would have no meaning."
+    "By Nikos Kazantzakis^There is only one woman in the world. One woman, with many faces."
+    "By Odysseus Elytis^You'll come to learn a great deal if you study the insignificant in depth."
+    "By Maria Callas^It's a terrible thing to go through life thinking that you have a rock on your side when you haven't."
+    "By Aristotle Onassis^We must free ourselves of the hope that the sea will ever rest. We must learn to sail in high winds."
+)
+
+# Formatting
+width=$(tput cols)
+selected=${quotes[$(($RANDOM % ${#quotes[@]} + 1 ))]}
+text="$(echo $selected | cut -d '^' -f 2)"
+subtitle="("$(echo $selected | cut -d '^' -f 3)")"
+author=--$(echo $selected | cut -d '^' -f 1)--
+
+printf "%0.s-" {1..$width}
+echo "\e[3m$(printf "%*s\n" $(((${#text}+$width)/2)) "$text")\e[0m"
+[ ${#subtitle} -gt 3 ] && printf "%*s\n" $(((${#subtitle}+$width)/2)) "$subtitle"
+printf "%*s\n" $(((${#author}+$width)/2)) "$author"
+printf "%0.s-" {1..$width}

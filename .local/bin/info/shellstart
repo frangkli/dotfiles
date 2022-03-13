@@ -1,0 +1,17 @@
+#!/bin/bash
+
+$HOME/.local/bin/info/quotegen
+echo ""
+
+width=$(tput cols)
+welcome="Welcome, Frank Li"
+printf "%*s\n" $(((${#welcome}+$width)/2)) "$welcome"
+
+homeFileCount="$(ls -a ~ | wc -l | sed "s/ //g")"
+
+if [ "$homeFileCount" -gt 36 ]
+then
+    echo "$(tput setaf 4)$homeFileCount files in \$HOME$(tput sgr0)"
+else
+    echo "$homeFileCount files in \$HOME"
+fi
