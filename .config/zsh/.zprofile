@@ -47,7 +47,6 @@ export PYLINTHOME="$XDG_CACHE_HOME/pylint"
 export PYTHON_CONFIGURE_OPTS="--enable-framework"
 
 # Other path variables
-export GOPATH="$HOME/Programming/Go"
 export NODE_PATH="$HOME/.local/share/node_modules"
 
 # Fuzzy finder config
