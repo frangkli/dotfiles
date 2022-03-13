@@ -1,0 +1,65 @@
+# https://wiki.archlinux.org/index.php/Nano
+# http://how-to.wikia.com/wiki/How_to_use_syntax_highlighting_with_the_GNU_nano_text_editor
+# https://github.com/gotbletu/dotfiles/blob/master/nanorc/.nanorc
+
+# Line numbering
+set linenumbers
+
+# Mouse support
+set mouse
+
+# Word wrap
+set softwrap
+
+# Spell check
+# http://wiki.excito.org/wiki/index.php/Tutorials_and_How-tos/Edit_Text_Files_with_nano
+set speller "aspell -x -c"
+
+# Syntax highlights
+# http://askubuntu.com/questions/90013/syntax-highlighting-on-nano
+# https://github.com/craigbarnes/nanorc
+# $ ls /usr/local/share/nano | grep nanorc$
+include /usr/local/share/nano/asm.nanorc
+include /usr/local/share/nano/autoconf.nanorc
+include /usr/local/share/nano/awk.nanorc
+include /usr/local/share/nano/c.nanorc
+include /usr/local/share/nano/changelog.nanorc
+include /usr/local/share/nano/cmake.nanorc
+include /usr/local/share/nano/css.nanorc
+include /usr/local/share/nano/debian.nanorc
+include /usr/local/share/nano/default.nanorc
+include /usr/local/share/nano/elisp.nanorc
+include /usr/local/share/nano/fortran.nanorc
+include /usr/local/share/nano/gentoo.nanorc
+include /usr/local/share/nano/go.nanorc
+include /usr/local/share/nano/groff.nanorc
+include /usr/local/share/nano/guile.nanorc
+include /usr/local/share/nano/html.nanorc
+include /usr/local/share/nano/java.nanorc
+include /usr/local/share/nano/javascript.nanorc
+include /usr/local/share/nano/json.nanorc
+include /usr/local/share/nano/lua.nanorc
+include /usr/local/share/nano/makefile.nanorc
+include /usr/local/share/nano/man.nanorc
+include /usr/local/share/nano/mgp.nanorc
+include /usr/local/share/nano/mutt.nanorc
+include /usr/local/share/nano/nanohelp.nanorc
+include /usr/local/share/nano/nanorc.nanorc
+include /usr/local/share/nano/nftables.nanorc
+include /usr/local/share/nano/objc.nanorc
+include /usr/local/share/nano/ocaml.nanorc
+include /usr/local/share/nano/patch.nanorc
+include /usr/local/share/nano/perl.nanorc
+include /usr/local/share/nano/php.nanorc
+include /usr/local/share/nano/po.nanorc
+include /usr/local/share/nano/postgresql.nanorc
+include /usr/local/share/nano/pov.nanorc
+include /usr/local/share/nano/python.nanorc
+include /usr/local/share/nano/ruby.nanorc
+include /usr/local/share/nano/rust.nanorc
+include /usr/local/share/nano/sh.nanorc
+include /usr/local/share/nano/spec.nanorc
+include /usr/local/share/nano/tcl.nanorc
+include /usr/local/share/nano/tex.nanorc
+include /usr/local/share/nano/texinfo.nanorc
+include /usr/local/share/nano/xml.nanorc

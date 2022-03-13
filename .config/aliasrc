@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# Alias
+alias v="$EDITOR" \
+    cat="highlight --force --out-format=ansi" \
+    ccat="/bin/cat" \
+    ls="ls -hNF --color=auto --group-directories-first" \
+    grep="grep --color=auto" \
+    diff="colordiff" \
+    fzfp="fzf --preview 'highlight --force --out-format=ansi {}'" \
+    clock="tty-clock -c" \
+    youtube="youtube-dl --add-metadata -i -o '%(upload_date)s-%(title)s.%(ext)s'" \
+    repr="source ~/.profile && cd -" \
+    dt="/usr/bin/git --git-dir=$HOME/.config/dotfiles/ --work-tree=$HOME" \
+    cpr="compiler" \
+    gcm="git checkout master" \
+
+# Clean up and conf
+alias tmux="tmux -f ~/.config/tmux/tmux.conf" \
+    bash="bash --init-file $HOME/.config/bash/bashrc" \
+    wget="wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"" \
+
+fvim() {
+    $EDITOR "$(fzfp -m --prompt='File> ')"
+}
+fconf() {
+    $EDITOR "$(fd -H . ~/.config ~/.local/bin -d 3 --type f | fzfp --prompt='Config> ')"
+}
+fman() {
+    man "$(man -k . | fzf --prompt='Man> ' | sed 's/(/ /g' | awk '{print $1}')"
+}
+ftldr() {
+    tldr "$(tldr --list | sed "s/ //g" | tr "," "\n" | fzf --prompt='Tldr> ' --preview 'tldr {}')"
+}
+lfcd() {
+    tmp="$(mktemp)"
+    lf -last-dir-path="$tmp" "$@"
+    if [ -f "$tmp" ]; then
+        dir="$(cat "$tmp")"
+        rm -f "$tmp"
+        [ -d "$dir" ] && [ "$dir" != "$(pwd)" ] && cd "$dir"
+    fi
+}

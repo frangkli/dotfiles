@@ -1,0 +1,149 @@
+extends texmath
+extends texscience
+extends texbeamer
+
+global !p
+endglobal
+
+snippet template "Basic template" b
+\documentclass[a4paper]{article}
+
+% Source preamble
+\input{/Users/frank/Repositories/Document-Templates/LaTeX/$1}
+
+% Metadata
+\title{\textit{${2:${VISUAL:Course Name}}}\\\\\vspace{0.5em}\textbf{\huge ${3:${VISUAL:Topic Name}}}}
+\hypersetup{
+	pdftitle={$3},
+	pdfsubject={$2: ${4:$3}},
+	pdfkeywords={$5}
+}
+\fancyfoot[L]{$3}
+\addbibresource{/Users/frank/Documents/Bibliography/$6.bib}
+
+\begin{document}
+
+\maketitle
+\begingroup
+	\renewcommand*{\IgnoreToc}[1]{}
+	\tableofcontents
+\endgroup
+${7:\listoffigures}
+\pagebreak
+
+$0
+
+\printbibliography
+
+\end{document}
+endsnippet
+
+snippet beg "Any environment" bA
+\begin{$1}
+	$0
+\end{$1}
+endsnippet
+
+snippet lec "Lecture" bA
+\lecture{$1}{$2}{$3}
+$0
+endsnippet
+
+snippet @@ "Citation" A
+\cite{$1}$0
+endsnippet
+
+snippet @) "Citation" A
+\parencite{$1}$0
+endsnippet
+
+snippet table "Table" b
+\begin{table}[${1:htpb}]
+	\centering
+	\begin{tabular}{${4:c}}
+		$0${4/((?<=.)c|l|r)|./(?1: & )/g}
+	\end{tabular}
+	\caption{${2:caption}}
+	\label{tab:${3:label}}
+\end{table}
+endsnippet
+
+snippet fig "Figure" b
+\begin{figure}[${1:htpb}]
+	\centering
+	${2:\includegraphics[width=0.8\textwidth]{$3}}
+	\caption{${4:$3}}
+	\label{fig:${5:${3/\W+/-/g}}}
+\end{figure}
+endsnippet
+
+snippet wrap "Wrap figure" b
+\begin{wrapfigure}{${1:R}}{0.5\textwidth}
+	\centering
+	${2:\includegraphics[width=0.8\textwidth]{$3}}
+	\caption{${4:$3}}
+	\label{fig:${5:${3/\W+/-/g}}}
+\end{wrapfigure}
+endsnippet
+
+snippet enum "Enumerate" bA
+\begin{enumerate}
+	\item $0
+\end{enumerate}
+endsnippet
+
+snippet enam "Enumerate alphabets" bA
+\begin{enumerate}[label=(\alph*)]
+	\item $0
+\end{enumerate}
+endsnippet
+
+snippet enom "Enumerate noindent" bA
+\begin{enumerate}[wide, labelindent=0pt]
+	\item $0
+\end{enumerate}
+endsnippet
+
+snippet item "Itemize" bA
+\begin{itemize}
+	\item $0
+\end{itemize}
+endsnippet
+
+snippet desc "Description" bA
+\begin{description}
+	\item[$1] $0
+\end{description}
+endsnippet
+
+snippet col "Column" b
+\begin{multicols}{$1}
+	$0
+\end{multicols}
+endsnippet
+
+snippet prog "Program listing" b
+\begin{lstlisting}[language=${1:${VISUAL:C++}}, style=${2:${VISUAL:program}}, caption={$3}]
+$0
+\end{lstlisting}
+endsnippet
+
+snippet output "Program listing" b
+\begin{lstlisting}[style=${1:output}, caption={$2}]
+$0
+\end{lstlisting}
+endsnippet
+
+snippet inprog "Input program listing" bA
+\lstinputlisting[language=${1:${VISUAL:C++}}, style=${2:${VISUAL:program}}, caption={$3}]{$0}
+endsnippet
+
+snippet vb "Inline verbatim" i
+\verb|$1|$0
+endsnippet
+
+snippet END "End text" b
+\vfill\centering
+\textbf{\huge END}
+\vspace{1cm}
+endsnippet

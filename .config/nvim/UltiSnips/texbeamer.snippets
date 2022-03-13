@@ -1,0 +1,38 @@
+snippet beamer "Beamer template" b
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usetheme{material}
+\useDarkTheme
+\useAccentLightBlue
+
+% Source preamble
+\input{/Users/frank/Repositories/Document-Templates/LaTeX/$1}
+
+% Metadata
+\title{$2}
+\subtitle{$3}
+\author{Ang Li (Frank)$4}
+\institute{Yew Chung International School}
+\date{\today}
+
+\AtBeginSection[]
+{
+\begin{frame}
+	\frametitle{Table of Contents}
+	\tableofcontents[currentsection]
+\end{frame}
+}
+\begin{document}
+
+\begin{frame}
+\frametitle{Table of Contents}
+\begingroup
+	\renewcommand*{\IgnoreToc}[1]{}
+	\tableofcontents
+\endgroup
+\end{frame}
+
+$0
+
+\end{document}
+endsnippet
