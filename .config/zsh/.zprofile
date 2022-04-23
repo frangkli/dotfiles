@@ -3,6 +3,7 @@
 export PATH="$PATH:/sbin"
 export PATH="$PATH:/usr/local/sbin"
 export PATH="$PATH:/opt/local/bin:/opt/local/sbin"
+export PATH="$PATH:$GOPATH/bin"
 export PATH="$PATH:$(du "$HOME/.local/bin" | cut -f2 | tr '\n' ':' | sed 's/:*$//')"
 
 # Personalize env
@@ -47,6 +48,7 @@ export PYLINTHOME="$XDG_CACHE_HOME/pylint"
 export PYTHON_CONFIGURE_OPTS="--enable-framework"
 
 # Other path variables
+export GOPATH="$HOME/.local/share/go"
 export NODE_PATH="$HOME/.local/share/node_modules"
 
 # Fuzzy finder config
