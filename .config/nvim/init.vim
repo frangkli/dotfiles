@@ -117,7 +117,7 @@ highlight htmlItalic cterm=italic ctermfg=5
 let g:limelight_priority = -1
 
 " ultisnips {{{2
-let g:UltiSnipsEditSplit = "vertical"
+let g:UltiSnipsEditSplit = "normal"
 let g:UltiSnipsExpandTrigger = "<Tab>"
 let g:UltiSnipsJumpForwardTrigger="<C-j>"
 let g:UltiSnipsJumpBackwardTrigger="<C-k>"
@@ -151,7 +151,7 @@ let g:qs_max_chars = 150
 
 " vimwiki {{{2
 let g:vimwiki_ext2syntax = {'.Rmd': 'markdown', '.rmd': 'markdown', '.md': 'markdown', '.markdown': 'markdown'}
-let g:vimwiki_list = [{'path': '~/Documents/Notebooks/Vimwiki', 'syntax': 'markdown', 'ext': '.md'}]
+let g:vimwiki_list = [{'path': '~/.local/share/vimwiki', 'syntax': 'markdown', 'ext': '.md'}]
 let g:vimwiki_folding = 'list'
 
 " nerdtree/nerdtree-git-plugin/vim-nerdtree-syntax-highlight {{{2
@@ -334,10 +334,6 @@ omap af <Plug>(coc-funcobj-a)
 " Templates {{{2
 nmap <F2> :CocList templates<CR>
 
-" Dictionary
-nmap <F3> "dyiw:!osx-dictionary -d "American English" <C-r>d<CR>
-nmap <F4> "dyiw:!osx-dictionary -d "American English Thesaurus" <C-r>d<CR>
-
 " Limelight toggle
 nmap <Leader>L :Limelight<CR>
 
@@ -417,8 +413,6 @@ endfunction
 function! s:show_documentation()
     if (index(['vim','help'], &filetype) >= 0)
         execute 'h '.expand('<cword>')
-    elseif (index(['sh','zsh','bash','c','cpp'], &filetype) >= 0)
-        execute 'Man '.expand('<cword>')
     else
         call CocAction('doHover')
     endif
@@ -441,8 +435,6 @@ function! WordProcessorMode()
     setlocal smartindent
     setlocal spell spelllang=en_us
     setlocal noexpandtab
-    nmap K "dyiw:!osx-dictionary -d "American English" <C-r>d<CR>
-    nmap <Leader>t "dyiw:!osx-dictionary -d "American English Thesaurus" <C-r>d<CR>
     Goyo
 endfunction
 command! WP call WordProcessorMode()
