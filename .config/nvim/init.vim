@@ -257,7 +257,7 @@ map gs :above wincmd f<CR>
 map gv :vertical wincmd f<CR>
 
 " Toggle interface {{{2
-map <Leader>l :call LocationToggle()<CR>
+map <Leader>l :CocDiagnostics<CR>
 map <Leader>n :NERDTreeToggle<CR>
 
 " Toggle spell check {{{2
@@ -332,7 +332,7 @@ omap if <Plug>(coc-funcobj-i)
 omap af <Plug>(coc-funcobj-a)
 
 " Templates {{{2
-nmap <F2> :CocList templates<CR>
+" autocmd BufNewFile *.cpp 0r ~/.config/nvim/templates/cp.cpp
 
 " Limelight toggle
 nmap <Leader>L :Limelight<CR>
@@ -361,7 +361,7 @@ autocmd VimLeave * call system("tmux setw automatic-rename")
 autocmd Bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
 " Disable auto commenting new lines {{{2
-" autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
 " Recognize comments in json {{{2
 autocmd FileType json syntax match Comment +\/\/.\+$+
@@ -438,3 +438,8 @@ function! WordProcessorMode()
     Goyo
 endfunction
 command! WP call WordProcessorMode()
+
+" Preserve cursor position
+if has("autocmd")
+  au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+endif

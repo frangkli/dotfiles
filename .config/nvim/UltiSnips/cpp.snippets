@@ -117,9 +117,42 @@ snippet inbs "include bits/stdc++" b
 endsnippet
 
 snippet cout "cout endl" b
-cout << $1 << endl;
+cout << $1 << '\n';
 endsnippet
 
 snippet std "use namespace std" b
 using namespace std;
+endsnippet
+
+snippet cpcpp "competitive template" b
+#include <bits/stdc++.h>
+#define INF INT_MAX
+
+using namespace std;
+
+using ll = long long;
+
+using vi = vector<int>;
+#define pb push_back
+#define sz(x) (int) (x).size()
+#define all(x) begin(x), end(x)
+
+using pi = pair<int, int>;
+#define f first
+#define s second
+#define mp make_pair
+
+void setIO(string name = "") {
+	cin.tie(0) -> sync_with_stdio(0);
+	if (sz(name)) {
+		freopen((name + ".in").c_str(), "r", stdin);
+		freopen((name + ".out").c_str(), "w", stdout);
+	}
+}
+
+int main() {
+	setIO($1);
+	$2
+	return 0;
+}
 endsnippet

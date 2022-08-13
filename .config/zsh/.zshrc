@@ -158,29 +158,17 @@ compctl -K _pip_completion pip3
 [ -f "$HOME/.config/zsh/.zprofile" ] && . "$HOME/.config/zsh/.zprofile"
 [ -f "$HOME/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh" ] && . "$HOME/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh"
 [ -f "$HOME/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh" ] && . "$HOME/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh"
+[ -f "$HOME/.config/zsh/zsh-z.plugin.zsh" ] && . "$HOME/.config/zsh/zsh-z.plugin.zsh"
 [ -f "$HOME/.config/aliasrc" ] && . "$HOME/.config/aliasrc"
 [ -f "$HOME/.config/shortcutrc" ] && . "$HOME/.config/shortcutrc"
 
 # Alias overwrite
 alias repr="source $HOME/.config/zsh/.zshrc"
 
+
 # Prompt syntax highlight
 ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=cyan' # e.g. -option
 ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=cyan' # e.g. --option
-ZSH_HIGHLIGHT_STYLES[redirection]='fg=red,underline' # e.g. >>, >
-
-# Miniconda3
-__conda_setup="$('/Users/frank/Miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/Users/frank/Miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/Users/frank/Miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/Users/frank/Miniconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
 
 # Go home
 cd

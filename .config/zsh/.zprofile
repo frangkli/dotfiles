@@ -1,5 +1,6 @@
 #!/bin/sh
 # Command path
+export GOPATH="$HOME/.local/share/go"
 export PATH="$PATH:/sbin"
 export PATH="$PATH:/usr/local/sbin"
 export PATH="$PATH:/opt/local/bin:/opt/local/sbin"
@@ -30,7 +31,7 @@ export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
 export PASSWORD_STORE_DIR="$XDG_CONFIG_HOME/password-store"
 export STARDICT_DATA_DIR="$HOME/Documents/Dictionaries"
 export NOTMUCH_CONFIG="$XDG_CONFIG_HOME/notmuch-config"
-export GNUPGHOME="$XDG_DATA_HOME/gnupg"
+# export GNUPGHOME="$XDG_DATA_HOME/gnupg"
 export GEM_HOME="$XDG_DATA_HOME/gem"
 export GEM_SPEC_CACHE="$XDG_CACHE_HOME/gem"
 export CONDA_PREFIX="$XDG_CONFIG_HOME/conda"
@@ -48,7 +49,6 @@ export PYLINTHOME="$XDG_CACHE_HOME/pylint"
 export PYTHON_CONFIGURE_OPTS="--enable-framework"
 
 # Other path variables
-export GOPATH="$HOME/.local/share/go"
 export NODE_PATH="$HOME/.local/share/node_modules"
 
 # Fuzzy finder config
