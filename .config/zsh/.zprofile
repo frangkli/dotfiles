@@ -15,6 +15,7 @@ export BROWSER="open"
 export CLICOLOR=1
 export LANG="en_US"
 export LC_ALL="en_US.UTF-8"
+export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
 
 # Clean up
 export XML_CATALOG_FILES="/usr/local/etc/xml/catalog"

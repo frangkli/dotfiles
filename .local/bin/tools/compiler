@@ -27,7 +27,10 @@ case "$file" in
     *config.h) sudo make install ;;
     *\.c) gcc -std=c99 -Wall -Wextra -Werror -Wno-long-long -Wno-unused-parameter -Wno-unused-variable -lm "$file" -o "$base" && "$base" ;;
     # *\.cpp) mkdir -p "$dir/.out" && g++ "$file" -std=c++17 -O2 -Wall -Wextra -Wshadow -Wconversion -Wfloat-equal -Wduplicated-cond -Wlogical-op -Werror -Wno-long-long -Wno-unused-parameter -Wno-unused-variable -fsanitize=address -fsanitize=undefined -D_GLIBCXX_DEBUG -g -o ".out/$(echo $base | sed 's/.*\///')" && ".out/$(echo $base | sed 's/.*\///')";;
-    *\.cpp) mkdir -p "$dir/.out" && g++ "$file" -std=c++17 -O2 -Wall -Wextra -Wshadow -Wconversion -Wfloat-equal -Wduplicated-cond -Wlogical-op -Werror -Wno-long-long -Wno-unused-parameter -Wno-unused-variable -o ".out/$(echo $base | sed 's/.*\///')" && ".out/$(echo $base | sed 's/.*\///')";;
+    # g++ -O1 -g -fsanitize=address -fno-omit-frame-pointer
+    #            -fsanitize=thread
+    #            -fsanitize=undefined -fsanitize=nullabilit
+    *\.cpp) mkdir -p "$dir/.out" && g++ "$file" -O2 -Wall -Wextra -Wshadow -Wconversion -Wfloat-equal -Wduplicated-cond -Wlogical-op -Werror -Wno-long-long -Wno-unused-parameter -Wno-unused-variable -o ".out/$(echo $base | sed 's/.*\///')" && ".out/$(echo $base | sed 's/.*\///')";;
     *\.rs) rustc "$file" && "$base";;
     *\.py) python3 "$file" ;;
     *\.go) go run "$file" ;;

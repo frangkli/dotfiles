@@ -19,8 +19,8 @@ Plug 'SirVer/ultisnips'
 Plug 'unblevable/quick-scope'
 Plug '/usr/local/opt/fzf'
 Plug 'junegunn/fzf.vim'
-Plug 'junegunn/limelight.vim'
-Plug 'junegunn/goyo.vim'
+Plug 'wellle/context.vim'
+Plug 'majutsushi/tagbar'
 
 " Completion {{{3
 Plug 'metalelf0/supertab'
@@ -44,9 +44,6 @@ Plug 'tpope/vim-fugitive'
 Plug 'dylanaraps/wal.vim'
 Plug 'octol/vim-cpp-enhanced-highlight', { 'for': ['c', 'cpp'] }
 Plug 'ap/vim-css-color'
-
-" Note taking {{{3
-Plug 'vimwiki/vimwiki'
 
 " Web development {{{3
 Plug 'maxmellon/vim-jsx-pretty', { 'for': ['javascript', 'jsx', 'javascriptreact'] }
@@ -91,13 +88,13 @@ syntax on                                               " Turn on syntax
 set nobackup                                            " Don't make backups
 set nowritebackup                                       " Don't make temporary backups
 set updatetime=300                                      " Swap and CursorHold duration
-set signcolumn=auto                                     " Show signcolumn on demand
+set signcolumn=yes                                      " Show signcolumn (left of line num) so text doesn't shift
 set shortmess+=c                                        " Don't show completion log
 
 " ==================== COLORS ==================== {{{1
 colorscheme wal
 highlight CursorLine ctermbg=9 cterm=none
-highlight CursorColumn ctermbg=9
+highlight CursorColumn ctermbg=250 ctermfg=0
 highlight CursorLineNr ctermfg=2
 highlight WildMenu ctermfg=0 ctermbg=3
 highlight Statusline ctermfg=7 ctermbg=none cterm=none
@@ -113,9 +110,6 @@ highlight vimUserCommand ctermfg=10
 highlight htmlItalic cterm=italic ctermfg=5
 
 " ==================== PLUGIN VARIABLES ===================== {{{1
-" limelight.vim
-let g:limelight_priority = -1
-
 " ultisnips {{{2
 let g:UltiSnipsEditSplit = "normal"
 let g:UltiSnipsExpandTrigger = "<Tab>"
@@ -124,8 +118,6 @@ let g:UltiSnipsJumpBackwardTrigger="<C-k>"
 
 " supertab {{{2
 let g:SuperTabDefaultCompletionType = "<C-n>"
-
-" coc.nvim {{{2
 
 " vimtex {{{2
 let g:vimtex_compiler_progname = 'nvr'
@@ -148,11 +140,6 @@ let g:cpp_concepts_highlight = 1
 " quick-scope {{{2
 let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
 let g:qs_max_chars = 150
-
-" vimwiki {{{2
-let g:vimwiki_ext2syntax = {'.Rmd': 'markdown', '.rmd': 'markdown', '.md': 'markdown', '.markdown': 'markdown'}
-let g:vimwiki_list = [{'path': '~/.local/share/vimwiki', 'syntax': 'markdown', 'ext': '.md'}]
-let g:vimwiki_folding = 'list'
 
 " nerdtree/nerdtree-git-plugin/vim-nerdtree-syntax-highlight {{{2
 let g:WebDevIconsUnicodeDecorateFolderNodes = 1
@@ -214,8 +201,8 @@ let g:closetag_regions = {
 let g:closetag_shortcut = '>'
 let g:closetag_close_shortcut = '<Leader>>'
 
-" goyo.vim {{{2
-let g:goyo_width = 140
+" context.vim {{{2
+let g:context_border_char = '-'
 
 " fzf.vim {{{2
 let g:fzf_layout = { 'window': 'call CreateCenteredFloatingWindow()' }
@@ -232,10 +219,13 @@ let g:fzf_action = {
 vnoremap < <gv
 vnoremap > >gv
 
+" Open tag bar
+nmap <Leader>t :TagbarToggle<CR>
+
 " Quick fzf commands {{{2
-map <Leader>. :Files<CR>
+map <C-p> :Files<CR>
+map <C-b> :Buffers<CR>
 map <Leader> :Maps<CR>,
-map <Leader>m :Buffers<CR>
 
 " Goyo modes {{{2
 map <Leader>F :Goyo \| set bg=dark \| set linebreak<CR>
@@ -270,10 +260,8 @@ map <C-k> <C-w>k
 map <C-l> <C-w>l
 
 " Run shell scripts {{{2
-" map <Leader>s :!clear && shellcheck %<CR>
+map <Leader>s :!clear && shellcheck %<CR>
 map <Leader>c :w! \| !compiler "<c-r>%"<CR>
-map <Leader>p :!opout "<c-r>%" &<CR><CR>
-map <Leader>w :w !detex \| wc -w<CR>
 
 " Navigating with guides {{{2
 inoremap <Leader><Leader> <Esc>/<++><CR>"_c4l
@@ -330,12 +318,10 @@ xmap if <Plug>(coc-funcobj-i)
 xmap af <Plug>(coc-funcobj-a)
 omap if <Plug>(coc-funcobj-i)
 omap af <Plug>(coc-funcobj-a)
-
-" Templates {{{2
-" autocmd BufNewFile *.cpp 0r ~/.config/nvim/templates/cp.cpp
-
-" Limelight toggle
-nmap <Leader>L :Limelight<CR>
+xmap ic <Plug>(coc-classobj-i)
+omap ic <Plug>(coc-classobj-i)
+xmap ac <Plug>(coc-classobj-a)
+omap ac <Plug>(coc-classobj-a)
 
 " ==================== AUTOCMDS ==================== {{{1
 " Clean tex junk on exit {{{2
@@ -366,12 +352,11 @@ autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 " Recognize comments in json {{{2
 autocmd FileType json syntax match Comment +\/\/.\+$+
 
-" Use limelight.vim automatically with goyo {{{2
-autocmd! User GoyoEnter Limelight
-autocmd! User GoyoLeave Limelight!
-
 " LaTeX auto iteming
 autocmd BufRead,BufNewFile *.tex set comments+=b:\\item
+
+" Highlight the symbol and its references when holding the cursor
+autocmd CursorHold * silent call CocActionAsync('highlight')
 
 " ==================== COMMANDS OR FUNCTIONS ==================== {{{1
 " Fzf add preview {{{2
@@ -400,21 +385,14 @@ function! CreateCenteredFloatingWindow()
     au BufWipeout <buffer> exe 'bw '.s:buf
 endfunction
 
-" Toggle location list {{{2
-function! LocationToggle()
-    if get(getloclist(0, {'winid':0}), 'winid', 0)
-        lclose
-    else
-        lopen
-    endif
-endfunction
-
 " Use K to show documentation in preview window {{{2
 function! s:show_documentation()
     if (index(['vim','help'], &filetype) >= 0)
         execute 'h '.expand('<cword>')
+    elseif CocAction('hasProvider', 'hover')
+        call CocActionAsync('doHover')
     else
-        call CocAction('doHover')
+        call feedkeys('K', 'in')
     endif
 endfunction
 
@@ -424,22 +402,34 @@ command! -nargs=0 Format :call CocAction('format')
 " Add `:OR` command for organize imports of the current buffer {{{2
 command! -nargs=0 OR :call CocAction('runCommand', 'editor.action.organizeImport')
 
-" Word processor mode {{{2
-" https://jasonheppler.org/2012/12/05/word-processor-mode-in-vim/
-function! WordProcessorMode()
-    setlocal ic
-    setlocal formatoptions=t1
-    setlocal textwidth=140
-    map j gj
-    map k gk
-    setlocal smartindent
-    setlocal spell spelllang=en_us
-    setlocal noexpandtab
-    Goyo
-endfunction
-command! WP call WordProcessorMode()
-
 " Preserve cursor position
 if has("autocmd")
   au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif
+
+" Regex align
+command! -nargs=? -range Align <line1>,<line2>call AlignSection('<args>')
+vnoremap <silent> A :Align<CR>
+function! AlignSection(regex) range
+  let extra = 1
+  let sep = empty(a:regex) ? '=' : a:regex
+  let maxpos = 0
+  let section = getline(a:firstline, a:lastline)
+  for line in section
+    let pos = match(line, ' *'.sep)
+    if maxpos < pos
+      let maxpos = pos
+    endif
+  endfor
+  call map(section, 'AlignLine(v:val, sep, maxpos, extra)')
+  call setline(a:firstline, section)
+endfunction
+
+function! AlignLine(line, sep, maxpos, extra)
+  let m = matchlist(a:line, '\(.\{-}\) \{-}\('.a:sep.'.*\)')
+  if empty(m)
+    return a:line
+  endif
+  let spaces = repeat(' ', a:maxpos - strlen(m[1]) + a:extra)
+  return m[1] . spaces . m[2]
+endfunction

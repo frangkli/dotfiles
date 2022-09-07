@@ -1,7 +1,6 @@
 #!/bin/sh
 alias h="cd ~/ && ls -l" \
     R="cd ~/repositories && ls -l" \
-    cf="cd ~/.config && ls -l" \
     sc="cd ~/.local/bin && ls -l" \
     ds="cd ~/.local/share && ls -l" \
     tb="cd ~/testbench && ls -l" \

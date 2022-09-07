@@ -1,7 +1,9 @@
 #!/bin/sh
 
 # Alias
-alias v="$EDITOR" \
+alias e="explorer.exe" \
+    v="$EDITOR" \
+    cf="cf-tool" \
     hi="highlight --force --out-format=ansi" \
     ls="ls -hNF --color=auto --group-directories-first" \
     grep="grep --color=auto" \
