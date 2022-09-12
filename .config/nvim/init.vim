@@ -222,10 +222,13 @@ vnoremap > >gv
 " Open tag bar
 nmap <Leader>t :TagbarToggle<CR>
 
+" Reasonable Y
+nnoremap Y y$
+
 " Quick fzf commands {{{2
 map <C-p> :Files<CR>
 map <C-b> :Buffers<CR>
-map <Leader> :Maps<CR>,
+" map <Leader> :Maps<CR>,
 
 " Goyo modes {{{2
 map <Leader>F :Goyo \| set bg=dark \| set linebreak<CR>
