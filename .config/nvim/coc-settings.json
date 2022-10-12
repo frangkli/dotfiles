@@ -81,5 +81,6 @@
                 "note": "info"
             }
         }
-    }
+    },
+    "svelte.enable-ts-plugin": true
 }

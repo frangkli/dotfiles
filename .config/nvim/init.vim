@@ -23,7 +23,7 @@ Plug 'wellle/context.vim'
 Plug 'majutsushi/tagbar'
 
 " Completion {{{3
-Plug 'metalelf0/supertab'
+" Plug 'metalelf0/supertab'
 Plug 'neoclide/coc.nvim', { 'branch': 'release' }
 Plug 'metakirby5/codi.vim'
 
@@ -48,6 +48,10 @@ Plug 'ap/vim-css-color'
 " Web development {{{3
 Plug 'maxmellon/vim-jsx-pretty', { 'for': ['javascript', 'jsx', 'javascriptreact'] }
 Plug 'alvan/vim-closetag', { 'for': ['javascript', 'jsx', 'javascriptreact', 'html', 'xml'] }
+Plug 'leafOfTree/vim-svelte-plugin'
+Plug 'codechips/coc-svelte', { 'do': 'npm install' }
+Plug 'pantharshit00/vim-prisma'
+
 call plug#end()
 
 " ==================== BASICS ==================== {{{1
@@ -60,7 +64,6 @@ set hlsearch                                            " Highlight search resul
 set autoread                                            " Reopen file when changed externally
 set wrap                                                " Wrap lines
 set title                                               " Set terminal title on enter
-set titleold=st                                         " Revert title on exit
 set clipboard=unnamedplus                               " Use mac clipboard
 set undodir=~/.config/nvim/undodir                      " Undo record directory
 set undofile                                            " Default undofile name
@@ -98,8 +101,6 @@ highlight CursorColumn ctermbg=250 ctermfg=0
 highlight CursorLineNr ctermfg=2
 highlight WildMenu ctermfg=0 ctermbg=3
 highlight Statusline ctermfg=7 ctermbg=none cterm=none
-highlight Pmenu ctermbg=233
-highlight PmenuSel ctermfg=0 ctermbg=3
 highlight QuickScopePrimary cterm=underline ctermfg=155
 highlight QuickScopeSecondary cterm=underline ctermfg=81
 highlight CocErrorFloat ctermfg=3
@@ -112,12 +113,12 @@ highlight htmlItalic cterm=italic ctermfg=5
 " ==================== PLUGIN VARIABLES ===================== {{{1
 " ultisnips {{{2
 let g:UltiSnipsEditSplit = "normal"
-let g:UltiSnipsExpandTrigger = "<Tab>"
+let g:UltiSnipsExpandTrigger = "<S-Tab>"
 let g:UltiSnipsJumpForwardTrigger="<C-j>"
 let g:UltiSnipsJumpBackwardTrigger="<C-k>"
 
 " supertab {{{2
-let g:SuperTabDefaultCompletionType = "<C-n>"
+" let g:SuperTabDefaultCompletionType = "<C-n>"
 
 " vimtex {{{2
 let g:vimtex_compiler_progname = 'nvr'
@@ -148,17 +149,17 @@ let g:NERDTreeFileExtensionHighlightFullName = 1
 let g:NERDTreeGitStatusNodeColorization = 1
 let g:NERDTreeGitStatusWithFlags = 1
 let g:NERDTreeGitStatusIndicatorMapCustom = {
-    \ "Modified"  : "✹",
-    \ "Staged"    : "✚",
-    \ "Untracked" : "✭",
-    \ "Renamed"   : "➜",
-    \ "Unmerged"  : "═",
-    \ "Deleted"   : "✖",
-    \ "Dirty"     : "✗",
-    \ "Clean"     : "✔︎",
-    \ 'Ignored'   : "☒",
-    \ "Unknown"   : "?"
-    \ }
+            \ "Modified"  : "✹",
+            \ "Staged"    : "✚",
+            \ "Untracked" : "✭",
+            \ "Renamed"   : "➜",
+            \ "Unmerged"  : "═",
+            \ "Deleted"   : "✖",
+            \ "Dirty"     : "✗",
+            \ "Clean"     : "✔︎",
+            \ 'Ignored'   : "☒",
+            \ "Unknown"   : "?"
+            \ }
 
 " vim-fugitive
 
@@ -195,9 +196,9 @@ let g:closetag_filetypes = 'html,xhtml,phtml,js'
 let g:closetag_xhtml_filetypes = 'xhtml,jsx,js'
 let g:closetag_emptyTags_caseSensitive = 1
 let g:closetag_regions = {
-    \ 'typescript.tsx': 'jsxRegion,tsxRegion',
-    \ 'javascript.jsx': 'jsxRegion',
-    \ }
+            \ 'typescript.tsx': 'jsxRegion,tsxRegion',
+            \ 'javascript.jsx': 'jsxRegion',
+            \ }
 let g:closetag_shortcut = '>'
 let g:closetag_close_shortcut = '<Leader>>'
 
@@ -208,11 +209,11 @@ let g:context_border_char = '-'
 let g:fzf_layout = { 'window': 'call CreateCenteredFloatingWindow()' }
 let $FZF_DEFAULT_OPTS = "--reverse"
 let g:fzf_action = {
-    \ 'ctrl-t': 'tab split',
-    \ 'ctrl-s': 'split',
-    \ 'ctrl-v': 'vsplit',
-    \ 'ctrl-r': 'read'
-    \ }
+            \ 'ctrl-t': 'tab split',
+            \ 'ctrl-s': 'split',
+            \ 'ctrl-v': 'vsplit',
+            \ 'ctrl-r': 'read'
+            \ }
 
 " ==================== MAPS ==================== {{{1
 " Better tabbing
@@ -313,6 +314,10 @@ nnoremap <silent> <space>j :<C-u>CocNext<CR>
 nnoremap <silent> <space>k :<C-u>CocPrev<CR>
 nnoremap <silent> <space>p :<C-u>CocListResume<CR>
 
+" Use tab and shift tab to navigate completion dropdown
+inoremap <expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#_select_confirm() : "\<C-g>u\<CR>"
+
 " Replace K with coc doc {{{2
 nnoremap <silent> K :call <SID>show_documentation()<CR>
 
@@ -407,32 +412,43 @@ command! -nargs=0 OR :call CocAction('runCommand', 'editor.action.organizeImport
 
 " Preserve cursor position
 if has("autocmd")
-  au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+    au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif
 
 " Regex align
 command! -nargs=? -range Align <line1>,<line2>call AlignSection('<args>')
 vnoremap <silent> A :Align<CR>
 function! AlignSection(regex) range
-  let extra = 1
-  let sep = empty(a:regex) ? '=' : a:regex
-  let maxpos = 0
-  let section = getline(a:firstline, a:lastline)
-  for line in section
-    let pos = match(line, ' *'.sep)
-    if maxpos < pos
-      let maxpos = pos
-    endif
-  endfor
-  call map(section, 'AlignLine(v:val, sep, maxpos, extra)')
-  call setline(a:firstline, section)
+    let extra = 1
+    let sep = empty(a:regex) ? '=' : a:regex
+    let maxpos = 0
+    let section = getline(a:firstline, a:lastline)
+    for line in section
+        let pos = match(line, ' *'.sep)
+        if maxpos < pos
+            let maxpos = pos
+        endif
+    endfor
+    call map(section, 'AlignLine(v:val, sep, maxpos, extra)')
+    call setline(a:firstline, section)
 endfunction
 
 function! AlignLine(line, sep, maxpos, extra)
-  let m = matchlist(a:line, '\(.\{-}\) \{-}\('.a:sep.'.*\)')
-  if empty(m)
-    return a:line
-  endif
-  let spaces = repeat(' ', a:maxpos - strlen(m[1]) + a:extra)
-  return m[1] . spaces . m[2]
+    let m = matchlist(a:line, '\(.\{-}\) \{-}\('.a:sep.'.*\)')
+    if empty(m)
+        return a:line
+    endif
+    let spaces = repeat(' ', a:maxpos - strlen(m[1]) + a:extra)
+    return m[1] . spaces . m[2]
 endfunction
+
+" Use tab for trigger completion and navigate to the next complete item
+function! CheckBackspace() abort
+    let col = col('.') - 1
+    return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+inoremap <expr> <Tab>
+            \ coc#pum#visible() ? coc#pum#next(1) :
+            \ CheckBackspace() ? "\<Tab>" :
+            \ coc#refresh()

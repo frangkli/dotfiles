@@ -13,6 +13,7 @@ export VISUAL="nvim"
 export PAGER="less"
 export BROWSER="open"
 export CLICOLOR=1
+export LS_COLORS=$LS_COLORS:'ow=1;34:'
 export LANG="en_US"
 export LC_ALL="en_US.UTF-8"
 export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
