@@ -3,6 +3,7 @@
 # Alias
 alias e="explorer.exe" \
     v="$EDITOR" \
+    attu="ssh angli23@attu8.cs.washington.edu" \
     cf="cf-tool" \
     hi="highlight --force --out-format=ansi" \
     ls="ls -hNF --color=auto --group-directories-first" \

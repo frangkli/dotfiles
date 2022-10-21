@@ -49,7 +49,6 @@ Plug 'ap/vim-css-color'
 Plug 'maxmellon/vim-jsx-pretty', { 'for': ['javascript', 'jsx', 'javascriptreact'] }
 Plug 'alvan/vim-closetag', { 'for': ['javascript', 'jsx', 'javascriptreact', 'html', 'xml'] }
 Plug 'leafOfTree/vim-svelte-plugin'
-Plug 'codechips/coc-svelte', { 'do': 'npm install' }
 Plug 'pantharshit00/vim-prisma'
 
 call plug#end()

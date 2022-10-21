@@ -165,6 +165,11 @@ compctl -K _pip_completion pip3
 # Alias overwrite
 alias repr="source $HOME/.config/zsh/.zshrc"
 
+# Launch ssh
+eval "$(ssh-agent -s)" >/dev/null
+keychain $HOME/.ssh/id_ed25519
+source $HOME/.keychain/$HOST-sh
+
 
 # Prompt syntax highlight
 ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=cyan' # e.g. -option
