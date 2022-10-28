@@ -169,6 +169,13 @@ alias repr="source $HOME/.config/zsh/.zshrc"
 keychain --agents ssh $HOME/.ssh/id_ed25519
 source $HOME/.keychain/$HOST-sh
 
+# Add DNS entry for Windows host
+if ! $(cat /etc/hosts | grep -q 'winhost'); then
+    echo 'Adding DNS entry for Windows host in /etc/hosts'
+    echo '\n# Windows host - added via ~/.zshrc' | sudo tee -a /etc/hosts
+    echo -e "$(grep nameserver /etc/resolv.conf | awk '{print $2, "   winhost"}')" | sudo tee -a /etc/hosts
+fi
+
 # Prompt syntax highlight
 ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=cyan' # e.g. -option
 ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=cyan' # e.g. --option
