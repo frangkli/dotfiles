@@ -19,13 +19,12 @@ Plug 'SirVer/ultisnips'
 Plug 'unblevable/quick-scope'
 Plug '/usr/local/opt/fzf'
 Plug 'junegunn/fzf.vim'
-Plug 'wellle/context.vim'
 Plug 'majutsushi/tagbar'
 
 " Completion {{{3
-" Plug 'metalelf0/supertab'
 Plug 'neoclide/coc.nvim', { 'branch': 'release' }
 Plug 'metakirby5/codi.vim'
+Plug 'rust-lang/rust.vim'
 
 " File tree {{{3
 Plug 'scrooloose/nerdtree'
@@ -39,17 +38,18 @@ Plug 'vim-airline/vim-airline-themes'
 
 " Git {{{3
 Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
 
 " Color and highlights {{{3
 Plug 'dylanaraps/wal.vim'
-Plug 'octol/vim-cpp-enhanced-highlight', { 'for': ['c', 'cpp'] }
 Plug 'ap/vim-css-color'
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'nvim-treesitter/nvim-treesitter-context'
+Plug 'luochen1990/rainbow'
 
 " Web development {{{3
 Plug 'maxmellon/vim-jsx-pretty', { 'for': ['javascript', 'jsx', 'javascriptreact'] }
 Plug 'alvan/vim-closetag', { 'for': ['javascript', 'jsx', 'javascriptreact', 'html', 'xml'] }
-Plug 'leafOfTree/vim-svelte-plugin'
-Plug 'pantharshit00/vim-prisma'
 
 call plug#end()
 
@@ -113,29 +113,11 @@ highlight htmlItalic cterm=italic ctermfg=5
 " ultisnips {{{2
 let g:UltiSnipsEditSplit = "normal"
 let g:UltiSnipsExpandTrigger = "<S-Tab>"
-let g:UltiSnipsJumpForwardTrigger="<C-j>"
-let g:UltiSnipsJumpBackwardTrigger="<C-k>"
+let g:UltiSnipsJumpForwardTrigger = "<C-j>"
+let g:UltiSnipsJumpBackwardTrigger = "<C-k>"
 
-" supertab {{{2
-" let g:SuperTabDefaultCompletionType = "<C-n>"
-
-" vimtex {{{2
-let g:vimtex_compiler_progname = 'nvr'
-let g:vimtex_view_general_viewer = 'dothura'
-let g:vimtex_fold_enabled = 1
-let g:vimtex_matchparen_enabled = 0
-" TODO: figure this out and synctex
-let g:vimtex_syntax_enabled = 1
-let g:vimtex_quickfix_open_on_warning = 0
-
-" vim-tex-conceal {{{2
-let g:tex_conceal = "abdgms"
-
-" vim-cpp-enhanced-highlight {{{2
-let g:cpp_class_scope_highlight = 1
-let g:cpp_member_variable_highlight = 1
-let g:cpp_class_decl_highlight = 1
-let g:cpp_concepts_highlight = 1
+" rainbow {{{2
+let g:rainbow_active = 1
 
 " quick-scope {{{2
 let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
@@ -148,17 +130,17 @@ let g:NERDTreeFileExtensionHighlightFullName = 1
 let g:NERDTreeGitStatusNodeColorization = 1
 let g:NERDTreeGitStatusWithFlags = 1
 let g:NERDTreeGitStatusIndicatorMapCustom = {
-            \ "Modified"  : "✹",
-            \ "Staged"    : "✚",
-            \ "Untracked" : "✭",
-            \ "Renamed"   : "➜",
-            \ "Unmerged"  : "═",
-            \ "Deleted"   : "✖",
-            \ "Dirty"     : "✗",
-            \ "Clean"     : "✔︎",
-            \ 'Ignored'   : "☒",
-            \ "Unknown"   : "?"
-            \ }
+    \ "Modified"  : "✹",
+    \ "Staged"    : "✚",
+    \ "Untracked" : "✭",
+    \ "Renamed"   : "➜",
+    \ "Unmerged"  : "═",
+    \ "Deleted"   : "✖",
+    \ "Dirty"     : "✗",
+    \ "Clean"     : "✔︎",
+    \ 'Ignored'   : "☒",
+    \ "Unknown"   : "?"
+    \ }
 
 " vim-fugitive
 
@@ -195,9 +177,9 @@ let g:closetag_filetypes = 'html,xhtml,phtml,js'
 let g:closetag_xhtml_filetypes = 'xhtml,jsx,js'
 let g:closetag_emptyTags_caseSensitive = 1
 let g:closetag_regions = {
-            \ 'typescript.tsx': 'jsxRegion,tsxRegion',
-            \ 'javascript.jsx': 'jsxRegion',
-            \ }
+    \ 'typescript.tsx': 'jsxRegion,tsxRegion',
+    \ 'javascript.jsx': 'jsxRegion',
+    \ }
 let g:closetag_shortcut = '>'
 let g:closetag_close_shortcut = '<Leader>>'
 
@@ -205,14 +187,14 @@ let g:closetag_close_shortcut = '<Leader>>'
 let g:context_border_char = '-'
 
 " fzf.vim {{{2
-let g:fzf_layout = { 'window': 'call CreateCenteredFloatingWindow()' }
-let $FZF_DEFAULT_OPTS = "--reverse"
+let $FZF_DEFAULT_OPTS = ""
+let g:fzf_commits_log_options = '--graph --color=always --format="%C(auto)%h%d %s %C(black)%C(bold)%cr"'
 let g:fzf_action = {
-            \ 'ctrl-t': 'tab split',
-            \ 'ctrl-s': 'split',
-            \ 'ctrl-v': 'vsplit',
-            \ 'ctrl-r': 'read'
-            \ }
+    \ 'ctrl-t': 'tab split',
+    \ 'ctrl-s': 'split',
+    \ 'ctrl-v': 'vsplit',
+    \ 'ctrl-r': 'read'
+    \ }
 
 " ==================== MAPS ==================== {{{1
 " Better tabbing
@@ -228,6 +210,8 @@ nnoremap Y y$
 " Quick fzf commands {{{2
 map <C-p> :Files<CR>
 map <C-b> :Buffers<CR>
+map <C-f> :Ag<CR>
+map <Leader>cm :Commits<CR>
 " map <Leader> :Maps<CR>,
 
 " Goyo modes {{{2
@@ -315,7 +299,6 @@ nnoremap <silent> <space>p :<C-u>CocListResume<CR>
 
 " Use tab and shift tab to navigate completion dropdown
 inoremap <expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
-inoremap <silent><expr> <CR> coc#pum#visible() ? coc#_select_confirm() : "\<C-g>u\<CR>"
 
 " Replace K with coc doc {{{2
 nnoremap <silent> K :call <SID>show_documentation()<CR>
@@ -365,32 +348,13 @@ autocmd BufRead,BufNewFile *.tex set comments+=b:\\item
 " Highlight the symbol and its references when holding the cursor
 autocmd CursorHold * silent call CocActionAsync('highlight')
 
+" Make rainbow work
+autocmd BufEnter * hi TSPunctBracket NONE
+autocmd BufEnter * hi link TSPunctBracket nonexistenth
+
 " ==================== COMMANDS OR FUNCTIONS ==================== {{{1
 " Fzf add preview {{{2
 command! -bang -nargs=? -complete=dir Files call fzf#vim#files(<q-args>, {'options': ['--preview', 'preview {}']}, <bang>0)
-
-" Fzf floating window {{{2
-function! CreateCenteredFloatingWindow()
-    let width = min([&columns - 4, max([80, &columns - 20])])
-    let height = min([&lines - 4, max([20, &lines - 10])])
-    let top = ((&lines - height) / 2) - 1
-    let left = (&columns - width) / 2
-    let opts = {'relative': 'editor', 'row': top, 'col': left, 'width': width, 'height': height, 'style': 'minimal'}
-    let top = "┌" . repeat("─", width - 2) . "┐"
-    let mid = "│" . repeat(" ", width - 2) . "│"
-    let bot = "└" . repeat("─", width - 2) . "┘"
-    let lines = [top] + repeat([mid], height - 2) + [bot]
-    let s:buf = nvim_create_buf(v:false, v:true)
-    call nvim_buf_set_lines(s:buf, 0, -1, v:true, lines)
-    call nvim_open_win(s:buf, v:true, opts)
-    set winhl=Normal:Floating
-    let opts.row += 1
-    let opts.height -= 2
-    let opts.col += 2
-    let opts.width -= 4
-    call nvim_open_win(nvim_create_buf(v:false, v:true), v:true, opts)
-    au BufWipeout <buffer> exe 'bw '.s:buf
-endfunction
 
 " Use K to show documentation in preview window {{{2
 function! s:show_documentation()
@@ -448,6 +412,19 @@ function! CheckBackspace() abort
 endfunction
 
 inoremap <expr> <Tab>
-            \ coc#pum#visible() ? coc#pum#next(1) :
-            \ CheckBackspace() ? "\<Tab>" :
-            \ coc#refresh()
+    \ coc#pum#visible() ? coc#pum#next(1) :
+    \ CheckBackspace() ? "\<Tab>" :
+    \ coc#refresh()
+
+" Nvim tree-sitter
+lua << EOF
+require'nvim-treesitter.configs'.setup {
+    highlight = {
+        enable = true,
+        additional_vim_regex_highlighting = false,
+    },
+    indent = {
+        enable = true,
+    }
+}
+EOF
