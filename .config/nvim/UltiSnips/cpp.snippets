@@ -150,9 +150,17 @@ void setIO(string name = "") {
 	}
 }
 
+void solve() {
+	$1
+}
+
 int main() {
-	setIO($1);
-	$2
+	setIO();
+	int t;
+	cin >> t;
+	while (t--) {
+		solve();
+	}
 	return 0;
 }
 endsnippet
