@@ -112,7 +112,7 @@ highlight htmlItalic cterm=italic ctermfg=5
 " ==================== PLUGIN VARIABLES ===================== {{{1
 " ultisnips {{{2
 let g:UltiSnipsEditSplit = "normal"
-let g:UltiSnipsExpandTrigger = "<S-Tab>"
+let g:UltiSnipsExpandTrigger = "<C-e>"
 let g:UltiSnipsJumpForwardTrigger = "<C-j>"
 let g:UltiSnipsJumpBackwardTrigger = "<C-k>"
 
@@ -221,10 +221,6 @@ map <Leader>F :Goyo \| set bg=dark \| set linebreak<CR>
 command! GG :vertical G
 cabbrev G GG
 
-" Vim replacement for up and down {{{2
-inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
-inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
-
 " Tmux compatibility {{{2
 map <C-q> <C-a>
 
@@ -272,6 +268,9 @@ nmap <silent> <leader>gr <Plug>(coc-references)
 " Use <c-space> to trigger completion {{{2
 inoremap <silent><expr> <c-space> coc#refresh()
 
+" Use enter to confirm completion {{{2
+inoremap <expr> <cr> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+
 " Symbol renaming {{{2
 nmap <leader>rn <Plug>(coc-rename)
 
@@ -302,6 +301,10 @@ inoremap <expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
 
 " Replace K with coc doc {{{2
 nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+" Vim replacement for up and down {{{2
+imap <expr> <C-j> coc#pum#visible() ? "\<C-N>" : "\<C-j>"
+imap <expr> <C-k> coc#pum#visible() ? "\<C-P>" : "\<C-k>"
 
 " Introduce function text object {{{2
 xmap if <Plug>(coc-funcobj-i)
