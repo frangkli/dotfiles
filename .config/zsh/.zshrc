@@ -20,8 +20,6 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|[._-]=* r:|=*'
 # Ignore certain file extension for each program
 # https://www.reddit.com/r/zsh/comments/5ghouo/is_there_a_way_to_have_zsh_ignore_certain_file/
 # http://zsh.sourceforge.net/Doc/Release/Expansion.html#Glob-Operators
-zstyle ':completion:*:*:dothura:*' file-patterns '*.pdf:source-files' '*:all-files'
-zstyle ':completion:*:*:zathura:*' file-patterns '*.pdf:source-files' '*:all-files'
 zstyle ':completion:*:*:nvim:*' file-patterns '^*.(pdf|o|png|jpg|jpeg|gif):source-files' '*:all-files'
 
 # Launch compinit
@@ -51,8 +49,8 @@ zstyle ':vcs_info:*' formats "[%{$fg[blue]%}%b%{$reset_color%}] (%{$fg[yellow]%}
 # Commands to run before each prompt
 function precmd() {
     vcs_info
-    window_title="\033]0;$(pwd | sed 's/\/Users\/frank/~/; s/OneDrive - Yew Chung International School HK/OneDrive/') - $(echo /usr/local/bin/zsh | rev | cut -d '/' -f 1 | rev | awk '{ print toupper($0) }')\007"
-    echo -ne "$window_title"
+    # window_title="\033]0;$(pwd | sed 's/\/Users\/frank/~/; s/OneDrive - Yew Chung International School HK/OneDrive/') - $(echo /usr/local/bin/zsh | rev | cut -d '/' -f 1 | rev | awk '{ print toupper($0) }')\007"
+    # echo -ne "$window_title"
 }
 
 # Vim commandline mode config
@@ -179,6 +177,9 @@ source $HOME/.keychain/$HOST-sh
 # Prompt syntax highlight
 ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=cyan' # e.g. -option
 ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=cyan' # e.g. --option
+
+# Fixed syntax highlighting very slow in wsl using solution from
+# https://github.com/zsh-users/zsh-syntax-highlighting/issues/790
 
 # Go home
 cd
