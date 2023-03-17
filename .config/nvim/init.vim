@@ -20,6 +20,7 @@ Plug 'unblevable/quick-scope'
 Plug '/usr/local/opt/fzf'
 Plug 'junegunn/fzf.vim'
 Plug 'majutsushi/tagbar'
+Plug 'puremourning/vimspector'
 
 " Completion {{{3
 Plug 'neoclide/coc.nvim', { 'branch': 'release' }

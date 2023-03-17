@@ -1,8 +1,7 @@
 #!/bin/sh
 
 # Alias
-alias e="explorer.exe" \
-    v="$EDITOR" \
+alias e="$EDITOR" \
     attu="ssh angli23@attu8.cs.washington.edu" \
     cf="cf-tool" \
     hi="highlight --force --out-format=ansi" \

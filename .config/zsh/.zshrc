@@ -112,8 +112,9 @@ bindkey -M vicmd "^B" history-incremental-search-backward
 
 # Prompt styling
 setopt PROMPT_SUBST
-PROMPT="%(?.%F{green}%?.%F{red}%?)%F{black}-%F{red}%B[%b%F{yellow}%n%F{green}@%F{blue}%M:%F{magenta}%c%F{red}%B]%f%#%b "
-RPROMPT='${vim_mode} ${vcs_info_msg_0_}'
+PROMPT="%(?.%F{green}%?.%F{red}%?)%F{black}-%F{red}%B[%b%F{yellow}%n%F{green}@:%F{magenta}%c%F{red}%B]%f%#%b "
+# PROMPT="%(?.%F{green}%?.%F{red}%?)%F{black}-%F{red}%B[%b%F{yellow}%n%F{green}@%F{blue}%M:%F{magenta}%c%F{red}%B]%f%#%b "
+# RPROMPT='${vim_mode} ${vcs_info_msg_0_}'
 
 # Expand aliases to actual commands
 function expand-alias() {
@@ -164,7 +165,7 @@ compctl -K _pip_completion pip3
 alias repr="source $HOME/.config/zsh/.zshrc"
 
 # Launch ssh
-keychain --agents ssh $HOME/.ssh/id_ed25519
+keychain --agents ssh $HOME/.ssh/id_ed25519 &>/dev/null
 source $HOME/.keychain/$HOST-sh
 
 # # Add DNS entry for Windows host
