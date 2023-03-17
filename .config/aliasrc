@@ -12,7 +12,7 @@ alias e="$EDITOR" \
     clock="tty-clock -c" \
     youtube="youtube-dl --add-metadata -i -o '%(upload_date)s-%(title)s.%(ext)s'" \
     repr="source ~/.profile && cd -" \
-    dt="/usr/bin/git --git-dir=$HOME/.config/dotfiles/ --work-tree=$HOME" \
+    dt="git --git-dir=$HOME/.config/dotfiles/ --work-tree=$HOME" \
     cpr="compiler" \
     gcm="git checkout master" \
 
