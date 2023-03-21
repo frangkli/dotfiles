@@ -20,7 +20,7 @@ Plug 'unblevable/quick-scope'
 Plug '/usr/local/opt/fzf'
 Plug 'junegunn/fzf.vim'
 Plug 'majutsushi/tagbar'
-Plug 'puremourning/vimspector'
+Plug 'mfussenegger/nvim-dap'
 
 " Completion {{{3
 Plug 'neoclide/coc.nvim', { 'branch': 'release' }
@@ -78,7 +78,7 @@ set backspace=2                                         " Allow <BS> for indent,
 set dictionary=~/.config/nvim/spell/en.utf-8.add        " User-defined spelling file
 set viminfo+='1000,n$XDG_DATA_HOME/vim/viminfo          " Move viminfo to XDG
 set foldmethod=indent                                   " Indent as primary foldmethod
-set foldlevel=1                                         " Open all folds by default
+set foldlevel=99                                        " Open all folds by default
 set splitbelow                                          " Horizontal split to the bottom
 set splitright                                          " Vertical split to the right
 set conceallevel=2                                      " Completely hide concealed
@@ -430,5 +430,29 @@ require'nvim-treesitter.configs'.setup {
     indent = {
         enable = true,
     }
+}
+EOF
+
+" Dap
+lua << EOF
+local dap = require('dap')
+dap.adapters.lldb = {
+    type = 'executable',
+    command = '/usr/bin/lldb-vscode',
+    name = "lldb"
+}
+dap.configurations.cpp = {
+    {
+        name = "Launch",
+        type = "lldb",
+        request = "launch",
+        program = function()
+        return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+        end,
+        cwd = '${workspaceFolder}',
+        stopOnEntry = false,
+        args = {},
+        runInTerminal = true,
+    },
 }
 EOF

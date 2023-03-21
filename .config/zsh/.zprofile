@@ -6,6 +6,7 @@ export PATH="$PATH:/usr/local/sbin"
 export PATH="$PATH:/opt/local/bin:/opt/local/sbin"
 export PATH="$PATH:$GOPATH/bin"
 export PATH="$PATH:$(du "$HOME/.local/bin" | cut -f2 | tr '\n' ':' | sed 's/:*$//')"
+export PATH="$PATH:$(yarn global bin)"
 
 # Personalize env
 export EDITOR="nvim"

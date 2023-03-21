@@ -25,7 +25,7 @@ fvim() {
     $EDITOR "$(fzfp -m --prompt='File> ')"
 }
 fconf() {
-    $EDITOR "$(fd -H . ~/.config ~/.local/bin -d 3 --type f | fzfp --prompt='Config> ')"
+    $EDITOR "$(fd -H . ~/.config ~/.local/bin -d 6 --type f | fzfp --prompt='Config> ')"
 }
 fman() {
     man "$(man -k . | fzf --prompt='Man> ' | sed 's/(/ /g' | awk '{print $1}')"
