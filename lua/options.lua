@@ -83,8 +83,8 @@ o.splitright = true
 opt.shortmess:append "sI"
 
 -- disable netrw
-g.loaded_netrw = 1
-g.loaded_netrwPlugin = 1
+-- g.loaded_netrw = 1
+-- g.loaded_netrwPlugin = 1
 
 -------------------------------------------------------------------------------
 -- Plugin & Provider Settings

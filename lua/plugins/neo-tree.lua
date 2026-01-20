@@ -17,6 +17,10 @@ return {
           ["\\"] = "close_window",
         },
       },
+      follow_current_file = {
+        enabled = true, -- opens the tree and highlights the current file
+      },
+      hijack_netrw_behavior = "open_current",
     },
   },
 }
