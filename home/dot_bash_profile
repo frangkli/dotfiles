@@ -1,0 +1,2 @@
+# Login bash reads this instead of ~/.profile, and installers like to create it.
+. "$HOME/.profile"
