@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Lists pending updates; --apply installs them. Claude Code and T3 update themselves from T3.
+set -euo pipefail
+
+apt list --upgradable 2>/dev/null | tail -n +2
+mise outdated
+vp upgrade --check
+if [ -f /var/run/reboot-required ]; then echo "Reboot required"; fi
+
+[ "${1:-}" = --apply ] || exit 0
+sudo apt-get update && sudo apt-get upgrade
+mise self-update --yes
+mise upgrade
+vp upgrade
+# Portless's root service records the node and portless paths at install time.
+portless service install

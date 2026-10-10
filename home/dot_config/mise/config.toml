@@ -1,0 +1,18 @@
+# Fast-moving tools; mature ones are in .chezmoidata/packages.yaml.
+# Node, Python and Rust have their own managers: Vite+, uv and rustup.
+[tools]
+gh = "latest" # Ubuntu's is years behind
+fd = "latest" # Ubuntu installs it as fdfind
+yq = "latest" # mikefarah's; Ubuntu's yq package is a different tool
+atuin = "latest" # Ubuntu's predates built-in bash support (18.18)
+ast-grep = "latest"
+uv = "latest"
+chezmoi = "latest"
+prek = "latest"
+betterleaks = "latest"
+jj = "latest"
+jjui = "latest"
+codex = "latest"
+agent-browser = "latest"
+"npm:portless" = "latest"
+"npm:@tryglen/cli" = { version = "latest", allow_low_downloads = true } # below npm's download threshold

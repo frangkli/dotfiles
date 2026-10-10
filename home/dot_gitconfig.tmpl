@@ -1,0 +1,30 @@
+[user]
+	name = {{ .name | quote }}
+	email = {{ .email | quote }}
+[init]
+	defaultBranch = main
+[core]
+	untrackedCache = true
+[status]
+	showStash = true
+[diff]
+	algorithm = histogram
+[merge]
+	conflictStyle = zdiff3
+[rerere]
+	enabled = true
+[push]
+	autoSetupRemote = true
+	followTags = true
+[fetch]
+	prune = true
+	pruneTags = true
+[pull]
+	rebase = true
+[rebase]
+	autoStash = true
+	updateRefs = true
+[credential "https://github.com"]
+	# The empty entry drops any system-wide helper so only gh answers for GitHub.
+	helper =
+	helper = !gh auth git-credential

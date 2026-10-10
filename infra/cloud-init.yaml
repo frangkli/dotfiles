@@ -1,0 +1,77 @@
+#cloud-config
+# OpenTofu renders this as a template, filling in the user name and timezone.
+
+timezone: ${timezone}
+ssh_pwauth: false
+package_update: true
+package_upgrade: true
+
+# Recommended extras (ubuntu-fan, dnsmasq-base) broke first boot by racing the guest agent.
+apt:
+  conf: |
+    APT::Install-Recommends "false";
+
+users:
+  - name: ${username}
+    shell: /bin/bash
+    groups: [sudo]
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
+    lock_passwd: true
+
+packages:
+  # Agent sandboxes (Claude Code, Codex)
+  - bubblewrap
+  - socat
+  # Memory safety nets
+  - systemd-zram-generator
+  - earlyoom
+  # Machine basics; user tools come from the dotfiles
+  - xfsprogs
+  - git
+  - build-essential
+  - unzip
+
+write_files:
+  # Rotating logs, room for a Compose network per worktree, containers that survive Docker upgrades.
+  - path: /etc/docker/daemon.json
+    content: |
+      {"log-driver": "local", "default-address-pools": [{"base": "172.16.0.0/12", "size": 24}], "live-restore": true}
+
+  # An empty section turns zram on with defaults (half of RAM, up to 4 GB).
+  - path: /etc/systemd/zram-generator.conf
+    content: |
+      [zram0]
+
+  # The default of 128 runs out with many dev servers and watchers.
+  - path: /etc/sysctl.d/90-devbox.conf
+    content: |
+      fs.inotify.max_user_instances = 8192
+
+  - path: /usr/local/sbin/devbox-data-setup
+    permissions: "0755"
+    content: |
+      #!/bin/bash
+      # Mount the data disk at /data and put /home on it. Safe to re-run.
+      set -euo pipefail
+
+      dev=/dev/disk/by-id/google-data
+      for _ in $(seq 60); do [ -e "$dev" ] && break; sleep 2; done
+
+      # Format only a brand-new disk; a reattached disk keeps its data.
+      blkid "$dev" >/dev/null || mkfs.xfs -L data "$dev"
+      mkdir -p /data
+      grep -q '^LABEL=data ' /etc/fstab || echo 'LABEL=data /data xfs defaults,noatime,nofail 0 2' >> /etc/fstab
+      mountpoint -q /data || mount /data
+
+      if [ ! -d /data/home ]; then mkdir /data/home && cp -a /home/. /data/home/; fi
+      grep -q '^/data/home ' /etc/fstab || echo '/data/home /home none bind,nofail,x-systemd.requires-mounts-for=/data 0 0' >> /etc/fstab
+      mountpoint -q /home || mount /home
+
+runcmd:
+  - curl -fsSL https://get.docker.com | sh # latest Docker, from Docker's own repo
+  - curl -fsSL https://tailscale.com/install.sh | sh # joined by hand after boot
+  - systemctl daemon-reload
+  - /usr/local/sbin/devbox-data-setup
+  - usermod -aG docker ${username}
+  - systemctl start systemd-zram-setup@zram0.service
+  - sysctl --system

@@ -1,0 +1,12 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* Sets only these keys on every apply; Claude Code owns the rest of the file. */ -}}
+{{- $settings := dict -}}
+{{- if .chezmoi.stdin -}}{{- $settings = fromJson .chezmoi.stdin -}}{{- end -}}
+{{- $settings
+    | setValueAtPath "attribution" false
+    | setValueAtPath "autoMemoryEnabled" false
+    | setValueAtPath "env.DISABLE_AUTOUPDATER" "1"
+    | setValueAtPath "env.GIT_TERMINAL_PROMPT" "0"
+    | setValueAtPath "env.GIT_ADVICE" "0"
+    | setValueAtPath "env.PYTHONUNBUFFERED" "1"
+    | toPrettyJson -}}

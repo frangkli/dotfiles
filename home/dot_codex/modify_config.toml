@@ -1,0 +1,18 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* Sets only these keys on every apply; Codex owns the rest (project trust, plugins). */ -}}
+{{- $config := dict -}}
+{{- if .chezmoi.stdin -}}{{- $config = fromToml .chezmoi.stdin -}}{{- end -}}
+{{- /* Codex runs commands in a PTY and already sets NO_COLOR, TERM=dumb and the pagers. */ -}}
+{{- $config
+    | setValueAtPath "sandbox_mode" "danger-full-access"
+    | setValueAtPath "approval_policy" "on-request"
+    | setValueAtPath "approvals_reviewer" "auto_review"
+    | setValueAtPath "web_search" "live"
+    | setValueAtPath "shell_environment_policy.set.GIT_EDITOR" "true"
+    | setValueAtPath "shell_environment_policy.set.GIT_TERMINAL_PROMPT" "0"
+    | setValueAtPath "shell_environment_policy.set.GIT_ADVICE" "0"
+    | setValueAtPath "shell_environment_policy.set.GH_PROMPT_DISABLED" "1"
+    | setValueAtPath "shell_environment_policy.set.GH_NO_UPDATE_NOTIFIER" "1"
+    | setValueAtPath "shell_environment_policy.set.NO_UPDATE_NOTIFIER" "1"
+    | setValueAtPath "shell_environment_policy.set.DOCKER_CLI_HINTS" "false"
+    | toToml -}}

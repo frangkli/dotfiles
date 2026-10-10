@@ -1,0 +1,40 @@
+// Example tailnet policy: paste into the admin console's JSON editor and swap in your own email and user.
+{
+	// Who may use the devbox.
+	"groups": {
+		"group:devbox-users": ["you@example.com"],
+	},
+
+	"tagOwners": {
+		"tag:devbox": ["autogroup:admin"],
+	},
+
+	"grants": [
+		// Tailscale's default: members' devices reach each other.
+		{"src": ["autogroup:member"], "dst": ["autogroup:member"], "ip": ["*"]},
+
+		// Tailscale's default: members can use exit nodes.
+		{"src": ["autogroup:member"], "dst": ["autogroup:internet"], "ip": ["*"]},
+
+		// Only devbox users reach the devbox. No rule lets tagged machines start connections.
+		{"src": ["group:devbox-users"], "dst": ["tag:devbox"], "ip": ["*"]},
+	],
+
+	"ssh": [
+		// Tailscale's default: members SSH into their own devices with a re-login check.
+		{
+			"action": "check",
+			"src":    ["autogroup:member"],
+			"dst":    ["autogroup:self"],
+			"users":  ["autogroup:nonroot", "root"],
+		},
+		// Devbox: SSH as your user without a prompt; root re-checks every 12 hours.
+		{"action": "accept", "src": ["group:devbox-users"], "dst": ["tag:devbox"], "users": ["you"]},
+		{"action": "check", "src": ["group:devbox-users"], "dst": ["tag:devbox"], "users": ["root"], "checkPeriod": "12h"},
+	],
+
+	// Checked on every save: you must be able to reach the devbox's SSH.
+	"tests": [
+		{"src": "you@example.com", "accept": ["tag:devbox:22"]},
+	],
+}

@@ -1,0 +1,9 @@
+# Agents load this too: they stop here, and nothing below may shadow a real command.
+case $- in *i*) ;; *) return ;; esac
+[ -n "$CLAUDECODE$CODEX_THREAD_ID" ] && return
+
+set -o vi
+
+eval "$(starship init bash)"
+eval "$(atuin init bash)"
+eval "$(zoxide init bash)"

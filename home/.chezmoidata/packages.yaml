@@ -1,0 +1,23 @@
+# Mature tools from the OS package manager. Fast-moving ones are in mise's config.
+packages:
+  apt:
+    - tmux
+    - neovim
+    - ripgrep
+    - jq
+    - just
+    - hyperfine
+    - starship
+    - zoxide
+    - htop
+    - postgresql-client
+  brew:
+    - tmux
+    - neovim
+    - ripgrep
+    - jq
+    - just
+    - hyperfine
+    - starship
+    - zoxide
+    - htop

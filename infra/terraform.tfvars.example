@@ -1,0 +1,5 @@
+# Copy to terraform.tfvars (gitignored). project and username are required.
+project  = "my-gcp-project"
+username = "me"
+# machine_type = "n4d-highmem-8"
+# data_disk_gb = 750

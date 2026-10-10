@@ -1,0 +1,8 @@
+repos:
+  - repo: local
+    hooks:
+      - id: betterleaks
+        name: betterleaks
+        entry: betterleaks git --staged --redact
+        language: system
+        pass_filenames: false
