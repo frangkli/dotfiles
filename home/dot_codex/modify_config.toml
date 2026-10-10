@@ -6,6 +6,7 @@
 {{- range $name, $url := .mcp -}}
 {{-   $_ := set $servers $name (dict "url" $url) -}}
 {{- end -}}
+{{- /* MCP logins call back to a fixed port so they can run over an SSH tunnel. */ -}}
 {{- /* Codex runs commands in a PTY and already sets NO_COLOR, TERM=dumb and the pagers. */ -}}
 {{- $config
     | setValueAtPath "sandbox_mode" "danger-full-access"

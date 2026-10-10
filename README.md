@@ -20,6 +20,7 @@ Coding agents run on it all day, a dozen threads at a time. I check in from my l
 - Agents get a plain shell. Claude Code and Codex load your shell config into every command, so aliases leak in. `.bashrc` bails out early for them.
 - One `chezmoi apply` sets up everything. Boring tools come from apt or Homebrew, fast-moving ones from [mise](https://mise.jdx.dev), and both lists live in this repo.
 - Every worktree gets its own URL through [Portless](https://github.com/vercel-labs/portless), like `https://fix-login.app.localhost`, so a dozen dev servers never fight over port 3000.
+
 ## Old stuff
 
 Older setups are on other branches if you're curious:

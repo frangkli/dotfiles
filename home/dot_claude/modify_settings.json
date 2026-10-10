@@ -2,7 +2,7 @@
 {{- /* Sets only these keys on every apply; Claude Code owns the rest of the file. */ -}}
 {{- $settings := dict -}}
 {{- if .chezmoi.stdin -}}{{- $settings = fromJson .chezmoi.stdin -}}{{- end -}}
-{{- /* atuin records agent shell commands, hidden from your own Ctrl-R. */ -}}
+{{- /* atuin logs agent shell commands, kept out of your Ctrl-R. */ -}}
 {{- $atuin := dict "matcher" "^Bash$" "hooks" (list (dict "type" "command" "command" "atuin hook claude-code")) -}}
 {{- $settings
     | setValueAtPath "attribution" (dict "commit" "" "pr" "" "sessionUrl" false)

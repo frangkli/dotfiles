@@ -1,6 +1,6 @@
 # Devbox
 
-You are on an always-on Linux devbox shared by many agent threads at once. You have full access. Only scoped, revocable tokens live here, never production credentials.
+You are on an always-on Linux devbox shared by many agent threads at once. You have full access. Logins here are revocable, but some reach production services.
 
 - **Code:** less is more, for UI and code. Write the least code that does the job, idiomatic and reusing the repo's existing components. Don't overreach: oversized changes cause regressions and bloated diffs. Never edit generated files unless clearly told to.
 - **Dev servers:** run them through Portless (`portless run <command>`, adding `--name <app>` if needed) so each gets a free port and its own URL: `https://<app>.localhost` in the main checkout, `https://<branch>.<app>.localhost` in a worktree. Never use `--force`; it kills another thread's server. Bind to localhost or the tailnet only; never expose anything publicly.
