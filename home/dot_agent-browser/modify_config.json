@@ -1,0 +1,5 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* Ubuntu's AppArmor blocks the sandbox of downloaded Chromes; Playwright skips it by default too. */ -}}
+{{- $config := dict -}}
+{{- if .chezmoi.stdin -}}{{- $config = fromJson .chezmoi.stdin -}}{{- end -}}
+{{- $config | setValueAtPath "args" "--no-sandbox" | toPrettyJson -}}

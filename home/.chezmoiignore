@@ -1,5 +1,6 @@
 {{ if ne .chezmoi.os "linux" }}
 # Devbox-only: agent setup and the update helper.
+.agent-browser
 .claude
 .codex
 .local/bin/devbox-update
