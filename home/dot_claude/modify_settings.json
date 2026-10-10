@@ -4,7 +4,6 @@
 {{- if .chezmoi.stdin -}}{{- $settings = fromJson .chezmoi.stdin -}}{{- end -}}
 {{- $settings
     | setValueAtPath "attribution" (dict "commit" "" "pr" "" "sessionUrl" false)
-    | setValueAtPath "autoMemoryEnabled" false
     | setValueAtPath "env.DISABLE_AUTOUPDATER" "1"
     | setValueAtPath "env.GIT_TERMINAL_PROMPT" "0"
     | setValueAtPath "env.GIT_ADVICE" "0"

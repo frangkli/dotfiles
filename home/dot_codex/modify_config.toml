@@ -8,6 +8,7 @@
     | setValueAtPath "approval_policy" "on-request"
     | setValueAtPath "approvals_reviewer" "auto_review"
     | setValueAtPath "web_search" "live"
+    | setValueAtPath "features.memories" true
     | setValueAtPath "shell_environment_policy.set.GIT_EDITOR" "true"
     | setValueAtPath "shell_environment_policy.set.GIT_TERMINAL_PROMPT" "0"
     | setValueAtPath "shell_environment_policy.set.GIT_ADVICE" "0"
