@@ -1,7 +1,0 @@
-# Third-party agent skills, tracking upstream. Without `exact`, a skill that moves upstream keeps its last copy.
-[".agents/skills/neon"]
-    type = "archive"
-    url = "https://github.com/neondatabase/agent-skills/archive/refs/heads/main.tar.gz"
-    include = ["*/skills/neon/**"]
-    stripComponents = 3
-    refreshPeriod = "168h"
