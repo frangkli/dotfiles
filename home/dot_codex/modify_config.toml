@@ -2,6 +2,10 @@
 {{- /* Sets only these keys on every apply; Codex owns the rest (project trust, plugins). */ -}}
 {{- $config := dict -}}
 {{- if .chezmoi.stdin -}}{{- $config = fromToml .chezmoi.stdin -}}{{- end -}}
+{{- $servers := dict -}}
+{{- range $name, $url := .mcp -}}
+{{-   $_ := set $servers $name (dict "url" $url) -}}
+{{- end -}}
 {{- /* Codex runs commands in a PTY and already sets NO_COLOR, TERM=dumb and the pagers. */ -}}
 {{- $config
     | setValueAtPath "sandbox_mode" "danger-full-access"
@@ -17,4 +21,7 @@
     | setValueAtPath "shell_environment_policy.set.GH_NO_UPDATE_NOTIFIER" "1"
     | setValueAtPath "shell_environment_policy.set.NO_UPDATE_NOTIFIER" "1"
     | setValueAtPath "shell_environment_policy.set.DOCKER_CLI_HINTS" "false"
+    | setValueAtPath "mcp_servers" $servers
+    | setValueAtPath "mcp_oauth_credentials_store" "file"
+    | setValueAtPath "mcp_oauth_callback_port" 1456
     | toToml -}}

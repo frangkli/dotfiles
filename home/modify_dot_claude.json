@@ -1,0 +1,9 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* Sets only the MCP servers; Claude Code owns the rest of this file. */ -}}
+{{- $state := dict -}}
+{{- if .chezmoi.stdin -}}{{- $state = fromJson .chezmoi.stdin -}}{{- end -}}
+{{- $servers := dict -}}
+{{- range $name, $url := .mcp -}}
+{{-   $_ := set $servers $name (dict "type" "http" "url" $url) -}}
+{{- end -}}
+{{- $state | setValueAtPath "mcpServers" $servers | toPrettyJson -}}

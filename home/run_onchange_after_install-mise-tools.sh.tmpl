@@ -4,3 +4,4 @@ set -e
 mise=$(command -v mise || echo "$HOME/.local/bin/mise")
 [ -x "$mise" ] || curl -fsSL https://mise.run | sh
 "$mise" install
+"$mise" exec -- sentry cli setup --quiet --no-modify-path --no-completions

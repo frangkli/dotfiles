@@ -1,0 +1,15 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* Adds atuin's agent hooks; other tools (Glen) own the rest of this file. */ -}}
+{{- $config := dict -}}
+{{- if .chezmoi.stdin -}}{{- $config = fromJson .chezmoi.stdin -}}{{- end -}}
+{{- $hooks := get $config "hooks" | default dict -}}
+{{- $atuin := dict "matcher" "^Bash$" "hooks" (list (dict "type" "command" "command" "atuin hook codex")) -}}
+{{- range $event := list "PreToolUse" "PostToolUse" "PostToolUseFailure" -}}
+{{-   $kept := list -}}
+{{-   range $entry := get $hooks $event | default list -}}
+{{-     if not (contains "atuin hook" (toJson $entry)) }}{{ $kept = append $kept $entry }}{{ end -}}
+{{-   end -}}
+{{-   $_ := set $hooks $event (append $kept $atuin) -}}
+{{- end -}}
+{{- $_ := set $config "hooks" $hooks -}}
+{{- toPrettyJson $config -}}

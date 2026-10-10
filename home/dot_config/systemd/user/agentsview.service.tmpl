@@ -1,0 +1,16 @@
+{{- $publicURL := "" -}}
+{{- if lookPath "tailscale" -}}
+{{-   $publicURL = printf "https://agentsview.%s" (output "tailscale" "status" "--json" | fromJson).CurrentTailnet.MagicDNSSuffix -}}
+{{- end -}}
+[Unit]
+Description=AgentsView: agent sessions, usage and cost
+
+[Service]
+WorkingDirectory=%h
+Environment=AGENTSVIEW_TELEMETRY_ENABLED=0
+# Port 8080 is what `tailscale serve --service=svc:agentsview` points at.
+ExecStart=%h/.local/share/mise/shims/agentsview serve --no-browser --no-update-check --port 8080{{ if $publicURL }} --public-url {{ $publicURL }}{{ end }}
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

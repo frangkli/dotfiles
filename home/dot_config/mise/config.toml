@@ -16,3 +16,9 @@ codex = "latest"
 agent-browser = "latest"
 "npm:portless" = "latest"
 "npm:@tryglen/cli" = { version = "latest", allow_low_downloads = true } # below npm's download threshold
+"npm:cf" = "1.0.0-beta.14" # Cloudflare (mise's cf is Cloud Foundry); mise skips betas, so bump by hand
+"npm:sentry" = "latest"
+"npm:@posthog/cli" = "latest"
+"npm:neon" = "latest"
+"npm:ctx7" = "latest"
+"github:kenn-io/agentsview" = "latest"

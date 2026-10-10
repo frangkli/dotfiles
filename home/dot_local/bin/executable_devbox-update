@@ -11,6 +11,7 @@ if [ -f /var/run/reboot-required ]; then echo "Reboot required"; fi
 sudo apt-get update && sudo apt-get upgrade
 mise self-update --yes
 mise upgrade
+sentry cli setup --quiet --no-modify-path --no-completions # refreshes its agent skill
 vp upgrade
 # Portless's root service records the node and portless paths at install time.
 portless service install

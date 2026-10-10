@@ -2,6 +2,8 @@
 {{- /* Sets only these keys on every apply; Claude Code owns the rest of the file. */ -}}
 {{- $settings := dict -}}
 {{- if .chezmoi.stdin -}}{{- $settings = fromJson .chezmoi.stdin -}}{{- end -}}
+{{- /* atuin records agent shell commands, hidden from your own Ctrl-R. */ -}}
+{{- $atuin := dict "matcher" "^Bash$" "hooks" (list (dict "type" "command" "command" "atuin hook claude-code")) -}}
 {{- $settings
     | setValueAtPath "attribution" (dict "commit" "" "pr" "" "sessionUrl" false)
     | setValueAtPath "disableClaudeAiConnectors" true
@@ -9,4 +11,7 @@
     | setValueAtPath "env.GIT_TERMINAL_PROMPT" "0"
     | setValueAtPath "env.GIT_ADVICE" "0"
     | setValueAtPath "env.PYTHONUNBUFFERED" "1"
+    | setValueAtPath "hooks.PreToolUse" (list $atuin)
+    | setValueAtPath "hooks.PostToolUse" (list $atuin)
+    | setValueAtPath "hooks.PostToolUseFailure" (list $atuin)
     | toPrettyJson -}}
