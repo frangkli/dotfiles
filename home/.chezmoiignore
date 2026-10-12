@@ -5,7 +5,9 @@
 .claude
 .claude.json
 .codex
+.config/fnox
 .config/systemd
 .local/bin/devbox-update
+.opencodereview
 .t3
 {{ end }}

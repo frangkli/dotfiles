@@ -1,0 +1,9 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* ocr fetches its key through fnox, so it runs without a wrapper and no key is stored here. */ -}}
+{{- $config := dict -}}
+{{- if .chezmoi.stdin -}}{{- $config = fromJson .chezmoi.stdin -}}{{- end -}}
+{{- $config
+    | setValueAtPath "provider" "anthropic"
+    | setValueAtPath "providers.anthropic.model" "claude-opus-4-6"
+    | setValueAtPath "providers.anthropic.api_key_cmd" "fnox exec -- printenv ANTHROPIC_API_KEY"
+    | toPrettyJson -}}
