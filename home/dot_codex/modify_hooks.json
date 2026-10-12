@@ -1,5 +1,6 @@
 {{- /* chezmoi:modify-template */ -}}
-{{- /* Adds atuin's agent hooks; other tools (Glen) own the rest of this file. */ -}}
+{{- /* Adds atuin's agent hooks; other tools (Glen) own the rest of this file.
+     atuin's go first: Glen re-appends its own on repair, and Codex trusts hooks by position. */ -}}
 {{- $config := dict -}}
 {{- if .chezmoi.stdin -}}{{- $config = fromJson .chezmoi.stdin -}}{{- end -}}
 {{- $hooks := get $config "hooks" | default dict -}}
@@ -9,7 +10,7 @@
 {{-   range $entry := get $hooks $event | default list -}}
 {{-     if not (contains "atuin hook" (toJson $entry)) }}{{ $kept = append $kept $entry }}{{ end -}}
 {{-   end -}}
-{{-   $_ := set $hooks $event (append $kept $atuin) -}}
+{{-   $_ := set $hooks $event (prepend $kept $atuin) -}}
 {{- end -}}
 {{- $_ := set $config "hooks" $hooks -}}
 {{- toPrettyJson $config -}}
