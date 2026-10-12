@@ -6,6 +6,7 @@
 {{- range $name, $url := .mcp -}}
 {{-   $_ := set $servers $name (dict "url" $url) -}}
 {{- end -}}
+{{- /* Plugins and apps installed on the ChatGPT account stay off the box. */ -}}
 {{- /* MCP logins call back to a fixed port so they can run over an SSH tunnel. */ -}}
 {{- /* Codex runs commands in a PTY and already sets NO_COLOR, TERM=dumb and the pagers. */ -}}
 {{- $config
@@ -14,6 +15,8 @@
     | setValueAtPath "approvals_reviewer" "auto_review"
     | setValueAtPath "web_search" "live"
     | setValueAtPath "features.memories" true
+    | setValueAtPath "features.remote_plugin" false
+    | setValueAtPath "features.apps" false
     | setValueAtPath "sandbox_workspace_write.network_access" true
     | setValueAtPath "shell_environment_policy.set.GIT_EDITOR" "true"
     | setValueAtPath "shell_environment_policy.set.GIT_TERMINAL_PROMPT" "0"
