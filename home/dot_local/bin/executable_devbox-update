@@ -2,9 +2,18 @@
 # Lists pending updates; --apply installs them. Claude Code and T3 update themselves from T3.
 set -euo pipefail
 
+# Vite+ pins the Node and pnpm used outside projects; this moves them to the latest LTS and release.
+vp_config="${XDG_CONFIG_HOME:-$HOME/.config}/vite-plus/config.json"
+node_now=$(jq -r '.defaultNodeVersion' "$vp_config")
+pnpm_now=$(jq -r '.defaultPackageManagerVersions.pnpm' "$vp_config")
+node_latest=$(curl -fsSL https://nodejs.org/dist/index.json | jq -r 'map(select(.lts))[0].version | ltrimstr("v")')
+pnpm_latest=$(curl -fsSL https://registry.npmjs.org/pnpm/latest | jq -r '.version')
+
 apt list --upgradable 2>/dev/null | tail -n +2
 mise outdated
 vp upgrade --check
+if [ "$node_now" != "$node_latest" ]; then echo "Node default $node_now -> $node_latest"; fi
+if [ "$pnpm_now" != "$pnpm_latest" ]; then echo "pnpm default $pnpm_now -> $pnpm_latest"; fi
 if [ -f /var/run/reboot-required ]; then echo "Reboot required"; fi
 
 [ "${1:-}" = --apply ] || exit 0
@@ -12,5 +21,6 @@ sudo apt-get update && sudo apt-get upgrade
 mise self-update --yes
 mise upgrade
 vp upgrade
+vp env default "$node_latest" "pnpm@$pnpm_latest"
 # Portless's root service records the node and portless paths at install time.
 portless service install
