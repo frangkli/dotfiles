@@ -1,0 +1,18 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* Sets only these keys on every apply; T3 Code owns the rest and reloads the file when it changes. */ -}}
+{{- $settings := dict -}}
+{{- if .chezmoi.stdin -}}{{- $settings = fromJson .chezmoi.stdin -}}{{- end -}}
+{{- $settings
+    | setValueAtPath "defaultThreadEnvMode" "worktree"
+    | setValueAtPath "defaultAutoPull" true
+    | setValueAtPath "pullRequestMergeMethod" "rebase"
+    | setValueAtPath "sourceControlWritingStyle.mode" "conventional_commits"
+    | setValueAtPath "removeAgentCreditsOnMerge" true
+    | setValueAtPath "continueThreadsAfterServerUpdate" true
+    | setValueAtPath "autoResumeLimitedThreads" true
+    | setValueAtPath "snoozeLimitedThreads" true
+    | setValueAtPath "sidebarAutoSettleAfterDays" 10
+    | setValueAtPath "storageCleanup.worktreeAfterDays" 10
+    | setValueAtPath "storageCleanup.worktreeOnDelete" true
+    | setValueAtPath "backgroundActivity" (dict "schemaVersion" 1 "profile" "performance" "overrides" dict)
+    | toPrettyJson -}}

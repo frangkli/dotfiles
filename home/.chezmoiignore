@@ -1,5 +1,5 @@
 {{ if ne .chezmoi.os "linux" }}
-# Devbox-only: agent setup, user services and the update helper.
+# Devbox-only: agent setup, T3 Code, user services and the update helper.
 .agent-browser
 .agents
 .claude
@@ -7,4 +7,5 @@
 .codex
 .config/systemd
 .local/bin/devbox-update
+.t3
 {{ end }}
