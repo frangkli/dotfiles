@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+"""Trusts the Codex hooks these dotfiles install, the same way approving them in /hooks does.
+
+Codex trusts each hook by a hash of its definition, so this runs after installs and updates.
+Hooks from config files and the listed plugins are trusted. Glen's plugin copy stays untrusted:
+its hooks.json entries already record every turn.
+"""
+import json
+import subprocess
+from pathlib import Path
+
+TRUSTED_PLUGINS = {"ponytail@ponytail"}
+
+server = subprocess.Popen(["codex", "app-server"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                          stderr=subprocess.DEVNULL, text=True, cwd=Path.home())
+
+
+def call(request_id, method, params):
+    server.stdin.write(json.dumps({"id": request_id, "method": method, "params": params}) + "\n")
+    server.stdin.flush()
+    for line in server.stdout:
+        message = json.loads(line)
+        if message.get("id") == request_id:
+            if "error" in message:
+                raise SystemExit(f"codex {method}: {message['error']}")
+            return message["result"]
+
+
+try:
+    call(1, "initialize", {"clientInfo": {"name": "codex-trust-hooks", "version": "1"}})
+    server.stdin.write(json.dumps({"method": "initialized"}) + "\n")
+    hooks = call(2, "hooks/list", {"cwds": [str(Path.home())]})["data"][0]["hooks"]
+    pending = {
+        hook["key"]: {"trusted_hash": hook["currentHash"]}
+        for hook in hooks
+        if hook["trustStatus"] in ("untrusted", "modified")
+        and (hook["pluginId"] is None or hook["pluginId"] in TRUSTED_PLUGINS)
+    }
+    if pending:
+        call(3, "config/batchWrite", {
+            "edits": [{"keyPath": "hooks.state", "value": pending, "mergeStrategy": "upsert"}],
+            "filePath": None, "expectedVersion": None, "reloadUserConfig": True,
+        })
+    print(f"codex-trust-hooks: trusted {len(pending)} hook(s)")
+finally:
+    server.kill()

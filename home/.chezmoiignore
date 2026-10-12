@@ -7,6 +7,7 @@
 .codex
 .config/fnox
 .config/systemd
+.local/bin/codex-trust-hooks
 .local/bin/devbox-update
 .opencodereview
 .t3
