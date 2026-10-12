@@ -1,0 +1,8 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* ocr reads its key from OPENAI_API_KEY, which fnox injects; no key is stored here. */ -}}
+{{- $config := dict -}}
+{{- if .chezmoi.stdin -}}{{- $config = fromJson .chezmoi.stdin -}}{{- end -}}
+{{- $config
+    | setValueAtPath "provider" "openai"
+    | setValueAtPath "providers.openai.model" "gpt-5.5"
+    | toPrettyJson -}}

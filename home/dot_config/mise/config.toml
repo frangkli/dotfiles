@@ -21,4 +21,8 @@ agent-browser = "latest"
 "npm:@posthog/cli" = "latest"
 "npm:neon" = "latest"
 "npm:ctx7" = "latest"
+"github:alibaba/open-code-review" = { version = "latest", rename_exe = "ocr" } # its npm releases dropped provenance in June 2026
+fnox = "latest"
+infisical = "latest"
+age = "latest"
 "github:kenn-io/agentsview" = "latest"
