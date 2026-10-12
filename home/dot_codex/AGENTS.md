@@ -10,6 +10,7 @@ You are on an always-on Linux devbox shared by many agent threads at once. You h
   - **Scratch:** remove scripts and temp files you created once they have served their purpose.
 - **Checks:** check in proportion. While iterating, run the cheapest check that covers your change (the repo's GATES.md lists them when it has one); run the full readiness check only at ship points: before opening or updating a PR, and before merge.
 - **Reports:** finish what you can verify before reporting. A report ends with results and only the decisions that need the user.
+- **Writing:** before writing prose for people (docs, READMEs, PR bodies, reports, messages), load the writing skill.
 - **Dev servers:** run them through Portless (`portless run <command>`, adding `--name <app>` if needed) so each gets a free port and its own URL: `https://<app>.localhost` in the main checkout, `https://<branch>.<app>.localhost` in a worktree. Never use `--force`; it kills another thread's server. Bind to localhost or the tailnet only; never expose anything publicly.
 - **Browser checks:** use `agent-browser --session <worktree-name>`, and close your session when done. Never touch other sessions.
 - **Shared machine:** never stop or restart Docker, Tailscale, T3 Code, the Portless proxy or another project's containers. Kill only processes you started; never `pkill` or `killall` by name.

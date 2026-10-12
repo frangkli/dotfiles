@@ -1,0 +1,3 @@
+interface:
+  display_name: "Logic Prototype"
+  short_description: "Answer a logic or state-model question with throwaway code"

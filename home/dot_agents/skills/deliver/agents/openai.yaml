@@ -1,0 +1,5 @@
+interface:
+  display_name: "Deliver"
+  short_description: "Plan, approve once, then build, ship and verify a feature"
+policy:
+  allow_implicit_invocation: false

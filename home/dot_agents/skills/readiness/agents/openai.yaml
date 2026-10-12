@@ -1,0 +1,5 @@
+interface:
+  display_name: "Readiness"
+  short_description: "Audit a repo's agent readiness and fix approved gaps"
+policy:
+  allow_implicit_invocation: false
