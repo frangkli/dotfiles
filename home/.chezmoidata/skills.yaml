@@ -1,0 +1,24 @@
+# Third-party skills, by source repo. Installed on apply; devbox-update upgrades them.
+skills:
+  blader/humanizer: [humanizer]
+  danyuchn/asd-ste100-skill: [asd-ste100]
+  emilkowalski/skills:
+    - animate
+    - animation-performance
+    - animation-vocabulary
+    - apple-design
+    - break-ui
+    - emil-design-eng
+    - find-animation-opportunities
+    - improve-animations
+    - mobile-native
+    - pick-ui-library
+    - prototype
+    - review-animations
+  getsentry/cli: [sentry-cli]
+  getsentry/skills: [gha-security-review]
+  Leonxlnx/taste-skill: [brandkit]
+  neondatabase/agent-skills: [neon, neon-postgres]
+  nutlope/variate: [variate]
+  trailofbits/skills: [open-sourcing]
+  vercel-labs/agent-skills: [web-design-guidelines]

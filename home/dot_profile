@@ -5,6 +5,8 @@ done
 if [ -f "$HOME/.config/vite-plus/env" ]; then . "$HOME/.config/vite-plus/env"; fi
 export EDITOR=nvim
 # CLI telemetry opt-outs (Neon has no environment switch).
-export CF_SEND_TELEMETRY=false SENTRY_CLI_NO_TELEMETRY=1 CTX7_TELEMETRY_DISABLED=1
+export CF_SEND_TELEMETRY=false SENTRY_CLI_NO_TELEMETRY=1 CTX7_TELEMETRY_DISABLED=1 IMPECCABLE_NO_TELEMETRY=1 DO_NOT_TRACK=1
+# impeccable's design hook reports findings only, not a note on every clean UI edit.
+export IMPECCABLE_HOOK_QUIET=1
 
 if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then . "$HOME/.bashrc"; fi

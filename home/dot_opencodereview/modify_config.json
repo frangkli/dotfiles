@@ -1,9 +1,12 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- /* ocr fetches its key through fnox, so it runs without a wrapper and no key is stored here. */ -}}
+{{- /* Astra needs OpenAI's Responses API; Opus stays set up as the fallback provider. */ -}}
 {{- $config := dict -}}
 {{- if .chezmoi.stdin -}}{{- $config = fromJson .chezmoi.stdin -}}{{- end -}}
 {{- $config
-    | setValueAtPath "provider" "anthropic"
-    | setValueAtPath "providers.anthropic.model" "claude-opus-4-6"
+    | setValueAtPath "provider" "openai-responses"
+    | setValueAtPath "providers.openai-responses.model" "gpt-6-astra"
+    | setValueAtPath "providers.openai-responses.api_key_cmd" "fnox exec -- printenv OPENAI_API_KEY"
+    | setValueAtPath "providers.anthropic.model" "claude-opus-5-5"
     | setValueAtPath "providers.anthropic.api_key_cmd" "fnox exec -- printenv ANTHROPIC_API_KEY"
     | toPrettyJson -}}

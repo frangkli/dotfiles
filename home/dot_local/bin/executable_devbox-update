@@ -24,3 +24,11 @@ vp upgrade
 vp env default "$node_latest" "pnpm@$pnpm_latest"
 # Portless's root service records the node and portless paths at install time.
 portless service install
+# Third-party skills and plugins, as installed by the dotfiles.
+npx -y skills@latest update --global --yes
+claude plugin marketplace update
+claude plugin update impeccable@impeccable
+claude plugin update ponytail@ponytail
+codex plugin marketplace upgrade
+codex plugin add ponytail@ponytail
+npx -y impeccable@latest install --providers=codex --scope=global --no-hooks -y
