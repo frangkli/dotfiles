@@ -1,8 +1,9 @@
 {{- /* chezmoi:modify-template */ -}}
-{{- /* ocr reads its key from OPENAI_API_KEY, which fnox injects; no key is stored here. */ -}}
+{{- /* ocr fetches its key through fnox under its own name, so ANTHROPIC_API_KEY never reaches other programs' environment. */ -}}
 {{- $config := dict -}}
 {{- if .chezmoi.stdin -}}{{- $config = fromJson .chezmoi.stdin -}}{{- end -}}
 {{- $config
-    | setValueAtPath "provider" "openai"
-    | setValueAtPath "providers.openai.model" "gpt-5.5"
+    | setValueAtPath "provider" "anthropic"
+    | setValueAtPath "providers.anthropic.model" "claude-opus-4-6"
+    | setValueAtPath "providers.anthropic.api_key_cmd" "fnox exec -- printenv OCR_ANTHROPIC_API_KEY"
     | toPrettyJson -}}

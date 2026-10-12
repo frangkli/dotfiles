@@ -5,4 +5,5 @@
 {{- if .chezmoi.stdin -}}{{- $config = fromToml .chezmoi.stdin -}}{{- end -}}
 {{- $config
     | setValueAtPath "secrets.OPENAI_API_KEY" (dict "provider" "devbox" "value" "OPENAI_API_KEY")
+    | setValueAtPath "secrets.OCR_ANTHROPIC_API_KEY" (dict "provider" "devbox" "value" "ANTHROPIC_API_KEY")
     | toToml -}}
