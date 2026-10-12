@@ -1,0 +1,17 @@
+{{ if eq .chezmoi.os "linux" -}}
+#!/bin/sh -l
+# Third-party skills and plugins. Reruns when this changes; devbox-update upgrades them.
+set -e
+# Claude Code reads ~/.agents/skills through ~/.claude/skills, so Codex is the only install target.
+{{ range $repo, $skills := .skills -}}
+npx -y skills@latest add {{ $repo }} --global --yes --agent codex --skill {{ join " " $skills }}
+{{ end -}}
+claude plugin marketplace add pbakaus/impeccable
+claude plugin install impeccable@impeccable
+claude plugin marketplace add DietrichGebert/ponytail
+claude plugin install ponytail@ponytail
+codex plugin marketplace add https://github.com/DietrichGebert/ponytail.git
+codex plugin add ponytail@ponytail
+# Codex gets impeccable from its own installer; its hooks are declared in ~/.codex/config.toml.
+npx -y impeccable@latest install --providers=codex --scope=global --no-hooks -y
+{{ end -}}
