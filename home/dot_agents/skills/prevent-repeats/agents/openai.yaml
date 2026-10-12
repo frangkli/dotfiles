@@ -1,0 +1,5 @@
+interface:
+  display_name: "Prevent Repeats"
+  short_description: "Make repeated agent mistakes impossible"
+policy:
+  allow_implicit_invocation: false

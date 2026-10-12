@@ -1,0 +1,5 @@
+interface:
+  display_name: "To Spec"
+  short_description: "Turn a conversation into a spec with a done-predicate"
+policy:
+  allow_implicit_invocation: false

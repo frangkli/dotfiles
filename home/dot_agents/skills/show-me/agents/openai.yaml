@@ -1,0 +1,5 @@
+interface:
+  display_name: "Show Me"
+  short_description: "Explain the current topic with the smallest visual that fits"
+policy:
+  allow_implicit_invocation: false

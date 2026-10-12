@@ -1,0 +1,3 @@
+interface:
+  display_name: "Orchestrate"
+  short_description: "Fan out tickets to worktree agents, verify and integrate"

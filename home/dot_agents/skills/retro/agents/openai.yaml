@@ -1,0 +1,5 @@
+interface:
+  display_name: "Retro"
+  short_description: "Turn a session's mistakes into environment fixes"
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Verify Create"
+  short_description: "Generate the project's verify skill that drives the real app"
