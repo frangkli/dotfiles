@@ -10,7 +10,7 @@
 {{- /* MCP logins call back to a fixed port so they can run over an SSH tunnel. */ -}}
 {{- /* Codex runs commands in a PTY and already sets NO_COLOR, TERM=dumb and the pagers. */ -}}
 {{- /* atuin logs agent shell commands, kept out of your Ctrl-R; impeccable checks UI edits.
-     Declared here, not in hooks.json, which Glen rewrites, so their positions and trust stay fixed. */ -}}
+     Declared here, not in hooks.json, which Glen rewrites; codex-trust-hooks trusts them. */ -}}
 {{- $atuin := dict "matcher" "^Bash$" "hooks" (list (dict "type" "command" "command" "atuin hook codex")) -}}
 {{- $impeccable := printf "%s/.agents/skills/impeccable/scripts/impeccable" .chezmoi.homeDir -}}
 {{- $design := printf "[ ! -f '%s' ] || '%s' hook" $impeccable $impeccable -}}
@@ -38,18 +38,4 @@
     | setValueAtPath "hooks.PreToolUse" (list $atuin)
     | setValueAtPath "hooks.PostToolUse" (list $atuin $designEdit)
     | setValueAtPath "hooks.Stop" (list $designStop) -}}
-{{- /* Trusts those hooks and ponytail's up front. Codex hashes each hook, so one that changes asks again in /hooks. */ -}}
-{{- $self := printf "%s/.codex/config.toml" .chezmoi.homeDir -}}
-{{- $ponytail := "ponytail@ponytail:hooks/claude-codex-hooks.json" -}}
-{{- $trusted := dict
-    (printf "%s:pre_tool_use:0:0" $self) "sha256:fc87dbee1cb8a9be4f78ba094c4fa8d5e2fd38cb800854e3717f9b6a52fe2a47"
-    (printf "%s:post_tool_use:0:0" $self) "sha256:ac371f260e4b23ba1d1b7a4ad68a44a323a8470b61f38471a47aceac1b7a5a7c"
-    (printf "%s:post_tool_use:1:0" $self) "sha256:262a115d0eac3360679ca3de89a7e3c2bf63cc21185ff9d009a9d9894807655a"
-    (printf "%s:stop:0:0" $self) "sha256:e3630b89c42601d83540a675f8afdc24741046d99fae91a14fd61d55f4c7fecf"
-    (printf "%s:session_start:0:0" $ponytail) "sha256:7ee5d5ae1f4a9e55f1f429f2960c2f9f32293f198c0e8e2e42b2fb3b4eeda142"
-    (printf "%s:user_prompt_submit:0:0" $ponytail) "sha256:8c9efc5a5e649c8cdca3f0b7bf4cba81d9717d1bc930c7dbc18b6efd66c7c58c"
-    (printf "%s:subagent_start:0:0" $ponytail) "sha256:7954d675ef3bafd5e5a6073ae51d7de57a08f21340f241c332f99078e955675d" -}}
-{{- range $key, $hash := $trusted -}}
-{{-   $config = setValueAtPath (list "hooks" "state" $key "trusted_hash") $hash $config -}}
-{{- end -}}
 {{- toToml $config -}}
