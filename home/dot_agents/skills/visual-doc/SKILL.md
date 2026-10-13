@@ -59,7 +59,8 @@ Each figure makes one claim, and its caption opens with that claim. Each keeps a
 Diagrams:
 
 - Use a card grid when parts and owners matter more than the arrows, Mermaid when edges and states matter. Past about 12 nodes, draw a Mermaid overview of 5 to 8 nodes and put the detail in cards or a second figure. Hand-draw SVG (`.diagram` with `d-*` classes) only when the layout itself carries meaning.
-- Keep node labels to a few words and put the detail and the verb on the edges. Use 5 to 12 nodes, `LR` for pipelines and `TD` for hierarchies.
+- Keep node labels to a few words and put the detail and the verb on the edges. Use 5 to 12 nodes.
+- Lean horizontal (`LR`) for flows and pipelines, so the diagram uses the page width and keeps the doc short. Use `TD` for hierarchies and long chains. Phones switch to top to bottom on their own.
 - Colour a node only with `class <node> good`, `warn` or `bad`. Quote labels that contain punctuation, keep colons out of gantt task names, break lines with `<br/>`, and keep the classes `.node`, `.label`, `.cluster`, `.edgeLabel` and `.note` off page elements, since Mermaid styles them.
 
 Charts:
@@ -90,13 +91,15 @@ Use semantic HTML, labelled and keyboard-operable controls, and visible focus. K
 
 ## Save
 
-1. Save in the repo you're working in, named `YYYY-MM-DD-<slug>.html` by the day it was first written:
+Write HTML with this skill for anything the owner reviews or decides on: plans, explainers, tradeoffs, experiment results and audits. Write Markdown for what later agent steps read: research inputs, specs and architect designs. The docs hub renders both the same way. A Markdown document declares its kind in front matter (`kind: experiment`), and its ```` ```mermaid ```` fences become diagrams in the hub and on GitHub.
+
+1. Save in the worktree you're working in, named `YYYY-MM-DD-<slug>` by the day it was first written:
    - plans, explainers and tradeoffs in `docs/plans/`;
    - research reports and experiment results in `docs/research/`;
    - specs where `to-spec` puts them.
 
-   If the repo documents its own layout for these folders (AGENTS.md, a README inside them), follow that. A Markdown document in these folders declares its kind in front matter (`kind: experiment`); the docs hub renders it with the kit, and ```` ```mermaid ```` fences become diagrams there and on GitHub.
-2. Commit the page with the work it explains, or on its own when the page is the deliverable. When revising, overwrite the same file and let git keep the history: no `-v2` or dated duplicates. The only copy never lives in `.context/`, `/tmp` or an environment-provided visualization directory. Evidence captures that no page links to stay in `.context/`.
+   If the repo documents its own layout for these folders (AGENTS.md, a README inside them), follow that. If its AGENTS.md says "Docs stay local: write them to `docs/local/` in the main checkout.", save them flat in `~/workspace/<repo>/docs/local/` and never commit them. A doc about no repo goes flat in `~/workspace/notes/`, never in a GitHub repo. In both flat folders the kind comes from `doc-kind` or `kind:`.
+2. Commit the page with the work it explains, or on its own when the page is the deliverable. It merges to main with the work. When revising, overwrite the same file and let git keep the history: no `-v2` or dated duplicates. The only copy never lives in `.context/`, `/tmp` or an environment-provided visualization directory. Evidence captures that no page links to stay in `.context/`.
 3. A page with images, evidence files or sibling pages becomes a directory with `index.html`. Use relative links, never `file://` or preview URLs.
 
 ## Check before you finish

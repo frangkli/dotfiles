@@ -50,10 +50,10 @@ aside h2, #toc h2 { margin: 24px 0 4px; font-size: 12.5px; font-weight: 600; lin
 aside .item { display: block; padding: 6px var(--inset); line-height: 20px; color: var(--text); text-decoration: none; border-radius: 6px; }
 aside .item:hover { background: var(--sunken); }
 aside .item.current { background: var(--sunken); font-weight: 600; }
-aside .item .draft { margin-left: 6px; font-weight: 400; }
+aside .item .tag { margin-left: 6px; font-weight: 400; }
 
-/* The draft marker: small ochre text, the only status shown anywhere. */
-.tag.draft { padding: 0; font-size: 12px; font-weight: 400; vertical-align: baseline; border: 0; }
+/* Status markers: small ochre "draft", or grey "local" for a doc that is never committed. */
+.tag:is(.draft, .local) { padding: 0; font-size: 12px; font-weight: 400; vertical-align: baseline; border: 0; }
 
 /* Focus: a 2px ring on the control's own edge, so it never breaks the column. */
 :is(aside, .bar, .list, #toc) :is(a, input, select, button):focus-visible { outline: 2px solid var(--muted); outline-offset: -2px; border-radius: 6px; }

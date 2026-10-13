@@ -1,7 +1,12 @@
 // The docs hub: serves every repo's docs/plans, docs/research and docs/specs, read live from each
-// checkout and worktree (unmerged branches included). Read-only, loopback only.
+// checkout and worktree (unmerged branches included), plus docs that are never committed: each main
+// checkout's flat docs/local folder and the flat notes folder for docs about no repo. Read-only,
+// loopback only.
 //
-//   node server.mjs [--port 7777] [--root ~/workspace]... [--kit <visual-doc template.html>]
+//   node server.mjs [--port 7777] [--root ~/workspace]... [--notes ~/workspace/notes] [--kit <template.html>]
+//
+// URLs: /<repo>/<branch>/<path> for committed docs, /<repo>/~local/<file> for local docs and
+// /~notes/<file> for notes. Git forbids "~" in branch names, so neither collides with a branch.
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { access, readdir, readFile, realpath, stat } from "node:fs/promises";
@@ -15,6 +20,7 @@ const { values: options } = parseArgs({
   options: {
     port: { type: "string", default: "7777" },
     root: { type: "string", multiple: true, default: [join(homedir(), "workspace")] },
+    notes: { type: "string", default: join(homedir(), "workspace", "notes") },
     kit: { type: "string", default: join(homedir(), ".agents/skills/visual-doc/assets/template.html") },
   },
 });
@@ -25,7 +31,7 @@ const run = promisify(execFile);
 const folders = { plans: "plan", research: "research", specs: "spec" };
 const kindLabels = {
   plan: "Plans", explainer: "Explainers", tradeoff: "Tradeoffs",
-  research: "Research", experiment: "Experiments", spec: "Specs",
+  research: "Research", experiment: "Experiments", spec: "Specs", note: "Notes",
 };
 const types = {
   ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
@@ -60,7 +66,8 @@ function parseDocument(source, path) {
 }
 
 // Each clone's `git worktree list` finds its worktrees wherever they live, so only the clones
-// need to sit under a root. The first repo with a given directory name wins.
+// need to sit under a root. The first repo with a given directory name wins. Each repo also gets its
+// main checkout's docs/local folder, and the notes folder, when it exists, becomes the "notes" entry.
 async function findRepos() {
   const dirs = [];
   for (const root of options.root) {
@@ -81,12 +88,16 @@ async function findRepos() {
     if (!name || repos.has(name)) continue;
     const worktrees = records
       .filter((record) => !("bare" in record) && !("prunable" in record))
-      .map((record) => ({
-        dir: record.worktree,
-        main: record.worktree === main,
-        key: record.branch?.replace("refs/heads/", "") ?? `@${basename(record.worktree)}`,
-      }));
-    repos.set(name, { name, dir: main, worktrees });
+      .map((record) => {
+        const key = record.branch?.replace("refs/heads/", "") ?? `@${basename(record.worktree)}`;
+        return { dir: record.worktree, main: record.worktree === main, key, label: key, url: `/${encodePath(name)}/${encodePath(key)}` };
+      });
+    const local = { dir: join(main, "docs", "local"), within: main, local: true, key: "~local", label: "local", url: `/${encodePath(name)}/~local` };
+    repos.set(name, { name, dir: main, worktrees, local });
+  }
+  if (await stat(options.notes).then((info) => info.isDirectory(), () => false)) {
+    const folder = { dir: options.notes, main: true, local: true, key: "~notes", label: "notes", url: "/~notes" };
+    repos.set("~notes", { name: "notes", dir: options.notes, notes: true, worktrees: [folder], local: folder });
   }
   return repos;
 }
@@ -132,9 +143,36 @@ async function walk(dir) {
   return nested.flat();
 }
 
+// A flat folder of uncommitted docs counts only if its real path exists and, for docs/local, stays
+// inside the main checkout.
+async function flatRoot(folder) {
+  const [dir, within] = await Promise.all([realpath(folder.dir), folder.within && realpath(folder.within)]).catch(() => []);
+  return dir && (!folder.within || dir.startsWith(within + sep)) ? dir : undefined;
+}
+
+// Docs in a flat folder (docs/local or notes): no git status, and the kind comes from the document.
+async function flatDocs(repo, folder) {
+  const root = await flatRoot(folder);
+  const entries = root ? await readdir(root, { withFileTypes: true }).catch(() => []) : [];
+  const docs = [];
+  for (const entry of entries) {
+    if (!entry.isFile() || entry.name.startsWith(".") || !/\.(md|html)$/.test(entry.name)) continue;
+    const file = join(root, entry.name);
+    const [content, info] = await Promise.all([readFile(file, "utf8"), stat(file)]).catch(() => []);
+    if (!content) continue;
+    const { title, kind, text } = parseDocument(content, entry.name);
+    const date = /\d{4}-\d{2}-\d{2}/.exec(entry.name)?.[0] ?? new Date(info.mtimeMs).toISOString().slice(0, 10);
+    const place = repo.notes ? `notes/${entry.name}` : `${repo.name} · docs/local/${entry.name}`;
+    docs.push({ repo: repo.name, worktree: folder, path: entry.name, place, title: title || entry.name, text, date, kind: kind?.toLowerCase() || "note", mtime: info.mtimeMs, merged: true, local: true });
+  }
+  return docs;
+}
+
 async function scan(repos) {
   const docs = [];
   for (const repo of repos.values()) {
+    docs.push(...(await flatDocs(repo, repo.local)));
+    if (repo.notes) continue;
     const { commit, blobs: merged } = await defaultBranch(repo.dir);
     const algorithm = [...merged.values()][0]?.length === 64 ? "sha256" : "sha1";
     for (const worktree of repo.worktrees) {
@@ -149,7 +187,7 @@ async function scan(repos) {
           const blob = createHash(algorithm).update(`blob ${content.length}\0`).update(content).digest("hex");
           const { title, kind, text } = parseDocument(content.toString("utf8"), path);
           const date = /\d{4}-\d{2}-\d{2}/.exec(path)?.[0] ?? new Date(info.mtimeMs).toISOString().slice(0, 10);
-          const doc = { repo: repo.name, worktree, path, title: title || basename(path), text, date };
+          const doc = { repo: repo.name, worktree, path, place: `${repo.name} · ${worktree.key} · ${path}`, title: title || basename(path), text, date };
           const isMerged = merged.get(path) === blob || inherited.get(path) === blob;
           docs.push({ ...doc, kind: kind?.toLowerCase() || folders[folder], mtime: info.mtimeMs, merged: isMerged });
         }
@@ -171,10 +209,16 @@ function unique(docs) {
 }
 
 // Pages are /<repo>/<branch>/<path> and raw files /raw/<repo>/<branch>/<path>; branch names may
-// contain slashes. A link into a removed worktree matches no worktree but keeps its path.
+// contain slashes. A link into a removed worktree matches no worktree but keeps its path. Local docs
+// and notes are a single file name under /<repo>/~local or /~notes.
 function route(pathname, repos) {
   const [, name, ...rest] = pathname.split("/");
   const repo = repos.get(name);
+  if (repo?.notes || rest[0] === "~local") {
+    const file = (repo?.notes ? rest : rest.slice(1)).join("/");
+    const valid = /^[^/\\]+\.(md|html)$/.test(file) && !file.startsWith(".") && !file.includes("\0");
+    return { repo, worktree: repo?.local, path: valid ? file : undefined, extra: file !== "" };
+  }
   const tail = rest.join("/");
   const worktree = repo?.worktrees
     .toSorted((a, b) => b.key.length - a.key.length)
@@ -184,8 +228,15 @@ function route(pathname, repos) {
   return { repo, worktree, path: valid ? path : undefined, extra: tail !== (worktree?.key ?? "") };
 }
 
-// Serves only regular files whose real path stays inside the worktree's docs folder.
+// Serves only regular files whose real path stays inside the worktree's docs folder, or directly in
+// a flat folder of local docs.
 async function resolveFile(worktree, path) {
+  if (worktree.local) {
+    const root = await flatRoot(worktree);
+    const file = root && (await realpath(join(root, path)).catch(() => undefined));
+    if (!file || dirname(file) !== root) return undefined;
+    return (await stat(file)).isFile() ? { file, directory: false } : undefined;
+  }
   const root = await folderRoot(worktree.dir, path.split("/")[1]);
   const file = root && (await realpath(join(worktree.dir, path)).catch(() => undefined));
   if (!file?.startsWith(root + sep)) return undefined;
@@ -348,12 +399,12 @@ async function documentHtml(file) {
 }
 
 const encodePath = (path) => path.split("/").map(encodeURIComponent).join("/");
-const branchUrl = (repo, worktree) => `/${encodePath(repo)}/${encodePath(worktree.key)}`;
-const docUrl = (doc) => `${branchUrl(doc.repo, doc.worktree)}/${encodePath(doc.path)}`;
+const docUrl = (doc) => `${doc.worktree.url}/${encodePath(doc.path)}`;
 const drafts = (docs) => docs.filter((doc) => !doc.merged).length;
 const plural = (count, word) => `${count} ${word}${count === 1 ? "" : "s"}`;
-// The only status marker: a quiet tag on a draft. Merged documents show nothing.
-const status = (doc) => (doc.merged ? "" : '<span class="tag draft">draft</span>');
+// The only status markers: a quiet tag on a draft or an uncommitted local doc. Merged documents show nothing.
+const status = (doc) =>
+  doc.local ? '<span class="tag local">local</span>' : doc.merged ? "" : '<span class="tag draft">draft</span>';
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const dayStart = (ms) => new Date(ms).setHours(0, 0, 0, 0);
 const dayLabel = (ms, now = Date.now()) => {
@@ -382,7 +433,7 @@ function row(doc, { where = true, current = false, snippet = "" } = {}) {
   const title = `<span class="title">${escapeHtml(doc.title)}</span>`;
   const aria = current ? ' aria-current="page"' : "";
   if (!where) return `<a class="item${current ? " current" : ""}" href="${docUrl(doc)}"${aria}>${title}${status(doc)}</a>`;
-  const place = `${doc.repo} · ${doc.worktree.key} · ${doc.path}`;
+  const place = doc.place;
   const excerpt = snippet ? `<span class="excerpt">${escapeHtml(snippet)}</span>` : "";
   return `<a class="item" href="${docUrl(doc)}">${time(doc)}<span class="body"><span class="head">${title}<span class="kind">${escapeHtml(doc.kind)}</span>${status(doc)}</span><span class="path">${escapeHtml(place)}</span>${excerpt}</span></a>`;
 }
@@ -398,7 +449,7 @@ function search(docs, query) {
   const results = [];
   for (const doc of unique(docs)) {
     const title = doc.title.toLowerCase();
-    const where = `${doc.repo} ${doc.worktree.key} ${doc.path} ${doc.kind} ${doc.merged ? "merged" : "draft"}`.toLowerCase();
+    const where = `${doc.place} ${doc.kind} ${doc.local ? "local" : doc.merged ? "merged" : "draft"}`.toLowerCase();
     const text = doc.text.toLowerCase();
     if (!terms.every((term) => title.includes(term) || where.includes(term) || text.includes(term))) continue;
     const score = terms.reduce(
@@ -412,22 +463,28 @@ function search(docs, query) {
   return results.toSorted((a, b) => b.score - a.score || b.doc.mtime - a.doc.mtime);
 }
 
+// The docs a worktree's view lists: its own, plus the repo's local docs in the main checkout's view.
+const inView = (docs, repo, worktree) =>
+  docs.filter((doc) => doc.worktree === worktree || (worktree?.main && doc.worktree === repo.local));
+
 function sidebar(repos, docs, repo, worktree, current, query = "") {
   const select = (label, items) =>
     `<label>${label}<select>${items.map(([url, text, selected, count]) => `<option value="${url}"${selected ? " selected" : ""}${count ? ` title="${plural(count, "draft")}"` : ""}>${escapeHtml(text)}</option>`).join("")}</select></label>`;
   const repoItems = [...repos.values()].map((candidate) => {
     const count = drafts(docs.filter((doc) => doc.repo === candidate.name));
-    return [branchUrl(candidate.name, candidate.worktrees[0]), `${candidate.name}${count ? ` · ${count}` : ""}`, candidate === repo, count];
+    return [candidate.worktrees[0].url, `${candidate.name}${count ? ` · ${count}` : ""}`, candidate === repo, count];
   });
   let html = `<form action="/"><input type="search" name="q" value="${escapeHtml(query)}" placeholder="Search every document" aria-label="Search every document"></form>`;
   html += select("Repository · drafts", repo ? repoItems : [["", "Choose a repository", true], ...repoItems]);
   if (!repo) return html;
+  // A repo's local docs belong to its main checkout's view.
+  const base = worktree === repo.local && !repo.notes ? repo.worktrees.find((candidate) => candidate.main) : worktree;
   const branchItems = repo.worktrees.map((candidate) => {
     const count = drafts(docs.filter((doc) => doc.worktree === candidate));
-    return [branchUrl(repo.name, candidate), `${candidate.key}${count ? ` · ${count}` : ""}`, candidate === worktree, count];
+    return [candidate.url, `${candidate.key}${count ? ` · ${count}` : ""}`, candidate === base, count];
   });
-  html += select("Branch or worktree · drafts", branchItems);
-  const shown = docs.filter((doc) => doc.worktree === worktree).toSorted((a, b) => b.date.localeCompare(a.date));
+  if (!repo.notes) html += select("Branch or worktree · drafts", branchItems);
+  const shown = inView(docs, repo, base).toSorted((a, b) => b.date.localeCompare(a.date));
   const byKind = Object.groupBy(shown, (doc) => doc.kind);
   html += '<nav aria-label="Documents in this worktree">';
   for (const kind of [...new Set([...Object.keys(kindLabels), ...Object.keys(byKind)])].filter((kind) => byKind[kind])) {
@@ -540,7 +597,7 @@ async function handle(request, response) {
     const results = query ? search(docs, query) : unique(docs).toSorted((a, b) => b.mtime - a.mtime).map((doc) => ({ doc }));
     const heading = query ? `Results${results.length > 50 ? ", first 50 shown" : ""}` : "Recently updated";
     const form = `<form class="search" action="/" role="search"><input type="search" name="q" value="${escapeHtml(query)}" placeholder="Search every document" aria-label="Search every document"><button type="submit">Search</button></form>`;
-    const intro = '<p class="muted">Plans, research and specs from every checkout and worktree on this box, drafts included.</p>';
+    const intro = '<p class="muted">Plans, research, specs and notes from every checkout and worktree on this box, drafts and local docs included.</p>';
     const body = results.length ? list(heading, results.slice(0, 50)) : '<p class="muted">Nothing found.</p>';
     const crumbs = [[query ? "Search" : "All repositories"]];
     return respond(200, "Docs", `<div class="list"><h1>Docs</h1>${intro}${form}${body}</div>`, { query, crumbs, home: true });
@@ -559,11 +616,11 @@ async function handle(request, response) {
     return fallback ? send(response, 302, types[".txt"], "", { location: docUrl(fallback) }) : notFound();
   }
   if (!path && extra) return notFound();
-  const where = `${repo.name} · ${shown.key}`;
-  const crumbs = [[repo.name, branchUrl(repo.name, main)], [shown.key, branchUrl(repo.name, shown)]];
+  const where = repo.notes ? "notes" : `${repo.name} · ${shown.label}`;
+  const crumbs = repo.notes ? [["notes", shown.url]] : [[repo.name, main.url], [shown.label, shown.url]];
   const context = { repo, worktree: shown, doc, crumbs };
   if (!doc) {
-    const shownDocs = docs.filter((candidate) => candidate.worktree === shown).toSorted((a, b) => b.mtime - a.mtime);
+    const shownDocs = (shown.local ? docs.filter((candidate) => candidate.worktree === shown) : inView(docs, repo, shown)).toSorted((a, b) => b.mtime - a.mtime);
     const rows = shownDocs.length ? list("Recently updated", shownDocs.map((candidate) => ({ doc: candidate }))) : '<p class="muted">No documents in this worktree.</p>';
     return respond(200, where, `<div class="list"><h1>${escapeHtml(where)}</h1>${rows}</div>`, context);
   }
