@@ -25,7 +25,12 @@ vp env default "$node_latest" "pnpm@$pnpm_latest"
 # Portless's root service records the node and portless paths at install time.
 portless service install
 # Third-party skills and plugins, as installed by the dotfiles.
+skill_hashes() { jq -r '.skills | to_entries[] | "\(.key) \(.value.skillFolderHash)"' ~/.agents/.skill-lock.json 2>/dev/null; }
+before=$(skill_hashes)
 npx -y skills@latest update --global --yes
+# Upstream skills run with full agent permissions, so name every one that changed.
+changed=$(comm -13 <(echo "$before" | sort) <(skill_hashes | sort) | cut -d' ' -f1)
+if [ -n "$changed" ]; then echo "Skills updated: $(echo $changed)"; fi
 claude plugin marketplace update
 claude plugin update impeccable@impeccable
 claude plugin update ponytail@ponytail
