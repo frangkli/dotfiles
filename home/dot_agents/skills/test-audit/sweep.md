@@ -55,7 +55,7 @@ Done when every shortlisted test has a verdict, and every non-retain verdict has
 
 ## 4. Findings and decisions
 
-Write the findings to `docs/research/<YYYY-MM-DD>-test-audit.html` with `visual-plan`, the content per the `writing` skill's technical mode ([technical.md](../writing/technical.md)):
+Write the findings to `docs/research/<YYYY-MM-DD>-test-audit.html` with `visual-doc`, the content per the `writing` skill's technical mode ([technical.md](../writing/technical.md)):
 
 - scope, cap and what wasn't read;
 - candidates grouped by owning module or package, each with its card and verdict;

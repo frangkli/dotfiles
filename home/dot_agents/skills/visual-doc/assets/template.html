@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="doc-kind" content="plan" />
+    <title>Render reports in a background job</title>
+    <!-- The kit: copy this block unchanged. Page-specific CSS goes in a second <style>. -->
+    <style id="kit">
+/* Accent colours, one meaning each: --accent green = recommendation, chosen option, good result;
+   --warn ochre = decision for the reader, draft, caution; --bad red = risk, regression.
+   Type scale: h1 30px, h2 22px, h3 18px, body 16px, notes 14px, labels 12-13px.
+   Light and dark follow the system setting. */
+:root {
+  color-scheme: light dark;
+  --bg: light-dark(#fafbf9, #131614);
+  --surface: light-dark(#fff, #1b1f1c);
+  --sunken: light-dark(#f1f3f0, #181b19);
+  --border: light-dark(#d6dbd5, #323934);
+  --text: light-dark(#1f2823, #e3e8e4);
+  --muted: light-dark(#56645b, #9ca79f);
+  --accent: light-dark(#25664b, #7cc4a0);
+  --accent-soft: light-dark(#e5efe8, #1d3027);
+  --warn: light-dark(#87601f, #e0b061);
+  --warn-soft: light-dark(#f6efe0, #302818);
+  --bad: light-dark(#a3392e, #ef8c80);
+  --bad-soft: light-dark(#f8e8e5, #3a211e);
+  --font: "Avenir Next", Avenir, "Segoe UI", "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --radius: 6px;
+  --measure: 72ch;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--font); }
+main { max-width: 1040px; margin: 0 auto; padding: 32px 24px 64px; }
+h1, h2, h3 { margin: 1.6em 0 0.5em; font-weight: 600; line-height: 1.25; }
+h1 { margin-top: 0; font-size: 30px; }
+h2 { font-size: 22px; }
+h3 { font-size: 18px; }
+p, ul, ol, dl { max-width: var(--measure); margin: 0 0 1em; }
+li { margin: 0.25em 0; }
+a { color: var(--accent); text-underline-offset: 3px; }
+strong { font-weight: 600; }
+code, pre { font-family: var(--mono); font-size: 0.875em; }
+code { padding: 0.1em 0.35em; background: var(--sunken); border-radius: 4px; overflow-wrap: anywhere; }
+pre {
+  margin: 0 0 1em; padding: 12px 14px; overflow-x: auto; line-height: 1.5;
+  background: var(--sunken); border: 1px solid var(--border); border-radius: var(--radius);
+}
+pre code { padding: 0; background: none; overflow-wrap: normal; }
+img { max-width: 100%; height: auto; }
+table { width: 100%; margin: 0 0 1em; font-size: 15px; border-collapse: collapse; }
+th, td { padding: 10px 14px 10px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+th { font-weight: 600; }
+.scroll { margin: 0 0 1em; overflow-x: auto; } /* wide tables and diagrams scroll on their own */
+.scroll > table { margin: 0; }
+details { padding: 12px 0; border-top: 1px solid var(--border); }
+summary { font-weight: 600; cursor: pointer; }
+figure { margin: 1.5em 0; }
+figcaption, .muted { margin-top: 8px; font-size: 14px; color: var(--muted); }
+:focus-visible { outline: 2px solid var(--warn); outline-offset: 2px; }
+
+/* Header: eyebrow (kind and date), title, one-sentence lede, status facts. */
+.eyebrow { margin: 0 0 6px; font-size: 14px; color: var(--muted); }
+.lede { font-size: 18px; color: var(--muted); }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 24px; max-width: none; font-size: 14px; }
+.facts div { display: flex; gap: 6px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; }
+.badge {
+  display: inline-block; padding: 0 8px; font-size: 12px; font-weight: 500; line-height: 1.6;
+  white-space: nowrap; color: var(--muted); border: 1px solid currentColor; border-radius: 999px;
+}
+:is(.badge, .delta).good { color: var(--accent); }
+:is(.badge, .delta).warn { color: var(--warn); }
+:is(.badge, .delta).bad { color: var(--bad); }
+
+/* Callouts: .recommend (once, near the top), .risk, or plain for a note. */
+.callout {
+  max-width: var(--measure); margin: 0 0 1.25em; padding: 12px 16px; background: var(--sunken);
+  border-left: 3px solid var(--muted); border-radius: 0 var(--radius) var(--radius) 0;
+}
+.callout > :last-child { margin-bottom: 0; }
+.callout-title { margin-bottom: 4px; font-weight: 600; }
+.callout.recommend { background: var(--accent-soft); border-color: var(--accent); }
+.callout.risk { background: var(--bad-soft); border-color: var(--bad); }
+
+/* Metric tiles: a measured number, its comparison, and where it came from. */
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 0 0 1.25em; }
+.metric {
+  display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 12px 14px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.metric .label { font-size: 13px; color: var(--muted); }
+.metric .value { font-size: 26px; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.metric .delta { font-size: 14px; }
+.metric .source { margin-top: 4px; font-size: 12px; color: var(--muted); }
+
+/* Bars: --value is the bar's share of the full width; add --start for a waterfall. */
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: minmax(90px, 180px) 1fr minmax(64px, auto); gap: 10px; align-items: center; font-size: 14px; }
+.bar .track { position: relative; height: 14px; overflow: hidden; background: var(--sunken); border-radius: 3px; }
+.bar .track::after {
+  content: ""; position: absolute; top: 0; bottom: 0; background: var(--muted);
+  left: calc(var(--start, 0) * 100%); width: calc(var(--value) * 100%);
+}
+.bar.good .track::after { background: var(--accent); }
+.bar.bad .track::after { background: var(--bad); }
+.bar .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Flow: steps left to right, top to bottom on a phone. */
+.flow { display: flex; gap: 28px; max-width: none; margin: 0 0 1.25em; padding: 0; list-style: none; }
+.flow > li {
+  position: relative; flex: 1; min-width: 0; margin: 0; padding: 12px 14px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.flow > li.good { border-color: var(--accent); }
+.flow > li.bad { border-color: var(--bad); }
+.flow strong, .flow small { display: block; }
+.flow small { margin-top: 4px; color: var(--muted); }
+.flow > li + li::before { content: "→"; position: absolute; top: 50%; left: -22px; transform: translateY(-50%); color: var(--muted); }
+
+/* Options table: tr.chosen marks the recommended row. */
+tr.chosen > * { background: var(--accent-soft); }
+tr.chosen > :first-child { padding-left: 12px; box-shadow: inset 3px 0 var(--accent); }
+
+/* Decisions: what the reader must decide, each with its recommended default. */
+.decisions { max-width: var(--measure); padding: 0; list-style: none; counter-reset: decision; }
+.decisions > li {
+  position: relative; margin: 0 0 10px; padding: 12px 14px 12px 50px; counter-increment: decision;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.decisions > li::before {
+  content: counter(decision); position: absolute; top: 12px; left: 14px; width: 24px; height: 24px;
+  font-size: 14px; font-weight: 600; line-height: 24px; text-align: center;
+  color: var(--warn); background: var(--warn-soft); border-radius: 50%;
+}
+.decisions .default { display: block; margin-top: 2px; font-size: 14px; color: var(--muted); }
+
+/* Tabs: <div class="tabs"> holding <section data-tab="Label">; all panels show without JavaScript. */
+.tabs > section[data-tab]::before { content: attr(data-tab); display: block; margin: 12px 0 6px; font-weight: 600; }
+.tabs.ready > section[data-tab]::before { display: none; }
+.tabs [role="tablist"] { display: flex; gap: 4px; margin-bottom: 12px; overflow-x: auto; border-bottom: 1px solid var(--border); }
+.tabs [role="tab"] {
+  padding: 8px 12px; font: inherit; font-size: 15px; white-space: nowrap; color: var(--muted);
+  background: none; border: 0; border-bottom: 2px solid transparent; cursor: pointer;
+}
+.tabs [role="tab"][aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+
+/* Hand-drawn SVG: put these classes on shapes so diagrams follow the theme. */
+.diagram svg { display: block; max-width: 100%; height: auto; font: 13px var(--font); }
+.d-box { fill: var(--surface); stroke: var(--border); }
+.d-good { fill: var(--accent-soft); stroke: var(--accent); }
+.d-line { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+.d-arrow, .d-muted { fill: var(--muted); }
+.d-text { fill: var(--text); }
+
+@media (max-width: 680px) {
+  main { padding: 20px 16px 48px; }
+  h1 { font-size: 25px; }
+  h2 { font-size: 20px; }
+  .flow { flex-direction: column; gap: 24px; }
+  .flow > li + li::before { content: "↓"; top: -22px; left: 50%; transform: translateX(-50%); }
+  .bar { grid-template-columns: 1fr auto; }
+  .bar .track { grid-column: 1 / -1; grid-row: 2; }
+}
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- Sample content showing each component. Replace all of it; delete what the document doesn't need. -->
+      <header>
+        <p class="eyebrow">Plan · 2026-10-13</p>
+        <h1>Render reports in a background job</h1>
+        <p class="lede">Report requests wait for the whole PDF. A job returns the request at once.</p>
+        <dl class="facts">
+          <div><dt>Status</dt><dd><span class="badge warn">Proposed</span></dd></div>
+          <div><dt>Scope</dt><dd>API and worker; no schema change</dd></div>
+        </dl>
+      </header>
+
+      <div class="callout recommend">
+        <p class="callout-title">Recommendation</p>
+        <p>Queue the render and return <code>202</code> with a status URL.</p>
+      </div>
+
+      <h2>How a request works after the change</h2>
+      <ol class="flow">
+        <li><strong>API</strong> validates the request and queues a job<small>Owner: api</small></li>
+        <li class="good"><strong>Worker</strong> renders the PDF<small>Owner: worker</small></li>
+        <li><strong>Browser</strong> polls the status URL<small>Owner: web</small></li>
+      </ol>
+
+      <h2>Where the time goes</h2>
+      <div class="metrics">
+        <div class="metric">
+          <span class="label">Request time, p95, today</span>
+          <span class="value">340 ms</span>
+          <span class="source">[source: command, commit, sample size]</span>
+        </div>
+        <div class="metric">
+          <span class="label">Request time, p95, with the job</span>
+          <span class="value">45 ms</span>
+          <span class="delta good">−295 ms</span>
+          <span class="source">[source]</span>
+        </div>
+      </div>
+      <figure>
+        <div class="bars" role="img" aria-label="Auth 0 to 20 ms, query 20 to 90 ms, render 90 to 340 ms">
+          <div class="bar" style="--value: 0.06"><span>Auth</span><span class="track"></span><span class="num">20 ms</span></div>
+          <div class="bar" style="--start: 0.06; --value: 0.2"><span>Query</span><span class="track"></span><span class="num">70 ms</span></div>
+          <div class="bar bad" style="--start: 0.26; --value: 0.74"><span>Render</span><span class="track"></span><span class="num">250 ms</span></div>
+        </div>
+        <figcaption>One request today. Full width is 340 ms.</figcaption>
+      </figure>
+
+      <h2>Options</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th scope="col">Option</th><th scope="col">Gives</th><th scope="col">Costs</th></tr></thead>
+          <tbody>
+            <tr class="chosen"><th scope="row">Background job</th><td>Requests return at once; renders retry.</td><td>A status URL and polling.</td></tr>
+            <tr><th scope="row">Faster renderer</th><td>No API change.</td><td>Requests still wait for the render.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Before and after</h2>
+      <div class="tabs">
+        <section data-tab="Before"><pre><code>POST /reports  →  200 application/pdf</code></pre></section>
+        <section data-tab="After"><pre><code>POST /reports     →  202 {"status": "/reports/42"}
+GET  /reports/42  →  200 {"state": "done"}</code></pre></section>
+      </div>
+
+      <div class="callout risk">
+        <p class="callout-title">Risk</p>
+        <p>Clients that expect a PDF body break. Keep the old path for existing API keys for 30 days.</p>
+      </div>
+
+      <h2>Decisions for you</h2>
+      <ol class="decisions">
+        <li>Keep the synchronous path for existing API keys?<span class="default">Default: yes, for 30 days.</span></li>
+      </ol>
+
+      <details>
+        <summary>How the claims were checked</summary>
+        <p>Verified 0, corrected 0, unsupported 0, unverifiable 0.</p>
+      </details>
+    </main>
+    <script id="kit-js">
+      for (const tabs of document.querySelectorAll(".tabs")) {
+        const panels = [...tabs.querySelectorAll(":scope > section[data-tab]")];
+        const list = document.createElement("div");
+        list.setAttribute("role", "tablist");
+        const select = (index) =>
+          panels.forEach((panel, i) => {
+            panel.hidden = i !== index;
+            list.children[i].setAttribute("aria-selected", String(i === index));
+            list.children[i].tabIndex = i === index ? 0 : -1;
+          });
+        panels.forEach((panel, i) => {
+          const tab = Object.assign(document.createElement("button"), { type: "button", textContent: panel.dataset.tab });
+          tab.setAttribute("role", "tab");
+          tab.addEventListener("click", () => select(i));
+          panel.setAttribute("role", "tabpanel");
+          list.append(tab);
+        });
+        list.addEventListener("keydown", (event) => {
+          const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+          if (!step) return;
+          const next = (panels.findIndex((panel) => !panel.hidden) + step + panels.length) % panels.length;
+          select(next);
+          list.children[next].focus();
+        });
+        tabs.prepend(list);
+        tabs.classList.add("ready");
+        select(0);
+      }
+    </script>
+  </body>
+</html>

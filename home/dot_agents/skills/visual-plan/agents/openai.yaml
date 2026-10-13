@@ -1,4 +1,0 @@
-interface:
-  display_name: "Visual Plan"
-  short_description: "HTML plans and reports that explain a design and its decision"
-  default_prompt: "Use $visual-plan to explain this plan visually, including the recommendation, design, tradeoffs, and open decisions."

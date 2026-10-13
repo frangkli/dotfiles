@@ -69,7 +69,7 @@ Done when every finding has a disposition in the plan and every reader-test ques
 
 ### 6. Publish and stop
 
-Render the plan with `visual-plan`; it decides where the file goes (the repo's `docs/plans/`) and how it appears on the plans hub, where the box has one. Check the rendered page. Send the approval message described in [plan.md](plan.md).
+Render the plan with `visual-doc`; it decides where the file goes (the repo's `docs/plans/`) and checks the page on the docs hub. Send the approval message described in [plan.md](plan.md).
 
 Done when the plan page is saved in `docs/plans/` and rendered cleanly, and the approval message is sent. **End the turn here.** Only explicit approval starts step 7. A question, comment or changed decision means revise the plan in place, re-review what changed materially, and send the approval message again.
 

@@ -1,0 +1,8 @@
+{{ if lookPath "systemctl" -}}
+#!/bin/sh
+# Reruns whenever the unit or the server changes: {{ include "dot_config/systemd/user/docs-hub.service" | sha256sum }} {{ include "dot_local/share/docs-hub/server.mjs" | sha256sum }}
+set -e
+systemctl --user daemon-reload
+systemctl --user enable docs-hub.service
+systemctl --user restart docs-hub.service
+{{ end -}}

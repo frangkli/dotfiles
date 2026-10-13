@@ -9,6 +9,7 @@
 .config/systemd
 .local/bin/codex-trust-hooks
 .local/bin/devbox-update
+.local/share/docs-hub
 .opencodereview
 .t3
 {{ end }}

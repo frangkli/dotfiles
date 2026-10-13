@@ -2,7 +2,7 @@
 
 Two files in `docs/research/`, named for the audit date:
 
-- `<YYYY-MM-DD>-readiness.html`, for the user, written with `visual-plan`.
+- `<YYYY-MM-DD>-readiness.html`, for the user, written with `visual-doc`.
 - `<YYYY-MM-DD>-readiness.json`, for the next run, which grounds on it.
 
 ## Order of the HTML file

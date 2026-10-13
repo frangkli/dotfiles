@@ -32,7 +32,7 @@ If the repo has a PR template (`.github/pull_request_template.md`, `.github/PULL
 
 - **Why:** the reader's problem, in the repo's domain words (its glossary or CONTEXT.md). No commit hashes or history of the work.
 - **What changed:** name a symbol or path only when it carries the change; name both sides of a rename. Use a visual when it's clearer than prose: pseudocode for logic, a call tree for control flow, a file tree for layout, a `diff` block for a shape that changed. Usually one visual, rarely two.
-- **Scope:** always present. Name the follow-ups and known gaps.
+- **Scope:** always present. Name the follow-ups and known gaps. Link each plan, report or spec the branch adds or changes under `docs/` as a GitHub file link at the branch head.
 - **Tradeoffs** (optional, after Scope): only the alternatives a reviewer would otherwise ask about.
 - **Blast radius:** a two-way door is cheap to reverse by reverting. A one-way door is not: a destructive migration, data written in a new format, a removed public API, messages or emails sent. Name what breaks if the change is wrong (an API's consumers, stored data, a deploy, a layout on small screens) and the one fact the change is safe because of, with how far you proved it: stated, pointed at the line, ran a script against the real code, reproduced in the app. Check this section hardest when it says "two-way, small".
 - **Evidence:** real behaviour, before and after, strongest first:

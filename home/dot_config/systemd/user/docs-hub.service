@@ -1,0 +1,10 @@
+[Unit]
+Description=Docs hub: plans, research and specs from every checkout
+
+[Service]
+# Port 7777 is what `tailscale serve --service=svc:docs` points at.
+ExecStart=%h/.local/share/vite-plus/bin/node %h/.local/share/docs-hub/server.mjs --port 7777
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

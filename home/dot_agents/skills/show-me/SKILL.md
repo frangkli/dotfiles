@@ -117,7 +117,7 @@ function expandSkill(command: string): string {
 
 - For a visual UI, layout, state comparison, or concept too dense for Mermaid, write one focused HTML file — a diagram, an infographic, or a short slide deck, whichever fits the point. Match the product's colors, type, spacing, and components; use real labels and data; support desktop and mobile.
   - A throwaway view goes to `.context/show-me/{description}.html`, which git ignores.
-  - A view that is a plan someone will act on goes to `docs/plans/YYYY-MM-DD-{slug}.html` and is committed with the work, following `visual-plan`.
+  - A view that is a plan someone will act on goes to `docs/plans/YYYY-MM-DD-{slug}.html` and is committed with the work, following `visual-doc`.
 
   Then open it for the user with what the environment offers (a browser opener, the harness's preview tool). If nothing can display it, give the path.
 
