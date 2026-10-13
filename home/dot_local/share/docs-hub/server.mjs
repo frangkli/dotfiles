@@ -180,9 +180,10 @@ async function resolveFile(worktree, path) {
   return info.isFile() || info.isDirectory() ? { file, directory: info.isDirectory() } : undefined;
 }
 
-async function kitCss() {
+// The kit's CSS and script, read from the visual-doc template so the hub matches every document.
+async function kit(tag) {
   const template = await readFile(options.kit, "utf8").catch(() => "");
-  return /<style id="kit">([\s\S]*?)<\/style>/.exec(template)?.[1] ?? "";
+  return new RegExp(`<${tag} id="kit(?:-js)?">([\\s\\S]*?)</${tag}>`).exec(template)?.[1] ?? "";
 }
 
 function inline(text) {
@@ -191,48 +192,88 @@ function inline(text) {
     .replace(/`([^`]+)`/g, (_, code) => `\0${codes.push(code) - 1}\0`)
     .replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, '<img alt="$1" src="$2">')
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/&lt;(https?:\/\/[^\s&]+)&gt;/g, '<a href="$1">$1</a>')
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|\W)[*_](\S.*?)[*_](?!\w)/g, "$1<em>$2</em>")
+    .replace(/~~(.+?)~~/g, "<del>$1</del>")
+    .replace(/ {2,}\n|\\\n/g, "<br>\n")
     .replace(/\0(\d+)\0/g, (_, index) => `<code>${codes[index]}</code>`);
 }
 
-// Headings, paragraphs, flat lists, fenced code and tables. Anything else reads as a paragraph.
+// The common subset of CommonMark and GitHub's extensions: headings, paragraphs, nested and task
+// lists, quotes, fenced code (Mermaid fences become diagrams), tables and rules. Raw HTML shows as text.
 function markdown(source) {
-  const lines = source.replace(/\r/g, "").split("\n");
-  const block = /^(#{1,6}\s|```|~~~|\s*([-*+]|\d+\.)\s)/;
+  const lines = source.replace(/\r\n?/g, "\n").split("\n");
+  const blank = (line) => line.trim() === "";
+  const indentOf = (line) => /^ */.exec(line)[0].length;
+  const listItem = /^( *)([-*+]|\d+[.)]) +(.*)$/;
+  const interrupts = /^ {0,3}(#{1,6} |```|~~~|>|([-*+]|\d+[.)]) )/;
+  const cells = (line) =>
+    line.trim().replace(/^\||\|$/g, "").split(/(?<!\\)\|/).map((cell) => cell.trim().replaceAll("\\|", "|"));
   const out = [];
-  for (let i = 0; i < lines.length; ) {
+  let i = 0;
+  while (i < lines.length) {
     const line = lines[i];
     let match;
-    if (!line.trim()) {
+    if (blank(line)) {
       i++;
-    } else if ((match = /^(```|~~~)/.exec(line))) {
+    } else if ((match = /^ {0,3}(`{3,}|~{3,})\s*([\w+-]*)/.exec(line))) {
       const code = [];
-      for (i++; i < lines.length && !lines[i].startsWith(match[1]); i++) code.push(lines[i]);
+      for (i++; i < lines.length && !lines[i].trimStart().startsWith(match[1]); i++) code.push(lines[i]);
       i++;
-      out.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
-    } else if ((match = /^(#{1,6})\s+(.*)$/.exec(line))) {
+      const text = escapeHtml(code.join("\n"));
+      out.push(match[2] === "mermaid" ? `<pre class="mermaid">${text}</pre>` : `<pre><code>${text}</code></pre>`);
+    } else if ((match = /^ {0,3}(#{1,6})\s+(.*?)[\s#]*$/.exec(line))) {
       out.push(`<h${match[1].length}>${inline(match[2])}</h${match[1].length}>`);
       i++;
-    } else if (/^\s*([-*+]|\d+\.)\s/.test(line)) {
-      const tag = /^\s*\d/.test(line) ? "ol" : "ul";
+    } else if (/^ {0,3}([-*_])( *\1){2,} *$/.test(line)) {
+      out.push("<hr>");
+      i++;
+    } else if (/^ {0,3}>/.test(line)) {
+      const quote = [];
+      for (; i < lines.length && !blank(lines[i]); i++) quote.push(lines[i].replace(/^ {0,3}> ?/, ""));
+      out.push(`<blockquote>${markdown(quote.join("\n"))}</blockquote>`);
+    } else if ((match = listItem.exec(line))) {
+      const indent = match[1].length;
+      const ordered = /\d/.test(match[2]);
       const items = [];
-      for (; i < lines.length && lines[i].trim(); i++) {
-        const item = /^\s*(?:[-*+]|\d+\.)\s+(.*)$/.exec(lines[i]);
-        if (item) items.push(item[1]);
-        else items[items.length - 1] += ` ${lines[i].trim()}`;
+      for (; i < lines.length; i++) {
+        const item = listItem.exec(lines[i]);
+        if (item && item[1].length === indent && /\d/.test(item[2]) === ordered) {
+          items.push([item[3]]);
+        } else if (blank(lines[i])) {
+          const next = lines.slice(i + 1).find((candidate) => !blank(candidate));
+          if (next === undefined || (indentOf(next) <= indent && !listItem.test(next))) break;
+          items.at(-1).push("");
+        } else if (indentOf(lines[i]) > indent) {
+          items.at(-1).push(lines[i].slice(Math.min(indentOf(lines[i]), indent + 4)));
+        } else if (!interrupts.test(lines[i]) && !blank(lines[i - 1])) {
+          items.at(-1).push(lines[i]);
+        } else {
+          break;
+        }
       }
-      out.push(`<${tag}>${items.map((item) => `<li>${inline(item)}</li>`).join("")}</${tag}>`);
-    } else if (line.includes("|") && /^[\s|:-]*-[\s|:-]*$/.test(lines[i + 1] ?? "")) {
+      const html = items.map((item) => {
+        const task = /^\[([ xX])\] +/.exec(item[0]);
+        if (task) item[0] = item[0].slice(task[0].length);
+        let body = markdown(item.join("\n"));
+        // A list without blank lines between items keeps its text out of paragraphs.
+        if (!item.includes("")) body = body.replace(/^<p>([\s\S]*?)<\/p>/, "$1");
+        const box = task ? `<input type="checkbox" disabled${task[1] === " " ? "" : " checked"}> ` : "";
+        return `<li>${box}${body}</li>`;
+      });
+      out.push(ordered ? `<ol>${html.join("")}</ol>` : `<ul>${html.join("")}</ul>`);
+    } else if (line.includes("|") && /^ *\|? *:?-+:? *(\| *:?-+:? *)*\|? *$/.test(lines[i + 1] ?? "")) {
+      const align = cells(lines[i + 1]).map((cell) => (cell.endsWith(":") ? (cell.startsWith(":") ? "center" : "right") : ""));
       const row = (text, tag) =>
-        `<tr>${text.trim().replace(/^\||\|$/g, "").split("|").map((cell) => `<${tag}>${inline(cell.trim())}</${tag}>`).join("")}</tr>`;
+        `<tr>${cells(text).map((cell, n) => `<${tag}${align[n] ? ` style="text-align:${align[n]}"` : ""}>${inline(cell)}</${tag}>`).join("")}</tr>`;
       const rows = [];
-      for (i += 2; i < lines.length && lines[i].includes("|"); i++) rows.push(row(lines[i], "td"));
+      for (i += 2; i < lines.length && lines[i].includes("|") && !blank(lines[i]); i++) rows.push(row(lines[i], "td"));
       out.push(`<div class="scroll"><table><thead>${row(line, "th")}</thead><tbody>${rows.join("")}</tbody></table></div>`);
     } else {
-      const text = [];
-      for (; i < lines.length && lines[i].trim() && !(text.length && block.test(lines[i])); i++) text.push(lines[i]);
-      out.push(`<p>${inline(text.join(" "))}</p>`);
+      const text = [line];
+      for (i++; i < lines.length && !blank(lines[i]) && !interrupts.test(lines[i]); i++) text.push(lines[i]);
+      out.push(`<p>${inline(text.join("\n"))}</p>`);
     }
   }
   return out.join("\n");
@@ -265,7 +306,7 @@ async function documentHtml(file) {
   const { fields, body } = frontMatter(source);
   const title = escapeHtml(fields.title || /^# (.+)$/m.exec(body)?.[1] || basename(file));
   const head = `<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title>`;
-  return withHeadingIds(`<!doctype html><html lang="en"><head>${head}<style>${await kitCss()}</style></head><body><main>${markdown(body)}</main></body></html>`);
+  return withHeadingIds(`<!doctype html><html lang="en"><head>${head}<style>${await kit("style")}</style></head><body><main>${markdown(body)}</main><script>${await kit("script")}</script></body></html>`);
 }
 
 const encodePath = (path) => path.split("/").map(encodeURIComponent).join("/");
@@ -275,9 +316,31 @@ const drafts = (docs) => docs.filter((doc) => !doc.merged).length;
 const plural = (count, word) => `${count} ${word}${count === 1 ? "" : "s"}`;
 const status = (doc) => (doc.merged ? '<span class="badge good">merged</span>' : '<span class="badge warn">draft</span>');
 
-function row(doc, { where = true, current = false } = {}) {
+function row(doc, { where = true, current = false, snippet = "" } = {}) {
   const place = where ? `<span class="badge">${escapeHtml(doc.kind)}</span><span>${escapeHtml(`${doc.repo} · ${doc.worktree.key}`)}</span>` : "";
-  return `<a class="row${current ? " current" : ""}" href="${docUrl(doc)}">${escapeHtml(doc.title)}<small>${status(doc)}${place}<span>${doc.date}</span></small></a>`;
+  const excerpt = snippet ? `<span class="excerpt">${escapeHtml(snippet)}</span>` : "";
+  return `<a class="row${current ? " current" : ""}" href="${docUrl(doc)}">${escapeHtml(doc.title)}<small>${status(doc)}${place}<span>${doc.date}</span></small>${excerpt}</a>`;
+}
+
+// Every term must appear in the title, the location, the kind, the status or the text. Title and
+// location matches rank first, then how often the terms occur.
+function search(docs, query) {
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const results = [];
+  for (const doc of unique(docs)) {
+    const title = doc.title.toLowerCase();
+    const where = `${doc.repo} ${doc.worktree.key} ${doc.path} ${doc.kind} ${doc.merged ? "merged" : "draft"}`.toLowerCase();
+    const text = doc.text.toLowerCase();
+    if (!terms.every((term) => title.includes(term) || where.includes(term) || text.includes(term))) continue;
+    const score = terms.reduce(
+      (sum, term) => sum + (title.includes(term) ? 20 : 0) + (where.includes(term) ? 10 : 0) + Math.min(text.split(term).length - 1, 25),
+      0,
+    );
+    const at = Math.max(0, text.indexOf(terms[0]));
+    const start = Math.max(0, at - 80);
+    results.push({ doc, score, snippet: `${start > 0 ? "…" : ""}${doc.text.slice(start, at + 160).trim()}…` });
+  }
+  return results.toSorted((a, b) => b.score - a.score || b.doc.mtime - a.doc.mtime);
 }
 
 function sidebar(repos, docs, repo, worktree, current, query = "") {
@@ -309,13 +372,14 @@ function page({ title, where = "", side, main, headings = [], doc }) {
     : "";
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title><link rel="stylesheet" href="/assets/kit.css"><link rel="stylesheet" href="/assets/hub.css"></head>
-<body class="${toc ? "has-toc" : ""}"><header><button id="menu" aria-label="Documents">☰</button><a href="/">Docs</a><span>${escapeHtml(where)}</span>${toc ? '<button id="contents">Contents</button>' : ""}</header>
+<body class="${toc ? "has-toc" : ""}"><header><button id="menu" aria-label="Documents">☰</button><a href="/">Docs</a><span>${escapeHtml(where)}</span><div data-theme-control></div>${toc ? '<button id="contents">Contents</button>' : ""}</header>
 <div class="layout"><aside>${side}</aside><div class="main">${main}</div>${toc}</div>
+<script src="/assets/kit.js"></script>
 <script>
 const frame = document.querySelector("iframe");
 document.getElementById("menu").onclick = () => document.body.classList.toggle("drawer");
 document.getElementById("contents")?.addEventListener("click", () => document.body.classList.toggle("toc-open"));
-for (const select of document.querySelectorAll("select")) select.onchange = () => (location = select.value);
+for (const select of document.querySelectorAll("aside select")) select.onchange = () => (location = select.value);
 if (frame) {
   const show = (id) => frame.contentDocument.getElementById(decodeURIComponent(id))?.scrollIntoView();
   for (const link of document.querySelectorAll("#toc a")) {
@@ -358,7 +422,8 @@ async function handle(request, response) {
   const url = new URL(request.url ?? "/", "http://localhost");
   const pathname = decodeURIComponent(url.pathname);
   if (request.method !== "GET" && request.method !== "HEAD") return send(response, 405, types[".txt"], "Method not allowed");
-  if (pathname === "/assets/kit.css") return send(response, 200, types[".css"], await kitCss());
+  if (pathname === "/assets/kit.css") return send(response, 200, types[".css"], await kit("style"));
+  if (pathname === "/assets/kit.js") return send(response, 200, types[".js"], await kit("script"));
   if (pathname === "/assets/hub.css") return send(response, 200, types[".css"], await readFile(join(here, "hub.css")));
 
   const repos = await findRepos();
@@ -388,13 +453,10 @@ async function handle(request, response) {
   const respond = (code, title, main, extra = {}) =>
     send(response, code, types[".html"], page({ title, main, side: sidebar(repos, docs, extra.repo, extra.worktree, extra.doc, extra.query), ...extra }));
   if (pathname === "/") {
-    const query = url.searchParams.get("q")?.toLowerCase().trim() ?? "";
-    const terms = query.split(/\s+/);
-    // Every term must appear in the title, the location, the status or the text.
-    const haystack = (doc) => `${doc.title} ${doc.repo} ${doc.worktree.key} ${doc.path} ${doc.kind} ${doc.merged ? "merged" : "draft"} ${doc.text}`.toLowerCase();
-    const shown = unique(docs).filter((doc) => terms.every((term) => haystack(doc).includes(term))).toSorted((a, b) => b.mtime - a.mtime);
-    const heading = query ? plural(shown.length, "result") : "Recently updated";
-    const list = shown.slice(0, 50).map((doc) => row(doc)).join("") || '<p class="muted">Nothing found.</p>';
+    const query = url.searchParams.get("q")?.trim() ?? "";
+    const results = query ? search(docs, query) : unique(docs).toSorted((a, b) => b.mtime - a.mtime).map((doc) => ({ doc }));
+    const heading = query ? `${plural(results.length, "result")}${results.length > 50 ? ", first 50 shown" : ""}` : "Recently updated";
+    const list = results.slice(0, 50).map(({ doc, snippet }) => row(doc, { snippet })).join("") || '<p class="muted">Nothing found.</p>';
     return respond(200, "Docs", `<div class="list"><h1>${heading}</h1>${list}</div>`, { query });
   }
 

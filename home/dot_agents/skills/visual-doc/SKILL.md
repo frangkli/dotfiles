@@ -22,14 +22,23 @@ Load the `writing` skill and follow its technical mode, including its AI-tell pa
 
 Add a visual only when it says something faster than prose: a comparison, a flow, a metric, a timeline. One idea per visual. No decorative images, icons or illustrations.
 
-| Question                        | Visual                                                         |
-| ------------------------------- | -------------------------------------------------------------- |
-| Where does the time go?         | A waterfall (`.bars` with `--start`), overlaps drawn to scale  |
-| What changed in the experiment? | Metric tiles plus a results table                              |
-| How does this work or fail?     | A `.flow` through the real components and owners               |
-| Which option should we choose?  | An options table with the chosen row marked                    |
+| Question                             | Visual                                                               |
+| ------------------------------------ | -------------------------------------------------------------------- |
+| Where does the time go?              | A waterfall (`.bars` with `--start`), overlaps drawn to scale        |
+| What changed in the experiment?      | Metric tiles plus a results table                                    |
+| How does this work or fail?          | A `.flow` through the real components and owners                     |
+| Which option should we choose?       | An options table with the chosen row marked                          |
+| What talks to what, in which states? | A Mermaid diagram: sequence, state, ER, dependency graph or timeline |
 
-Every number comes from a source you can point to; never invent values to fill a chart. State units and the full-width scale in the caption. Give each chart a text or table equivalent, and never carry meaning by colour alone.
+Pick the diagram tool by what it shows:
+
+- Mermaid (`<pre class="mermaid">`) is the default for structural diagrams. Colour a node with `class <node> good`, `warn` or `bad`; add no other styling.
+- The kit's `.flow` and `.bars` cover simple flows and magnitudes.
+- Hand-drawn inline SVG only for a bespoke visual whose layout carries meaning.
+
+Each diagram or chart shows one idea, stays readable at 390 px wide, and has a text or table equivalent in its caption or beside it.
+
+Every number comes from a source you can point to; never invent values to fill a chart. State units and the full-width scale in the caption, and never carry meaning by colour alone.
 
 ## The kit
 
@@ -43,7 +52,8 @@ Copy [assets/template.html](assets/template.html) to the target path, then repla
 | `.metrics`                    | Measured headline numbers                           | 2 to 4 tiles, each with a `.source`     |
 | `.bars`                       | Magnitudes side by side, or a waterfall             | Units on every bar                      |
 | `.flow`                       | A request or process through its owners             | 3 to 6 steps                            |
-| `.diagram` with `d-*` classes | Structure a flow can't show, as inline SVG          | Readable at 390 px wide                 |
+| `pre.mermaid`                 | Sequence, state, ER, dependency and timeline views  | One idea; caption gives the text form   |
+| `.diagram` with `d-*` classes | A bespoke visual whose layout carries meaning       | Readable at 390 px wide                 |
 | Table with `tr.chosen`        | Options and their tradeoffs                         | Wrap in `.scroll`                       |
 | `.tabs`                       | Alternative views of one thing (before and after)   | All panels must make sense on their own |
 | `.decisions`                  | Decisions the reader owns                           | At the end, each with a `.default`      |
@@ -54,7 +64,8 @@ Formatting shows hierarchy and nothing else:
 - Colour has three meanings, set in the kit: green for the recommendation, the chosen option and good results; ochre for decisions the reader owns and drafts; red for risks and regressions. Use no other colours, and pair each colour with a word.
 - Bold marks at most one key number or term per paragraph.
 - Use the kit's type scale; don't set font sizes in page CSS.
-- No external fonts, scripts, CDNs or frameworks.
+- No external fonts, scripts, CDNs or frameworks, with one exception: kit-js loads the pinned Mermaid build from jsDelivr, with an integrity hash, when the page has a diagram.
+- Kit-js adds the light, dark and system theme control; don't add another.
 
 Use semantic HTML, labelled and keyboard-operable controls, and visible focus. Keep the content readable without JavaScript and at phone width.
 
@@ -65,7 +76,7 @@ Use semantic HTML, labelled and keyboard-operable controls, and visible focus. K
    - research reports and experiment results in `docs/research/`;
    - specs where `to-spec` puts them.
 
-   If the repo documents its own layout for these folders (AGENTS.md, a README inside them), follow that. A Markdown document in these folders declares its kind in front matter (`kind: experiment`); the docs hub renders it with the kit.
+   If the repo documents its own layout for these folders (AGENTS.md, a README inside them), follow that. A Markdown document in these folders declares its kind in front matter (`kind: experiment`); the docs hub renders it with the kit, and ```` ```mermaid ```` fences become diagrams there and on GitHub.
 2. Commit the page with the work it explains, or on its own when the page is the deliverable. When revising, overwrite the same file and let git keep the history: no `-v2` or dated duplicates. The only copy never lives in `.context/`, `/tmp` or an environment-provided visualization directory. Evidence captures that no page links to stay in `.context/`.
 3. A page with images, evidence files or sibling pages becomes a directory with `index.html`. Use relative links, never `file://` or preview URLs.
 

@@ -10,7 +10,7 @@
 /* Accent colours, one meaning each: --accent green = recommendation, chosen option, good result;
    --warn ochre = decision for the reader, draft, caution; --bad red = risk, regression.
    Type scale: h1 30px, h2 22px, h3 18px, body 16px, notes 14px, labels 12-13px.
-   Light and dark follow the system setting. */
+   Light and dark follow the system until the theme control (kit-js) sets data-theme on <html>. */
 :root {
   color-scheme: light dark;
   --bg: light-dark(#fafbf9, #131614);
@@ -30,6 +30,8 @@
   --radius: 6px;
   --measure: 72ch;
 }
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--font); }
@@ -60,6 +62,17 @@ summary { font-weight: 600; cursor: pointer; }
 figure { margin: 1.5em 0; }
 figcaption, .muted { margin-top: 8px; font-size: 14px; color: var(--muted); }
 :focus-visible { outline: 2px solid var(--warn); outline-offset: 2px; }
+.theme { float: right; margin: 0 0 8px 12px; font-size: 13px; color: var(--muted); }
+.theme select {
+  margin-left: 4px; padding: 2px 6px; font: inherit; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+}
+
+/* Mermaid: the source shows as code until kit-js draws it. class <node> good|warn|bad colours a node. */
+pre.mermaid[data-processed] { padding: 0; text-align: center; background: none; border: 0; }
+.mermaid .node.good :is(rect, polygon, circle, path) { fill: var(--accent-soft) !important; stroke: var(--accent) !important; }
+.mermaid .node.warn :is(rect, polygon, circle, path) { fill: var(--warn-soft) !important; stroke: var(--warn) !important; }
+.mermaid .node.bad :is(rect, polygon, circle, path) { fill: var(--bad-soft) !important; stroke: var(--bad) !important; }
 
 /* Header: eyebrow (kind and date), title, one-sentence lede, status facts. */
 .eyebrow { margin: 0 0 6px; font-size: 14px; color: var(--muted); }
@@ -191,6 +204,18 @@ tr.chosen > :first-child { padding-left: 12px; box-shadow: inset 3px 0 var(--acc
         <li class="good"><strong>Worker</strong> renders the PDF<small>Owner: worker</small></li>
         <li><strong>Browser</strong> polls the status URL<small>Owner: web</small></li>
       </ol>
+      <figure>
+        <pre class="mermaid">
+stateDiagram-v2
+  [*] --> queued
+  queued --> rendering: worker claims
+  rendering --> done
+  rendering --> failed
+  failed --> queued: retry, at most twice
+  class done good
+  class failed bad</pre>
+        <figcaption>Job states: queued, rendering, then done; a failed render goes back to the queue at most twice.</figcaption>
+      </figure>
 
       <h2>Where the time goes</h2>
       <div class="metrics">
@@ -276,6 +301,97 @@ GET  /reports/42  →  200 {"state": "done"}</code></pre></section>
         tabs.prepend(list);
         tabs.classList.add("ready");
         select(0);
+      }
+
+      // Theme: system, light or dark, saved in this browser. The docs hub runs this same code and
+      // sets the theme of the document in its frame; a document opened on its own gets the control.
+      {
+        const root = document.documentElement;
+        const saved = () => {
+          try {
+            return localStorage.getItem("theme") || "system";
+          } catch {
+            return "system";
+          }
+        };
+        const apply = (target, theme) => (theme === "system" ? delete target.dataset.theme : (target.dataset.theme = theme));
+        const frames = () => [...document.querySelectorAll("iframe")].map((frame) => frame.contentDocument?.documentElement).filter(Boolean);
+        apply(root, saved());
+        for (const frame of document.querySelectorAll("iframe")) {
+          frame.addEventListener("load", () => frame.contentDocument && apply(frame.contentDocument.documentElement, saved()));
+        }
+        if (window === top) {
+          const label = Object.assign(document.createElement("label"), { className: "theme" });
+          const select = document.createElement("select");
+          label.append(Object.assign(document.createElement("span"), { textContent: "Theme" }));
+          for (const theme of ["system", "light", "dark"]) {
+            select.append(new Option(theme[0].toUpperCase() + theme.slice(1), theme, false, theme === saved()));
+          }
+          select.addEventListener("change", () => {
+            try {
+              localStorage.setItem("theme", select.value);
+            } catch {}
+            for (const target of [root, ...frames()]) apply(target, select.value);
+          });
+          label.append(select);
+          (document.querySelector("[data-theme-control]") ?? document.querySelector("main") ?? document.body).prepend(label);
+        }
+      }
+
+      // Mermaid, loaded only when the page has a diagram. Without it the source stays readable as code.
+      {
+        const blocks = [...document.querySelectorAll("pre.mermaid")];
+        const sources = blocks.map((block) => block.textContent);
+        const probe = document.createElement("span");
+        const color = (name) => {
+          probe.style.color = `var(${name})`;
+          return getComputedStyle(probe).color;
+        };
+        const render = () => {
+          document.body.append(probe);
+          const background = color("--bg");
+          const [red, green, blue] = background.match(/\d+/g).map(Number);
+          const themeVariables = {
+            darkMode: red * 0.299 + green * 0.587 + blue * 0.114 < 128,
+            background,
+            fontFamily: getComputedStyle(document.body).fontFamily,
+            primaryColor: color("--surface"),
+            primaryBorderColor: color("--border"),
+            primaryTextColor: color("--text"),
+            secondaryColor: color("--sunken"),
+            tertiaryColor: color("--sunken"),
+            lineColor: color("--muted"),
+            edgeLabelBackground: background,
+            textColor: color("--text"),
+            noteBkgColor: color("--warn-soft"),
+            noteBorderColor: color("--warn"),
+            noteTextColor: color("--text"),
+            errorBkgColor: color("--bad-soft"),
+            errorTextColor: color("--bad"),
+          };
+          probe.remove();
+          blocks.forEach((block, i) => {
+            block.removeAttribute("data-processed");
+            block.textContent = sources[i];
+          });
+          mermaid.initialize({ startOnLoad: false, theme: "base", themeVariables });
+          mermaid.run({ nodes: blocks });
+        };
+        if (blocks.length) {
+          const script = Object.assign(document.createElement("script"), {
+            src: "https://cdn.jsdelivr.net/npm/mermaid@12.2.0/dist/mermaid.min.js",
+            integrity: "sha384-8xUhuLNMjW/cI2Dacg3DR4WliYznvIg0LVG1stctThKD/YVrJFI9TNCFxft5NYgp",
+            crossOrigin: "anonymous",
+            referrerPolicy: "no-referrer",
+          });
+          script.addEventListener("load", () => {
+            render();
+            // Redraw when the theme changes, from the control, the hub or the system.
+            new MutationObserver(render).observe(document.documentElement, { attributeFilter: ["data-theme"] });
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+          });
+          document.head.append(script);
+        }
       }
     </script>
   </body>
