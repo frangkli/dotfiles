@@ -1,6 +1,6 @@
 ---
 name: writing
-description: Writing prose for human readers. Load it before drafting, editing or reviewing any of these, however short: an email, chat message or reply; a README or docs page; a technical explanation, plan, report or spec; or a blog post, landing page or announcement.
+description: 'Writing prose for human readers. Load it before drafting, editing or reviewing any of these, however short: an email, chat message or reply; a README or docs page; a technical explanation, plan, report or spec; or a blog post, landing page or announcement.'
 ---
 
 # Writing

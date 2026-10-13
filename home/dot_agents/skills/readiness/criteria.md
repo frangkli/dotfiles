@@ -27,7 +27,7 @@ The recommended config for a failing VAL-1, VAL-2, VAL-6 or VAL-7 is per stack: 
 | BLD-1 | 1 | app | The app builds or starts from a documented command in a fresh worktree |
 | BLD-2 | 2 | repo | One command runs every check (lint, types, tests, build) and exits non-zero when any fails |
 | BLD-3 | 2 | repo | `GATES.md` lists each check command with what it covers and how long it takes, and maps the recipe names (`setup`, `teardown`, `check`, `fix`, `test <path>`, `dev`) to their commands; every listed command exists, and each timing is within 2x of a measured run |
-| BLD-4 | 2 | repo | A lockfile is committed, CI installs from it frozen, and the runtime and toolchain versions are pinned in files the tools read |
+| BLD-4 | 2 | repo | A lockfile is committed, CI installs from it frozen so a stale lockfile fails the run (`uv sync --locked`: plain `uv sync` re-locks after a `pyproject.toml` change; `--locked` on each cargo command, such as `cargo build --locked`), and the runtime and toolchain versions are pinned in files the tools read |
 | BLD-5 | 3 | repo | `AGENTS.md` or `GATES.md` says to run the cheapest covering check while iterating and the full check only at ship points, and no instruction tells agents to run the full check before every hand-off |
 | BLD-6 | 4 | repo | Checks can run per package or per app, so a unit's check doesn't need the whole repo |
 

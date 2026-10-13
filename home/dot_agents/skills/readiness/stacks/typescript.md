@@ -153,6 +153,10 @@ Bite test: `<Image src="x.png" />` without `alt` in a covered file must fail `js
 
 **Browser tests (TST-7), only for a shared component library.** A Vitest browser project (`@vitest/browser-playwright`, or `vite-plus/test/browser-playwright` under Vite+) with one Chromium instance and `headless: true` runs axe-core over every component, and CI runs it on Linux. App pages get their real-browser axe scan from the `verify` skill instead.
 
+## SQL tests
+
+Tests that need SQL run on PGlite (`@electric-sql/pglite`): a fresh in-memory instance per test file with the migrations applied, and the query layer on its PGlite driver (`drizzle-orm/pglite` for Drizzle). A test that needs an extension PGlite lacks or two connections at once runs on the project's Postgres test container: [postgres.md](../postgres.md#tests-on-pglite).
+
 ## pnpm
 
 pnpm 11 and later turn on `strictDepBuilds`, `blockExoticSubdeps`, a one-day `minimumReleaseAge` and frozen-lockfile installs in CI. In `pnpm-workspace.yaml`, add only what the defaults leave out:
