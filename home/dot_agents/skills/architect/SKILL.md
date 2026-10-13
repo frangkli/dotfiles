@@ -68,7 +68,7 @@ Done when the usage matches the sketch's signatures and the synthesis has no red
 
 ## 7. Write the design doc
 
-Load the `writing` skill by name and follow its technical mode, including its AI-tell pass. Write `docs/plans/YYYY-MM-DD-<slug>-design.md` from [rationale.md](rationale.md), with the synthesised sketch inline and the step 4 line under the synthesis decision. The plans hub shows it live from the worktree.
+Load the `writing` skill by name and follow its technical mode, including its AI-tell pass. Write `docs/plans/YYYY-MM-DD-<slug>-design.md` from [rationale.md](rationale.md), with the synthesised sketch inline and the step 4 line under the synthesis decision. Where a plans hub serves the repo, it shows the file live from the worktree.
 
 Done when every section of the rationale is filled and the technical mode's completion check passes.
 

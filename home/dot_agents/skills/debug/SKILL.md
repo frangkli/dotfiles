@@ -9,6 +9,8 @@ A discipline for hard bugs. Skip phases only when explicitly justified.
 
 When exploring the codebase, read the repo's glossary or domain doc (`GLOSSARY.md`, `CONTEXT.md`) if one exists to get a clear mental model of the relevant modules, and check ADRs in the area you're touching. Read `GATES.md` for the check commands, what each covers and how long it takes.
 
+For a production issue, start from observability evidence before forming theories: Sentry issues and traces, Axiom logs and PostHog replays, through their CLIs or MCP servers.
+
 Keep scratch artifacts (harnesses, captured traces, fixtures, repro scripts, measurements) in `.context/debug/<slug>/`, which git ignores.
 
 ## Redact

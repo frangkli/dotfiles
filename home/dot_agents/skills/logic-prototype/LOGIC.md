@@ -30,7 +30,7 @@ One file, plain HTML, CSS and JavaScript, everything inline, so it opens with no
 
 Clean typography, generous spacing, one accent colour, no animation: nothing competes with the state and the buttons.
 
-Save it under the repo's `docs/plans/` on the prototype branch (for example `docs/plans/prototype-<slug>.html`), so the plans hub shows it from the worktree.
+Save it under the repo's `docs/plans/` on the prototype branch (for example `docs/plans/prototype-<slug>.html`), so a plans hub, where one serves the repo, shows it from the worktree.
 
 ## 4. Drive it yourself
 

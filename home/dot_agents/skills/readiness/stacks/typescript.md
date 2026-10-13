@@ -1,6 +1,6 @@
 # TypeScript stack
 
-The recommended lint and type-check setup for a TypeScript repo: the default to offer for VAL-1 and VAL-2 when the repo has no config, and the settings to merge into an existing config. It matches the `typescript` skill, which leaves every rule below to the tools. Rule ids are Oxlint's (checked against Oxlint 1.87 with oxlint-tsgolint 7.0, Vite+ 0.2.9, and `@effect/tsgo` 0.51 with Effect 4.0.0-rc.110); confirm them against the installed version, and keep a repo's own linter when it already does the job.
+The recommended lint and type-check setup for a TypeScript repo: the default to offer for VAL-1 and VAL-2 when the repo has no config, and the settings to merge into an existing config. [React UI](#react-ui) covers VAL-6, VAL-7, TST-5 and TST-7; [pnpm](#pnpm) covers SEC-12. It matches the `typescript` skill, which leaves every rule below to the tools. Rule ids are Oxlint's (checked against Oxlint 1.87 with oxlint-tsgolint 7.0, Vite+ 0.2.9, and `@effect/tsgo` 0.51 with Effect 4.0.0-rc.110); confirm them against the installed version, and keep a repo's own linter when it already does the job.
 
 ## Compiler flags
 
@@ -117,6 +117,53 @@ Categories: turn on `correctness`, `suspicious` and `perf` (Effect's own set) an
 Passing `no-unused-vars` any options object drops its default of ignoring `^_` names; restate `argsIgnorePattern`, `varsIgnorePattern` and `caughtErrorsIgnorePattern` as `"^_"` if you configure it.
 
 Add a dead-export and dead-file finder (knip) for unused exports and files, which no lint rule sees.
+
+## React UI
+
+For an app that renders React or other JSX.
+
+**Accessibility lint (VAL-6).** Load the `react` and `jsx-a11y` plugins in an override for the UI files; the base config's `correctness: "error"` turns their rules on at error. Map the design-system components to the elements they render under a top-level `settings` key: Oxlint rejects `settings` inside `overrides`. Set `polymorphicPropName` to the prop the component library uses (`render` for Base UI, `as` for many others).
+
+```jsonc
+{
+  "settings": { "jsx-a11y": { "components": { "Button": "button", "Link": "a", "Image": "img" }, "polymorphicPropName": "render" } },
+  "overrides": [{ "files": ["src/**/*.tsx"], "plugins": ["react", "jsx-a11y"] }]
+}
+```
+
+Bite test: `<Image src="x.png" />` without `alt` in a covered file must fail `jsx-a11y(alt-text)`.
+
+**Design-system lint (VAL-7), only when the repo uses shadcn/ui (`components.json` exists).** `@shadcn/lint` (Oxlint 1.80 or later) loads as a JS plugin. Its rules reject restyling a component through `className` (`no-restyle`, with per-component `contracts` for what each may change), raw palette colours such as `bg-pink-500` (`no-raw-colors`), arbitrary values such as `p-[13px]` (`no-arbitrary-values`), inline styles (`no-inline-styles`), classes Tailwind can't generate (`no-unknown-classes`) and class strings it can't read statically (`require-static-classes`):
+
+```jsonc
+{
+  "jsPlugins": ["@shadcn/lint"],
+  "rules": {
+    "shadcn/no-restyle": ["error", { "allow": ["layout"] }],
+    "shadcn/no-raw-colors": "error",
+    "shadcn/no-arbitrary-values": "error",
+    "shadcn/no-inline-styles": "error",
+    "shadcn/no-unknown-classes": "error",
+    "shadcn/require-static-classes": "error"
+  }
+}
+```
+
+**Component tests (TST-5).** Vitest with `environment: "happy-dom"` and Testing Library. Tests find elements with `getByRole` and `getByLabelText`, so a control with no accessible name fails; pure logic runs in the `node` environment. Render the real component; a test that mocks React's hooks checks call order, not what a user sees.
+
+**Browser tests (TST-7), only for a shared component library.** A Vitest browser project (`@vitest/browser-playwright`, or `vite-plus/test/browser-playwright` under Vite+) with one Chromium instance and `headless: true` runs axe-core over every component, and CI runs it on Linux. App pages get their real-browser axe scan from the `verify` skill instead.
+
+## pnpm
+
+pnpm 11 and later turn on `strictDepBuilds`, `blockExoticSubdeps`, a one-day `minimumReleaseAge` and frozen-lockfile installs in CI. In `pnpm-workspace.yaml`, add only what the defaults leave out:
+
+```yaml
+trustPolicy: no-downgrade
+allowBuilds:
+  esbuild: true # one entry per package whose install script the app needs
+```
+
+`trustPolicyExclude` lists exceptions, each with a reason in a comment. SEC-12 fails when any file (`pnpm-workspace.yaml`, `.npmrc`, a CI step) turns a default guard off: `strictDepBuilds: false`, `blockExoticSubdeps: false`, `minimumReleaseAge: 0`, `dangerouslyAllowAllBuilds`, or `--no-frozen-lockfile` in CI. Name the file and line in the evidence.
 
 ## What the tools enforce
 

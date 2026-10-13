@@ -263,15 +263,15 @@
         <p>
           <strong>Recommendation:</strong> save each explanation as one self-contained HTML file in
           the repo’s <code>docs/plans</code> or <code>docs/research</code>, and commit it with the
-          work. The plans hub shows it as soon as it is saved. Use the local preview only for a
-          quick look.
+          work. When a plans hub serves the repo, it shows the page as soon as it is saved. Use the
+          local preview for a quick look.
         </p>
       </div>
       <section aria-labelledby="flow-title">
         <h2 id="flow-title">How the pieces fit together</h2>
         <p>
-          The skill provides instructions and a starter. The saved page owns the explanation. The
-          plans hub finds the page on disk and serves it.
+          The skill provides instructions and a starter. The saved page owns the explanation. When a
+          plans hub serves the repo, it finds the page on disk and serves it.
         </p>
         <div
           class="flow"
@@ -292,7 +292,7 @@
           <div class="step">
             <h3>3. Plans hub</h3>
             <p>Lists every checkout and worktree’s pages, read live from disk.</p>
-            <span class="owner">The box-wide hub; the local preview stands in for a quick look.</span>
+            <span class="owner">When a hub serves the repo; otherwise the local preview.</span>
           </div>
         </div>
         <div class="controls" id="scenario-controls" hidden>
