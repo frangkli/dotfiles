@@ -25,6 +25,9 @@ Pick one that the repo's configuration should catch; read its config first so th
 | Dead code | Add an exported function nothing imports, or a dependency nothing uses |
 | Generated output | Hand-edit one generated file; the check must fail on staleness |
 | Import boundaries | Import a package's internal file from outside it |
+| Accessibility lint | Render a mapped image component (`<Image>`) without `alt` |
+| Design-system lint | Add an arbitrary value (`p-[13px]`) to a component's `className` |
+| Log redaction | Log a fake credential through the app's logger; the emitted event must show it redacted |
 | CI parity | Read the CI job's steps and compare them with the local check command, step by step; a step only CI runs is a FAIL for SEC-3 |
 
 Never commit or push a violation outside the scratch worktree. Delete the scratch worktree and any commits made in it when the audit ends.

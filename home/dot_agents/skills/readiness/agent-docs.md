@@ -6,7 +6,7 @@ For gaps in the agent docs and build-and-checks areas. Read `writing-for-agents`
 
 - One root file under ~60 lines, never over 100. Add an app-level `AGENTS.md` only where that app's commands differ, shorter than the root.
 - Tables for commands, file-scoped first: test one file, lint one file, type-check one package. The full check appears once, as a pointer to `GATES.md`.
-- Pointers, not copies: one line each to `GATES.md`, `REVIEW_RULES.md`, the `verify` skill, setup docs, architecture and security docs that exist. Repo-relative paths only.
+- Pointers, not copies: one line each to `GATES.md`, `REVIEW_RULES.md`, `GLOSSARY.md`, the `verify` skill, setup docs, architecture and security docs that exist. Repo-relative paths only.
 - Cache only what an agent can't find by looking: unwritten conventions, the reason behind a surprising choice, gotchas. Leave out linter settings, installed skills, slogans and commit attribution.
 - Claude reads `AGENTS.md` when `CLAUDE.md` links to it (`ln -s AGENTS.md CLAUDE.md`) or imports it (`@AGENTS.md`); add one only if the repo lacks both. Project skills live in `.agents/skills/`, with `.claude/skills` as a link to it.
 - Before finishing, run every command in the file and resolve every path.
@@ -22,10 +22,27 @@ For gaps in the agent docs and build-and-checks areas. Read `writing-for-agents`
 | `<test one package>` | <which tests> | ~20 s |
 | `<full check>` | lint, types, all tests, build | ~6 min |
 
+| Recipe | Command |
+|---|---|
+| `setup` / `teardown` | `<runner> run setup` / `<runner> run teardown` |
+| `check` / `fix` | `<runner> run check` / `<runner> run fix` |
+| `test <path>` | `<runner> test <path>` |
+| `dev` | `<runner> run dev` |
+
 While iterating, run the cheapest command that covers your change. When a unit of work is done, check the packages it touched. Run the full check only at ship points: before opening or updating a PR, once on the integrated head, and before merge.
 ```
 
 Times come from runs you measured on this machine, rounded. Remove any `AGENTS.md` line that asks for the full check before every hand-off.
+
+## GLOSSARY.md
+
+```markdown
+# Glossary
+
+- **<Term>:** <what it means in this project, in one line>.
+```
+
+One line per domain term, alphabetical. Take the terms from type names, routes, tables and the README, and keep only words whose meaning here differs from everyday use or that a newcomer would have to look up. Grep each term; drop any that appear nowhere in the code or docs.
 
 ## REVIEW_RULES.md
 

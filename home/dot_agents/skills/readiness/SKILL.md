@@ -22,9 +22,10 @@ Read before judging. Record:
 
 - **Stacks:** languages, package managers, toolchain pins.
 - **Apps:** each independently run or deployed unit (web app, API, worker, CLI, published package) with its surface (UI, HTTP, CLI, library), its start command and where it deploys. App-scoped criteria are scored once per app.
-- **Existing tools:** checkers, test runners, hooks, CI system, review bots, secrets handling, observability backends, agent docs (`AGENTS.md`, `GATES.md`, the `verify` skill under `.agents/skills/`).
+- **Existing tools:** checkers, test runners, hooks, CI system, review bots, secrets handling, observability backends, agent docs (`AGENTS.md`, `GATES.md`, `GLOSSARY.md`, `t3.json`, the `verify` skill under `.agents/skills/`).
+- **Conditions that make criteria apply:** per app, whether it renders React or JSX, uses shadcn/ui (`components.json`), is a shared component library, calls a model (an LLM SDK in its dependencies), and has users or runs in production (ask the user when the repo doesn't show it).
 
-Done when every app has a surface, a start command (or "none found") and its list of checkers.
+Done when every app has a surface, a start command (or "none found"), its list of checkers and its conditions.
 
 ## 3. Audit
 
@@ -49,7 +50,9 @@ Done when both files exist and every FAIL appears in the gap list.
 
 ## 5. Recommend
 
-For each gap, give one to three options that fit the repo's stack and existing tools, each with its effort and what it changes. When an option in [defaults.md](defaults.md) fits, offer it as the recommended default; when it doesn't fit, say why and recommend what does. Fixes for the agent docs and checks areas follow [agent-docs.md](agent-docs.md).
+For each gap, give one to three options that fit the repo's stack and existing tools, each with its effort and what it changes. When an option in [defaults.md](defaults.md) fits, offer it as the recommended default; when it doesn't fit, say why and recommend what does. Fixes for the agent docs and checks areas follow [agent-docs.md](agent-docs.md); dev environment fixes follow [worktrees.md](worktrees.md) and [postgres.md](postgres.md).
+
+Under DOC-6, also offer per-project installs of stack skills that match the detected stack: the vendor's own skill first (Sentry, Neon, Prisma, Stripe, Cloudflare, Supabase and Expo publish them; Next.js, Playwright, Storybook and TanStack ship them in the package), installed into `.agents/skills/` with `npx skills add <owner/repo> --skill <name> --agent codex`. List each pick with its source; read a pick's body before installing it.
 
 End the report with the decision batch: one line per gap, the recommended option first, and what happens if the gap stays. Then stop. The audit changes nothing in the repo beyond the two report files.
 
@@ -57,7 +60,7 @@ End the report with the decision batch: one line per gap, the recommended option
 
 Only after the user approves, and only the gaps they approved:
 
-1. One branch for all approved fixes. Merge into existing configs, never overwrite them. For a missing `verify` skill, run `verify-create` once per app surface.
+1. One branch for all approved fixes. Merge into existing configs, never overwrite them. For a missing `verify` skill, run `verify-create` once per app surface. `PRODUCT.md` and `DESIGN.md` stay the owner's: the hand-off names `/impeccable init`, which interviews the owner before it writes `PRODUCT.md`. After writing `t3.json`, the hand-off tells the owner to import its actions once in T3's project settings.
 2. Prove each fix: the criterion it targets now passes with fresh evidence, including its bite test.
 3. Re-run steps 3–4 on the branch and save the new report beside the old one.
 4. Ship through `pr`, with the before and after levels in the body.

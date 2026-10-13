@@ -1,0 +1,5 @@
+interface:
+  display_name: "Tune-up"
+  short_description: "Measured improvement run: survey, or one kind as PRs"
+policy:
+  allow_implicit_invocation: false
