@@ -91,16 +91,26 @@ async function findRepos() {
   return repos;
 }
 
-// Blob ids on the default branch (origin's, else the main checkout's HEAD). Comparing bytes, not
-// just paths, is what marks a merged plan that a branch has since edited as a draft.
-async function defaultBlobs(dir) {
+const docBlobs = async (dir, commit) => {
+  const output = await git(dir, "ls-tree", "-r", "-z", commit, "--", "docs");
+  return new Map(output.split("\0").filter(Boolean).map((line) => [line.split("\t")[1], line.split(/[ \t]/)[2]]));
+};
+
+// The default branch's commit (origin's, else the main checkout's HEAD) and its docs' blob ids.
+// Comparing bytes, not just paths, is what marks a merged plan that a branch has since edited as a draft.
+async function defaultBranch(dir) {
   for (const ref of ["refs/remotes/origin/HEAD", "HEAD"]) {
-    const output = await git(dir, "ls-tree", "-r", "-z", ref, "--", "docs").catch(() => undefined);
-    if (output !== undefined) {
-      return new Map(output.split("\0").filter(Boolean).map((line) => [line.split("\t")[1], line.split(/[ \t]/)[2]]));
-    }
+    const commit = (await git(dir, "rev-parse", "--verify", "-q", `${ref}^{commit}`).catch(() => "")).trim();
+    if (commit) return { commit, blobs: await docBlobs(dir, commit) };
   }
-  return new Map();
+  return { commit: undefined, blobs: new Map() };
+}
+
+// Blob ids where a worktree's branch left the default branch. A file still equal to them came from
+// the default branch unchanged, so it isn't the branch's draft even when the default branch has moved on.
+async function forkBlobs(dir, commit) {
+  const base = commit && (await git(dir, "merge-base", "HEAD", commit).catch(() => "")).trim();
+  return base ? docBlobs(dir, base) : new Map();
 }
 
 // A docs folder counts only if its real path stays inside the worktree.
@@ -125,9 +135,10 @@ async function walk(dir) {
 async function scan(repos) {
   const docs = [];
   for (const repo of repos.values()) {
-    const merged = await defaultBlobs(repo.dir);
+    const { commit, blobs: merged } = await defaultBranch(repo.dir);
     const algorithm = [...merged.values()][0]?.length === 64 ? "sha256" : "sha1";
     for (const worktree of repo.worktrees) {
+      const inherited = await forkBlobs(worktree.dir, commit);
       for (const folder of Object.keys(folders)) {
         const root = await folderRoot(worktree.dir, folder);
         for (const file of root ? await walk(root) : []) {
@@ -139,7 +150,8 @@ async function scan(repos) {
           const { title, kind, text } = parseDocument(content.toString("utf8"), path);
           const date = /\d{4}-\d{2}-\d{2}/.exec(path)?.[0] ?? new Date(info.mtimeMs).toISOString().slice(0, 10);
           const doc = { repo: repo.name, worktree, path, title: title || basename(path), text, date };
-          docs.push({ ...doc, kind: kind?.toLowerCase() || folders[folder], mtime: info.mtimeMs, merged: merged.get(path) === blob });
+          const isMerged = merged.get(path) === blob || inherited.get(path) === blob;
+          docs.push({ ...doc, kind: kind?.toLowerCase() || folders[folder], mtime: info.mtimeMs, merged: isMerged });
         }
       }
     }
@@ -147,7 +159,8 @@ async function scan(repos) {
   return docs;
 }
 
-// A merged document sits in every checkout; list it once, preferring the main checkout's copy.
+// A merged document sits in every checkout, some copies behind the default branch; list it once,
+// preferring the main checkout's copy.
 function unique(docs) {
   const merged = new Map();
   for (const doc of docs.filter((doc) => doc.merged)) {
@@ -314,13 +327,44 @@ const branchUrl = (repo, worktree) => `/${encodePath(repo)}/${encodePath(worktre
 const docUrl = (doc) => `${branchUrl(doc.repo, doc.worktree)}/${encodePath(doc.path)}`;
 const drafts = (docs) => docs.filter((doc) => !doc.merged).length;
 const plural = (count, word) => `${count} ${word}${count === 1 ? "" : "s"}`;
-const status = (doc) => (doc.merged ? '<span class="badge good">merged</span>' : '<span class="badge warn">draft</span>');
+// The only status marker: a quiet tag on a draft. Merged documents show nothing.
+const status = (doc) => (doc.merged ? "" : '<span class="tag draft">draft</span>');
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const dayStart = (ms) => new Date(ms).setHours(0, 0, 0, 0);
+const dayLabel = (ms, now = Date.now()) => {
+  const days = Math.round((dayStart(now) - dayStart(ms)) / 864e5);
+  const date = new Date(ms);
+  if (days <= 0) return "Today";
+  if (days === 1) return "Yesterday";
+  return `${months[date.getMonth()]} ${date.getDate()}${date.getFullYear() === new Date(now).getFullYear() ? "" : `, ${date.getFullYear()}`}`;
+};
+const ago = (ms, now = Date.now()) => {
+  const minutes = Math.max(0, Math.round((now - ms) / 6e4));
+  if (minutes < 1) return "now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 24 * 60 && dayStart(ms) === dayStart(now)) return `${Math.round(minutes / 60)}h ago`;
+  const label = dayLabel(ms, now);
+  return label === "Yesterday" ? "yesterday" : label;
+};
+const time = (doc) => {
+  const iso = new Date(doc.mtime).toISOString();
+  return `<time datetime="${iso}" title="${iso.slice(0, 16).replace("T", " ")} UTC">${ago(doc.mtime)}</time>`;
+};
 
+// One document in a list: when it changed, its title, kind and draft tag, then where it lives.
+// Sidebar items show only the title and the draft tag.
 function row(doc, { where = true, current = false, snippet = "" } = {}) {
-  const place = where ? `<span class="badge">${escapeHtml(doc.kind)}</span><span>${escapeHtml(`${doc.repo} · ${doc.worktree.key}`)}</span>` : "";
+  const title = `<span class="title">${escapeHtml(doc.title)}</span>`;
+  const aria = current ? ' aria-current="page"' : "";
+  if (!where) return `<a class="item${current ? " current" : ""}" href="${docUrl(doc)}"${aria}>${title}${status(doc)}</a>`;
+  const place = `${doc.repo} · ${doc.worktree.key} · ${doc.path}`;
   const excerpt = snippet ? `<span class="excerpt">${escapeHtml(snippet)}</span>` : "";
-  return `<a class="row${current ? " current" : ""}" href="${docUrl(doc)}">${escapeHtml(doc.title)}<small>${status(doc)}${place}<span>${doc.date}</span></small>${excerpt}</a>`;
+  return `<a class="item" href="${docUrl(doc)}">${time(doc)}<span class="body"><span class="head">${title}<span class="kind">${escapeHtml(doc.kind)}</span>${status(doc)}</span><span class="path">${escapeHtml(place)}</span>${excerpt}</span></a>`;
 }
+
+// A heading with a count over one bordered list, newest first.
+const list = (heading, items) =>
+  `<section class="group"><h2>${heading} <span class="count">${items.length}</span></h2><div class="card">${items.map(({ doc, snippet }) => row(doc, { snippet })).join("")}</div></section>`;
 
 // Every term must appear in the title, the location, the kind, the status or the text. Title and
 // location matches rank first, then how often the terms occur.
@@ -345,40 +389,54 @@ function search(docs, query) {
 
 function sidebar(repos, docs, repo, worktree, current, query = "") {
   const select = (label, items) =>
-    `<label>${label}<select>${items.map(([url, text, selected]) => `<option value="${url}"${selected ? " selected" : ""}>${escapeHtml(text)}</option>`).join("")}</select></label>`;
+    `<label>${label}<select>${items.map(([url, text, selected, count]) => `<option value="${url}"${selected ? " selected" : ""}${count ? ` title="${plural(count, "draft")}"` : ""}>${escapeHtml(text)}</option>`).join("")}</select></label>`;
   const repoItems = [...repos.values()].map((candidate) => {
     const count = drafts(docs.filter((doc) => doc.repo === candidate.name));
-    return [branchUrl(candidate.name, candidate.worktrees[0]), `${candidate.name}${count ? ` (${plural(count, "draft")})` : ""}`, candidate === repo];
+    return [branchUrl(candidate.name, candidate.worktrees[0]), `${candidate.name}${count ? ` · ${count}` : ""}`, candidate === repo, count];
   });
   let html = `<form action="/"><input type="search" name="q" value="${escapeHtml(query)}" placeholder="Search every document" aria-label="Search every document"></form>`;
-  html += select("Repository", repo ? repoItems : [["", "Choose a repository", true], ...repoItems]);
+  html += select("Repository · drafts", repo ? repoItems : [["", "Choose a repository", true], ...repoItems]);
   if (!repo) return html;
   const branchItems = repo.worktrees.map((candidate) => {
     const count = drafts(docs.filter((doc) => doc.worktree === candidate));
-    return [branchUrl(repo.name, candidate), `${candidate.key} · ${count ? plural(count, "draft") : "no drafts"}`, candidate === worktree];
+    return [branchUrl(repo.name, candidate), `${candidate.key}${count ? ` · ${count}` : ""}`, candidate === worktree, count];
   });
-  html += `${select("Branch or worktree", branchItems)}<p class="muted">${escapeHtml(worktree.dir.replace(homedir(), "~"))}</p>`;
+  html += select("Branch or worktree · drafts", branchItems);
   const shown = docs.filter((doc) => doc.worktree === worktree).toSorted((a, b) => b.date.localeCompare(a.date));
   const byKind = Object.groupBy(shown, (doc) => doc.kind);
+  html += '<nav aria-label="Documents in this worktree">';
   for (const kind of [...new Set([...Object.keys(kindLabels), ...Object.keys(byKind)])].filter((kind) => byKind[kind])) {
-    html += `<h2>${escapeHtml(kindLabels[kind] ?? kind)}</h2>${byKind[kind].map((doc) => row(doc, { where: false, current: doc === current })).join("")}`;
+    html += `<h2>${escapeHtml(kindLabels[kind] ?? kind)} <span class="count">${byKind[kind].length}</span></h2>${byKind[kind].map((doc) => row(doc, { where: false, current: doc === current })).join("")}`;
   }
-  return html;
+  return `${html}</nav>`;
 }
 
-function page({ title, where = "", side, main, headings = [], doc }) {
+const icons = {
+  menu: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/></svg>',
+  open: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 2.5h4.5V7M13.5 2.5 7.5 8.5M11.5 9.5v3a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3"/></svg>',
+  contents: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4h7.5M6 8h7.5M6 12h7.5"/><circle cx="3" cy="4" r=".6"/><circle cx="3" cy="8" r=".6"/><circle cx="3" cy="12" r=".6"/></svg>',
+};
+
+// crumbs: [text, url] pairs, the last one the current page.
+function page({ title, crumbs = [], side, main, headings = [], doc, home = false }) {
   const toc = headings.length
-    ? `<nav id="toc"><h2>Contents</h2>${headings.map((h) => `<a class="h${h.level}" href="#${escapeHtml(h.id)}">${escapeHtml(h.text)}</a>`).join("")}</nav>`
+    ? `<nav id="toc" aria-label="Contents"><h2>Contents</h2>${headings.map((h) => `<a class="h${h.level}" href="#${escapeHtml(h.id)}">${escapeHtml(h.text)}</a>`).join("")}</nav>`
     : "";
+  const trail = crumbs
+    .map(([text, url], i) => (i < crumbs.length - 1 && url ? `<a href="${url}">${escapeHtml(text)}</a>` : `<span aria-current="page">${escapeHtml(text)}</span>`))
+    .join('<span class="sep" aria-hidden="true">/</span>');
+  const open = doc ? `<a class="open" href="/raw${docUrl(doc)}" target="_blank" aria-label="Open alone" title="Open alone">${icons.open}</a>` : "";
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title><link rel="stylesheet" href="/assets/kit.css"><link rel="stylesheet" href="/assets/hub.css"></head>
-<body class="${toc ? "has-toc" : ""}"><header><button id="menu" aria-label="Documents">☰</button><a href="/">Docs</a><span>${escapeHtml(where)}</span><div data-theme-control></div>${toc ? '<button id="contents">Contents</button>' : ""}</header>
-<div class="layout"><aside>${side}</aside><div class="main">${main}</div>${toc}</div>
+<body class="${[toc && "has-toc", doc && "is-doc", home && "is-home"].filter(Boolean).join(" ")}">
+<header class="bar"><button id="menu" aria-label="Documents" aria-expanded="false">${icons.menu}</button><a class="brand" href="/">Docs</a><nav class="crumbs" aria-label="Location">${trail}</nav>${open}<div data-theme-control></div>${toc ? `<button id="contents" aria-label="Contents" aria-expanded="false">${icons.contents}<span>Contents</span></button>` : ""}</header>
+<aside>${side}</aside><div class="main">${main}</div>${toc}
 <script src="/assets/kit.js"></script>
 <script>
 const frame = document.querySelector("iframe");
-document.getElementById("menu").onclick = () => document.body.classList.toggle("drawer");
-document.getElementById("contents")?.addEventListener("click", () => document.body.classList.toggle("toc-open"));
+const toggle = (button, name) => button?.addEventListener("click", () => button.setAttribute("aria-expanded", document.body.classList.toggle(name)));
+toggle(document.getElementById("menu"), "drawer");
+toggle(document.getElementById("contents"), "toc-open");
 for (const select of document.querySelectorAll("aside select")) select.onchange = () => (location = select.value);
 if (frame) {
   const show = (id) => frame.contentDocument.getElementById(decodeURIComponent(id))?.scrollIntoView();
@@ -455,13 +513,16 @@ async function handle(request, response) {
   if (pathname === "/") {
     const query = url.searchParams.get("q")?.trim() ?? "";
     const results = query ? search(docs, query) : unique(docs).toSorted((a, b) => b.mtime - a.mtime).map((doc) => ({ doc }));
-    const heading = query ? `${plural(results.length, "result")}${results.length > 50 ? ", first 50 shown" : ""}` : "Recently updated";
-    const list = results.slice(0, 50).map(({ doc, snippet }) => row(doc, { snippet })).join("") || '<p class="muted">Nothing found.</p>';
-    return respond(200, "Docs", `<div class="list"><h1>${heading}</h1>${list}</div>`, { query });
+    const heading = query ? `Results${results.length > 50 ? ", first 50 shown" : ""}` : "Recently updated";
+    const form = `<form class="search" action="/" role="search"><input type="search" name="q" value="${escapeHtml(query)}" placeholder="Search every document" aria-label="Search every document"><button type="submit">Search</button></form>`;
+    const intro = '<p class="muted">Plans, research and specs from every checkout and worktree on this box, drafts included.</p>';
+    const body = results.length ? list(heading, results.slice(0, 50)) : '<p class="muted">Nothing found.</p>';
+    const crumbs = [[query ? "Search" : "All repositories"]];
+    return respond(200, "Docs", `<div class="list"><h1>Docs</h1>${intro}${form}${body}</div>`, { query, crumbs, home: true });
   }
 
   const { repo, worktree, path, extra } = route(pathname, repos);
-  const notFound = () => respond(404, "Not found", '<div class="list"><h1>Not found</h1><p class="muted">No checkout on the box has this document.</p></div>');
+  const notFound = () => respond(404, "Not found", '<div class="list"><h1>Not found</h1><p class="muted">No checkout on the box has this document.</p></div>', { crumbs: [["Not found"]] });
   if (!repo) return notFound();
   const main = repo.worktrees.find((candidate) => candidate.main) ?? repo.worktrees[0];
   const shown = worktree ?? main;
@@ -474,17 +535,18 @@ async function handle(request, response) {
   }
   if (!path && extra) return notFound();
   const where = `${repo.name} · ${shown.key}`;
-  const context = { where, repo, worktree: shown, doc };
+  const crumbs = [[repo.name, branchUrl(repo.name, main)], [shown.key, branchUrl(repo.name, shown)]];
+  const context = { repo, worktree: shown, doc, crumbs };
   if (!doc) {
-    const list = docs.filter((candidate) => candidate.worktree === shown).toSorted((a, b) => b.mtime - a.mtime);
-    const rows = list.map((candidate) => row(candidate, { where: false })).join("") || '<p class="muted">No documents in this worktree.</p>';
+    const shownDocs = docs.filter((candidate) => candidate.worktree === shown).toSorted((a, b) => b.mtime - a.mtime);
+    const rows = shownDocs.length ? list("Recently updated", shownDocs.map((candidate) => ({ doc: candidate }))) : '<p class="muted">No documents in this worktree.</p>';
     return respond(200, where, `<div class="list"><h1>${escapeHtml(where)}</h1>${rows}</div>`, context);
   }
   const found = await resolveFile(shown, path);
   if (!found) return notFound();
   const { headings } = await documentHtml(found.file);
-  const bar = `<div class="doc-bar"><strong>${escapeHtml(doc.title)}</strong>${status(doc)}<span class="badge">${escapeHtml(doc.kind)}</span><span>${doc.date}</span><a href="/raw${docUrl(doc)}" target="_blank">Open alone</a></div>`;
-  return respond(200, doc.title, `${bar}<iframe src="/raw${docUrl(doc)}" title="${escapeHtml(doc.title)}"></iframe>`, { ...context, headings });
+  context.crumbs.push([doc.title]);
+  return respond(200, doc.title, `<iframe src="/raw${docUrl(doc)}" title="${escapeHtml(doc.title)}"></iframe>`, { ...context, headings });
 }
 
 createServer((request, response) => {
