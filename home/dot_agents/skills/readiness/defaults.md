@@ -22,7 +22,7 @@ Offer these as the recommended option when they fit the repo's stack and nothing
 
 ## CI and release
 
-- GitHub Actions on Blacksmith runners, sized by job; cancel superseded runs.
+- GitHub Actions on Blacksmith runners, sized by job: `runs-on: ${{ vars.RUNNER || 'blacksmith-4vcpu-ubuntu-2404' }}`, with each job's size in its fallback, so setting the `RUNNER` repo variable (`ubuntu-latest`) moves the repo to GitHub-hosted runners with no workflow edit. Setup steps use their built-in caches, which Blacksmith serves from its colocated cache unchanged: `setup-node` with `cache: pnpm` (after `pnpm/action-setup`), `setup-uv` with `enable-cache: true` (its `auto` default caches only on GitHub-hosted runners). Cancel superseded runs.
 - Actions pinned to SHAs, `permissions: {}` at the top of each workflow, widened per job.
 - Pull-request workflows hold no secrets; deploy credentials live in a GitHub environment restricted to the default branch, and only jobs on that branch use it.
 - Dependabot or Renovate for dependencies and actions, grouped, with a cooldown.

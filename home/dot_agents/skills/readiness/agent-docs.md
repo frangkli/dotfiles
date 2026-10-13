@@ -9,6 +9,7 @@ For gaps in the agent docs and build-and-checks areas. Read `writing-for-agents`
 - Pointers, not copies: one line each to `GATES.md`, `REVIEW_RULES.md`, `GLOSSARY.md`, the `verify` skill, setup docs, architecture and security docs that exist. Repo-relative paths only.
 - Cache only what an agent can't find by looking: unwritten conventions, the reason behind a surprising choice, gotchas. Leave out linter settings, installed skills, slogans and commit attribution.
 - Claude reads `AGENTS.md` when `CLAUDE.md` links to it (`ln -s AGENTS.md CLAUDE.md`) or imports it (`@AGENTS.md`); add one only if the repo lacks both. Project skills live in `.agents/skills/`, with `.claude/skills` as a link to it.
+- A tool writes into `AGENTS.md` or `CLAUDE.md` only when the owner opts in, and only between its own markers (`<!-- <tool>:start -->` / `<!-- <tool>:end -->`), so it can update or remove its block without touching hand-written text. Flag tool-written text outside a fence.
 - Before finishing, run every command in the file and resolve every path.
 
 ## GATES.md
