@@ -3,6 +3,7 @@
 {{- $settings := dict -}}
 {{- if .chezmoi.stdin -}}{{- $settings = fromJson .chezmoi.stdin -}}{{- end -}}
 {{- /* claude.ai connectors, skills and plugins stay off the box. */ -}}
+{{- /* Transcripts are kept: retro, prevent-repeats and AgentsView read them. */ -}}
 {{- /* impeccable runs from its plugin; this hides the Codex copy in ~/.agents/skills. */ -}}
 {{- /* atuin logs agent shell commands, kept out of your Ctrl-R. */ -}}
 {{- $atuin := dict "matcher" "^Bash$" "hooks" (list (dict "type" "command" "command" "atuin hook claude-code")) -}}
@@ -11,6 +12,7 @@
     | setValueAtPath "disableClaudeAiConnectors" true
     | setValueAtPath "syncClaudeAiSkills" false
     | setValueAtPath "syncClaudeAiPlugins" false
+    | setValueAtPath "cleanupPeriodDays" 3650
     | setValueAtPath "skillOverrides.impeccable" "off"
     | setValueAtPath "env.DISABLE_AUTOUPDATER" "1"
     | setValueAtPath "env.GIT_TERMINAL_PROMPT" "0"
