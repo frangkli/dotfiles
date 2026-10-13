@@ -256,7 +256,7 @@ pre.mermaid.wide svg { max-width: none; }
   </head>
   <body>
     <main>
-      <!-- Sample content showing each component. Replace all of it; delete what the document doesn't need. -->
+      <!-- Sample content: replace all of it. For every other component, see components.html; copy only what the content needs. -->
       <header>
         <p class="eyebrow">Plan · 2026-10-13</p>
         <h1>Render reports in a background job</h1>
@@ -270,7 +270,7 @@ pre.mermaid.wide svg { max-width: none; }
 
       <div class="callout recommend">
         <p><strong>What we build.</strong> The API queues the render and returns <code>202</code> with a status URL.</p>
-        <p><strong>What it costs.</strong> A status endpoint and client polling. [source: estimate, owner]</p>
+        <p><strong>Why.</strong> Render takes <strong>250 of 340 ms</strong> of a request today. [source: command, commit, sample size]</p>
       </div>
 
       <h2>Where things live after the change</h2>
@@ -291,77 +291,15 @@ pre.mermaid.wide svg { max-width: none; }
           <p class="owner">Service <code>render-worker</code> · one replica</p>
         </div>
       </div>
-      <figure>
-        <pre class="mermaid">
-stateDiagram-v2
-  direction LR
-  [*] --> queued
-  queued --> rendering: worker claims
-  rendering --> done
-  rendering --> failed
-  failed --> queued: retry, at most twice
-  class done good
-  class failed bad</pre>
-        <figcaption>A job ends done or, after two retries, failed. States: queued, rendering, done, failed.</figcaption>
-      </figure>
       <details>
         <summary>A concrete request: <code>POST /reports</code> for report 42</summary>
         <ol>
           <li><code>api</code> validates <code>{"template": "monthly", "account": 7}</code> and inserts job 42 as <code>queued</code>.</li>
-          <li>It returns <code>202 {"status": "/reports/42"}</code> in about 45 ms. [source]</li>
-          <li><code>render-worker</code> claims job 42, renders for about 250 ms [source], stores <code>reports/42.pdf</code> and marks it done.</li>
+          <li>It returns <code>202 {"status": "/reports/42"}</code>.</li>
+          <li><code>render-worker</code> claims job 42, stores <code>reports/42.pdf</code> and marks it done.</li>
           <li>The next poll of <code>/reports/42</code> returns <code>{"state": "done", "url": "…"}</code>.</li>
         </ol>
       </details>
-
-      <h2>Render is 74% of today's request time</h2>
-      <div class="metrics">
-        <div class="metric">
-          <span class="label">Request time, p95, today</span>
-          <span class="value">340 ms</span>
-          <svg class="spark bad" viewBox="0 0 120 24" role="img" aria-label="p95 over 7 days, from 300 to 340 ms">
-            <polyline points="0,14 20,16 40,13 60,11 80,10 100,8 120,6" /><circle cx="120" cy="6" r="2" />
-          </svg>
-          <span class="source">[source: command, commit, sample size]</span>
-        </div>
-        <div class="metric">
-          <span class="label">Request time, p95, with the job</span>
-          <span class="value">45 ms</span>
-          <span class="delta good">−295 ms</span>
-          <span class="source">[source]</span>
-        </div>
-      </div>
-      <figure>
-        <div class="stack">
-          <div class="stack-bar" aria-hidden="true"><span style="--value: 0.06"></span><span style="--value: 0.2"></span><span class="bad" style="--value: 0.74"></span></div>
-          <ul class="stack-key"><li>Auth <b>20 ms</b></li><li>Query <b>70 ms</b></li><li class="bad">Render <b>250 ms</b></li></ul>
-        </div>
-        <figcaption>Render takes 250 of 340 ms in one request today. [source]</figcaption>
-      </figure>
-
-      <h2>The job moves the wait out of the request</h2>
-      <div class="arch two" role="group" aria-label="The same request today and with the job">
-        <div class="box">
-          <h3>Today</h3>
-          <ol>
-            <li>Browser posts <code>/reports</code></li>
-            <li><del>api renders the PDF in the request</del></li>
-            <li>Browser gets the PDF after 340 ms</li>
-          </ol>
-        </div>
-        <div class="box">
-          <h3>With the job</h3>
-          <ol>
-            <li>Browser posts <code>/reports</code></li>
-            <li><ins>api queues job 42 and returns 202</ins></li>
-            <li><ins>Browser polls the status URL</ins></li>
-          </ol>
-        </div>
-      </div>
-      <pre><code>services/
-├── api/
-│   └── reports.ts        # validates, queues, returns 202
-└── render-worker/        # new: claims jobs and renders</code></pre>
 
       <h2>A job beats a faster renderer</h2>
       <div class="scroll">
@@ -374,16 +312,6 @@ stateDiagram-v2
         </table>
       </div>
       <p>A renderer under 50 ms at p95 would change this call.</p>
-
-      <h2>Order of work</h2>
-      <ol class="phases">
-        <li><h3>Add the worker and the status route</h3><span class="check">Check: a test job reaches done in staging.</span></li>
-        <li><h3>Switch new API keys to the job</h3><span class="check">Check: p95 under 60 ms for 24 hours.</span></li>
-      </ol>
-
-      <div class="callout risk">
-        <p><strong class="callout-title">Risk</strong> Clients that expect a PDF body break. Keep the old path for existing API keys for 30 days.</p>
-      </div>
 
       <h2>Decisions for you</h2>
       <ol class="decisions">
@@ -490,7 +418,8 @@ stateDiagram-v2
         const fit = () => {
           if (narrow !== undefined && narrow !== innerWidth < 600) return render();
           for (const block of blocks) {
-            const natural = block.querySelector("svg")?.viewBox.baseVal?.width;
+            const svg = block.querySelector("svg");
+            const natural = Number.parseFloat(svg?.style.width) || svg?.viewBox.baseVal?.width;
             if (natural) block.classList.toggle("wide", natural * 0.8 > block.clientWidth);
           }
         };
@@ -529,7 +458,8 @@ stateDiagram-v2
             ...Object.fromEntries(palette.flatMap((hue, i) => [[`pie${i + 1}`, hue], [`pie${i + 7}`, tints[i]]])),
             pieStrokeColor: surface, pieStrokeWidth: "1.5px", pieOuterStrokeColor: border, pieOuterStrokeWidth: "1px", pieOpacity: "1",
             pieSectionTextColor: background, pieTitleTextColor: text, pieLegendTextColor: text,
-            pieTitleTextSize: "15px", pieSectionTextSize: "13px", pieLegendTextSize: "13.5px",
+            // Text sizes allow for the pie being drawn at 0.65 scale (see pieScale).
+            pieTitleTextSize: "22px", pieSectionTextSize: "20px", pieLegendTextSize: "20px",
             ...Object.fromEntries(
               tints.flatMap((tint, i) =>
                 [i, i + 6].flatMap((n) => [[`cScale${n}`, tint], [`cScaleLabel${n}`, text], [`cScalePeer${n}`, palette[i]], [`cScaleInv${n}`, palette[i]]]),
@@ -563,10 +493,11 @@ stateDiagram-v2
             sequence: { ...natural, actorFontSize: 13.5, messageFontSize: 13.5, noteFontSize: 13.5, actorMargin: 40, boxMargin: 8, mirrorActors: false },
             class: natural, er: { ...natural, fontSize: 13.5 }, timeline: natural, pie: natural, quadrantChart: natural, journey: natural, mindmap: natural,
             gantt: { ...natural, useWidth: Math.max(width, 560), fontSize: 12.5, sectionFontSize: 13, barHeight: 22, barGap: 6, topPadding: 44, leftPadding: 120 },
-            xyChart: { ...natural, width: Math.min(Math.max(width, 480), 880), height: 280, titleFontSize: 14, legendFontSize: 12.5, xAxis: axis, yAxis: axis },
+            xyChart: { ...natural, width: Math.min(Math.max(width, 480), 720), height: 240, titleFontSize: 14, legendFontSize: 12.5, xAxis: axis, yAxis: axis },
             sankey: { ...natural, width: Math.min(Math.max(width, 480), 880), height: 360, linkColor: "source", nodeColors: sankeyColors(palette) },
           };
         };
+        const pieScale = 0.65;
         let pass = 0;
         const render = async () => {
           narrow = innerWidth < 600;
@@ -583,6 +514,9 @@ stateDiagram-v2
               if (run !== pass) return;
               block.innerHTML = svg;
               bindFunctions?.(block);
+              // Mermaid draws every pie at a fixed 370 px across; show it at about 240 px.
+              const drawn = block.querySelector("svg");
+              if (drawn?.getAttribute("aria-roledescription") === "pie") drawn.style.width = `${Math.round(drawn.viewBox.baseVal.width * pieScale)}px`;
               block.setAttribute("data-processed", "true");
             } catch (error) {
               for (const leftover of document.querySelectorAll(`#${id}, #d${id}`)) leftover.remove();

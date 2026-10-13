@@ -33,7 +33,7 @@ Load the `writing` skill and follow its technical mode, including its AI-tell pa
 
 ## Visuals
 
-Show structure, comparison, sequence, magnitude and change as a visual by default. Prose carries the reasoning: why, what it means, and what would change the call. Before you write a sentence, find its place in a figure: a node or edge label, a cell, a bar, a tile or a caption. If a sentence describes a figure, make it a label in the figure. Use a numbered list for steps the reader follows. Use bullets only for short parallel items with no order, size or relation between them.
+Show structure, comparison and sequence as a visual by default: a table, a diagram, a card grid, phases or a tree in place of a bullet list. Charts are a separate choice, only for data that has a shape (see the chart rules). Prose carries the reasoning: why, what it means, and what would change the call. Before you write a sentence, find its place in a figure: a node or edge label, a cell, a bar, a tile or a caption. If a sentence describes a figure, make it a label in the figure. Use a numbered list for steps the reader follows. Use bullets only for short parallel items with no order, size or relation between them.
 
 | Content shape | Visual | Rule |
 |---|---|---|
@@ -42,14 +42,16 @@ Show structure, comparison, sequence, magnitude and change as a visual by defaul
 | One request | `.flow` or a sequence diagram | 3 to 6 steps |
 | Order of work | `.phases` | Each phase ends on a check |
 | Options | Table with `tr.chosen`, in `.scroll` | Followed by a "what would change this" line |
-| 2 to 4 measured numbers | `.metrics` | Each tile has a `.source` |
-| Change over time | `.spark` sparkline in a tile, or Mermaid `xychart` | The tile's value is the last point |
-| Magnitudes, or where time goes | `.bars`, with `--start` for a waterfall | Units on every bar |
-| Part of a whole | `.stack` | Its key names every part with its value |
+| 1 to 3 numbers | The sentence, with the key number bold, or a small table | The default for small numbers |
+| 2 to 4 headline measurements | `.metrics` | Each tile has a `.source` |
+| Change over time, when there's enough data | `.spark` sparkline in a tile, or Mermaid `xychart` | The tile's value is the last point |
+| Magnitudes or where time goes, when there's enough data | `.bars`, with `--start` for a waterfall | Units on every bar |
+| Part of a whole, when there's enough data | `.stack`; a pie only when one share is the point | Its key names every part with its value |
 | Before and after | The same figure twice at one scale, in `.arch.two` | `<ins>` for additions, `<del>` for removals |
 | Cases (failure modes, environments) | Small multiples in `.arch` with a shared scale | Never a table of sentences |
 | Files and calls | File tree with `# role` comments, or a call tree, in `<pre>` | A diff of the tree when the point is the change |
 | Many exact values | Table | |
+| Dated work, when there's enough data | Mermaid gantt | Without dates, use `.phases` |
 | Decisions the reader owns | `.decisions` | At the end, each with a `.default` |
 
 Each figure makes one claim, and its caption opens with that claim. Each keeps a text or table equivalent beside it or in the caption, and stays readable at 390 px wide. Every number comes from a source you can point to. Never invent a value or a position, a quadrant point included. A chart without real data says "illustrative" in its caption.
@@ -62,7 +64,9 @@ Diagrams:
 
 Charts:
 
+- Chart only when the data has a shape: about 4 or more values, a trend over 3 or more ordered points, or a comparison across 3 or more items. With 1 to 3 numbers, put them in the sentence (bold the key one) or in a small table. Use metric tiles only for 2 to 4 headline measurements. Never chart small counts such as 3 of 5.
 - Start bars at zero, share one scale across small multiples, and sort by value unless the order means something.
+- A line needs 3 or more points on an ordered axis. For before and after, use paired bars.
 - Use one y-axis, label values directly, add gridlines only when the reader must read values, and annotate only the point the caption names.
 - When one series or option is the point, colour it and grey the rest.
 - Pie, gantt, timeline, quadrant and sankey charts are fine when they are the clearest form. Prefer `.stack` to a pie, and `.phases` to a gantt that has no dates.
@@ -73,7 +77,7 @@ Tabs switch real scenarios or evidence, and the conclusion stays visible while t
 
 ## The kit
 
-Copy [assets/template.html](assets/template.html) to the target path, then replace all of its sample content. Keep `<style id="kit">` and `<script id="kit-js">` unchanged, and put page-specific CSS in a second `<style>`. Set `<meta name="doc-kind">` to `plan`, `explainer`, `tradeoff`, `research`, `experiment` or `spec`. The template's sample shows every component in use.
+Copy [assets/template.html](assets/template.html) to the target path, then replace all of its sample content. Keep `<style id="kit">` and `<script id="kit-js">` unchanged, and put page-specific CSS in a second `<style>`. Set `<meta name="doc-kind">` to `plan`, `explainer`, `tradeoff`, `research`, `experiment` or `spec`. See [assets/components.html](assets/components.html) for every component; copy only what the content needs.
 
 Formatting serves clarity and consistency. Break a rule when the figure reads better without it:
 

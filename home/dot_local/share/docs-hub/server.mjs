@@ -292,12 +292,37 @@ function markdown(source) {
   return out.join("\n");
 }
 
-// Gives every h2 and h3 an id (keeping existing ones), for the contents list and deep links.
+// The offsets of the h2 and h3 that sit inside a component (a card, phase, tab, callout, figure or
+// details). Their titles name parts of a figure, not sections, so they stay out of the contents list.
+// Comments, styles and scripts are skipped, since the kit's own comments mention tags.
+const componentClass = /\bclass="[^"]*\b(arch|box|phases|decisions|tabs|flow|callout|metrics|stack)\b/;
+function nestedHeadings(html) {
+  const skipped = [...html.matchAll(/<!--[\s\S]*?-->|<(script|style)\b[\s\S]*?<\/\1>/gi)].map((m) => [m.index, m.index + m[0].length]);
+  const nested = new Set();
+  const open = [];
+  for (const match of html.matchAll(/<(\/?)(div|section|ol|ul|details|figure|aside|h[23])\b([^>]*)>/gi)) {
+    if (skipped.some(([from, to]) => match.index >= from && match.index < to)) continue;
+    const [, close, name, attributes] = match;
+    const tag = name.toLowerCase();
+    if (tag[0] === "h") {
+      if (!close && open.includes(true)) nested.add(match.index);
+    } else if (close) {
+      open.pop();
+    } else {
+      open.push(/^(details|figure|aside)$/.test(tag) || componentClass.test(attributes));
+    }
+  }
+  return nested;
+}
+
+// Gives every h2 and h3 an id (keeping existing ones), for deep links, and lists the section headings
+// for the contents. Tags and badges inside a heading stay out of its text.
 function withHeadingIds(html) {
   const used = new Set();
   const headings = [];
-  const out = html.replace(/<h([23])\b([^>]*)>([\s\S]*?)<\/h\1>/gi, (match, level, attributes, inner) => {
-    const text = stripTags(inner);
+  const nested = nestedHeadings(html);
+  const out = html.replace(/<h([23])\b([^>]*)>([\s\S]*?)<\/h\1>/gi, (match, level, attributes, inner, offset) => {
+    const text = stripTags(inner.replace(/<(span|small)\b[^>]*class="[^"]*\b(tag|badge)\b[^"]*"[^>]*>[\s\S]*?<\/\1>/gi, ""));
     let id = /\sid="([^"]+)"/i.exec(attributes)?.[1];
     if (!id) {
       const base = text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "") || "section";
@@ -306,7 +331,7 @@ function withHeadingIds(html) {
       match = `<h${level}${attributes} id="${id}">${inner}</h${level}>`;
     }
     used.add(id);
-    headings.push({ level, id, text });
+    if (!nested.has(offset)) headings.push({ level, id, text });
     return match;
   });
   return { html: out, headings };
