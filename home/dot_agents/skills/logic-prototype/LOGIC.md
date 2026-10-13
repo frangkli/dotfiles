@@ -30,7 +30,7 @@ One file, plain HTML, CSS and JavaScript, everything inline, so it opens with no
 
 Clean typography, generous spacing, one accent colour, no animation: nothing competes with the state and the buttons.
 
-Save it under the repo's `docs/plans/` on the prototype branch (for example `docs/plans/prototype-<slug>.html`), so a plans hub, where one serves the repo, shows it from the worktree.
+Save it under the repo's `docs/plans/` on the prototype branch (for example `docs/plans/YYYY-MM-DD-prototype-<slug>.html`), so the docs hub shows it from the worktree.
 
 ## 4. Drive it yourself
 
@@ -38,7 +38,7 @@ Run every walkthrough before handing over: load the page in a headless browser, 
 
 ## 5. Hand it over
 
-Give the user the file path and the plans-hub link if there is one. The interesting moments are "wait, that shouldn't be possible" and "I assumed X would be different": those are bugs in the idea, which is the point. Add actions or scenarios when they ask.
+Give the user the file path and its docs hub link. The interesting moments are "wait, that shouldn't be possible" and "I assumed X would be different": those are bugs in the idea, which is the point. Add actions or scenarios when they ask.
 
 If no one will drive it (an unattended run), the verdict is yours: report what each scenario showed and log the verdict as a ruling.
 

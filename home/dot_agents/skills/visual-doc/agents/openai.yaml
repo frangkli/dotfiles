@@ -1,0 +1,4 @@
+interface:
+  display_name: "Visual Doc"
+  short_description: "HTML plans, explainers, reports and specs that lead the reader to a decision"
+  default_prompt: "Use $visual-doc to write this up as a page, with the recommendation, the evidence, the tradeoffs and the open decisions."

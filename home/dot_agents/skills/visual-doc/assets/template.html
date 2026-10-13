@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="doc-kind" content="plan" />
+    <title>Render reports in a background job</title>
+    <!-- The kit: copy this block unchanged. Page-specific CSS goes in a second <style>. -->
+    <style id="kit">
+/* Colour keeps three meanings: --accent green = recommended, chosen, new, good (and links);
+   --warn ochre = decision for the reader, draft; --bad red = risk. Everything else starts neutral.
+   A chart that must tell categories apart uses --cat-1 to --cat-6, muted hues that pass 3:1 on the
+   page in both themes.
+   Type: system sans. Body 15/23, h1 26, h2 20, h3 16, notes 13.5, labels 12.5. Prose 80ch; tables,
+   card grids, figures and metrics use the full width. Light and dark follow the system until the
+   theme control (kit-js) sets data-theme on <html>. */
+:root {
+  color-scheme: light dark;
+  --bg: light-dark(#fafbf9, #151816);
+  --surface: light-dark(#ffffff, #1b1f1c);
+  --sunken: light-dark(#f1f3f0, #222723);
+  --border: light-dark(#d3d7d2, #353c37);
+  --border-soft: light-dark(#e6e9e5, #282e2a);
+  --text: light-dark(#222b25, #e2e7e3);
+  --muted: light-dark(#536258, #9ca8a0);
+  --accent: light-dark(#25664b, #7cc4a0);
+  --warn: light-dark(#79551d, #e0b061);
+  --bad: light-dark(#a3392e, #ef8c80);
+  --cat-1: light-dark(#3b6ea8, #7fa7d9);
+  --cat-2: light-dark(#7056a3, #a993d6);
+  --cat-3: light-dark(#2f7f86, #6cbcc2);
+  --cat-4: light-dark(#9a4d7a, #d48bb6);
+  --cat-5: light-dark(#7a6a3a, #c2b07a);
+  --cat-6: light-dark(#6b7280, #a3a9b3);
+  --accent-soft: color-mix(in oklab, var(--accent) 9%, var(--surface));
+  --warn-soft: color-mix(in oklab, var(--warn) 10%, var(--surface));
+  --bad-soft: color-mix(in oklab, var(--bad) 9%, var(--surface));
+  --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --radius: 4px;
+  --measure: 80ch;
+  --gutter: 28px;
+  --diagram-size: 13.5;
+  --diagram-radius: 4;
+  --diagram-fill: var(--surface);
+  --diagram-stroke: var(--border);
+  --diagram-group: transparent;
+  --diagram-line: var(--muted);
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 var(--font); -webkit-font-smoothing: antialiased; }
+main { max-width: 1120px; margin: 0 auto; padding: var(--gutter) var(--gutter) 64px; }
+[data-framed] main { margin: 0; }
+h1, h2, h3 { margin: 0 0 12px; font-weight: 600; line-height: 1.25; text-wrap: balance; }
+h1 { font-size: 26px; line-height: 1.2; letter-spacing: -0.01em; }
+h2 { margin-top: 36px; font-size: 20px; }
+h3 { margin-top: 20px; font-size: 16px; }
+p, ul, ol, dl { max-width: var(--measure); margin: 0 0 12px; }
+ul, ol { padding-left: 22px; }
+li { margin-bottom: 4px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+strong { font-weight: 600; }
+code, pre { font-family: var(--mono); font-size: 13px; }
+code { padding: 1px 4px; background: var(--sunken); border-radius: 3px; overflow-wrap: anywhere; }
+pre { margin: 0 0 12px; padding: 12px 14px; overflow-x: auto; line-height: 1.5; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+pre code { padding: 0; background: none; overflow-wrap: normal; }
+img { max-width: 100%; height: auto; }
+table { width: 100%; margin: 0 0 12px; font-size: 14px; line-height: 1.5; border-collapse: collapse; background: var(--surface); font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 10px; text-align: left; vertical-align: top; border: 1px solid var(--border); }
+th { font-weight: 600; }
+thead th { background: var(--sunken); }
+:is(.scroll, .table-wrap) { margin: 0 0 12px; overflow-x: auto; }
+:is(.scroll, .table-wrap) > table { margin: 0; }
+:is(.scroll, .table-wrap, table) + p { max-width: none; }
+details { margin: 12px 0 16px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+details > summary { font-weight: 600; cursor: pointer; }
+details[open] > summary { margin-bottom: 10px; }
+details > :last-child { margin-bottom: 0; }
+figure { margin: 16px 0 20px; }
+figcaption, .muted { margin-top: 8px; font-size: 13.5px; color: var(--muted); }
+figcaption { max-width: none; }
+.small { font-size: 13.5px; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+.theme { float: right; margin: 0 0 8px 12px; font-size: 13px; color: var(--muted); }
+.theme select { margin-left: 6px; padding: 3px 6px; font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+
+/* Header: title, then a muted line with the kind and date (dropped in the docs hub, whose bar shows
+   where the page lives), a muted lede and the status facts. */
+main > header { display: flex; flex-direction: column; margin-bottom: 20px; }
+main > header > h1 { order: -1; }
+main > header > p, .eyebrow, .lede { color: var(--muted); }
+.eyebrow { margin-bottom: 6px; font-size: 13.5px; }
+[data-framed] .eyebrow { display: none; }
+.facts { display: flex; flex-wrap: wrap; gap: 4px 20px; max-width: none; margin: 0; font-size: 13.5px; }
+.facts div { display: flex; align-items: baseline; gap: 6px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; }
+
+/* Tags: a small bordered word. .new (green) marks a new part, .ask or .draft (ochre) a decision or a draft. */
+.tag, .badge { display: inline-block; padding: 0 5px; font-size: 12px; font-weight: 500; line-height: 1.5; white-space: nowrap; vertical-align: 0.1em; color: var(--muted); border: 1px solid var(--border); border-radius: 3px; }
+:is(.tag, .badge):is(.new, .good) { color: var(--accent); border-color: var(--accent); }
+:is(.tag, .badge):is(.ask, .draft, .warn) { color: var(--warn); border-color: var(--warn); }
+.badge.bad { color: var(--bad); border-color: var(--bad); }
+.delta.good { color: var(--accent); }
+.delta.warn { color: var(--warn); }
+.delta.bad { color: var(--bad); }
+
+/* Lead block: the recommendation, under a green rule, with bold lead-ins. .risk is red, .decision ochre,
+   a plain .callout grey. .callout-title runs into its paragraph as a lead-in. */
+:is(.callout, .recommendation) { max-width: var(--measure); margin: 20px 0; padding: 2px 0 2px 16px; border-left: 3px solid var(--border); }
+:is(.callout, .recommendation) > :last-child { margin-bottom: 0; }
+:is(.callout.recommend, .recommendation) { border-left-color: var(--accent); }
+.callout.risk { border-left-color: var(--bad); }
+:is(.callout.decision, .decision) { padding: 12px 16px; background: var(--warn-soft); border-left: 3px solid var(--warn); }
+.callout-title { display: inline; font-weight: 600; }
+.callout-title::after { content: "."; }
+.callout-title + p { display: inline; }
+.callout.risk .callout-title { color: var(--bad); }
+
+/* Card grid: where things live. .box cards in three columns, .span2 or .span3 to widen one, .down for
+   an arrow row between rows, .box.new (green) for a new part, .owner for who runs it. */
+.arch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 14px 0; }
+.box { min-width: 0; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.box.new { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.box h3 { margin: 0 0 6px; font-size: 15px; }
+.box :is(p, ul) { margin: 0 0 6px; font-size: 14px; }
+.box > :last-child { margin-bottom: 0; }
+.owner { font-size: 12.5px; color: var(--muted); }
+.span2 { grid-column: span 2; }
+.span3, .down { grid-column: 1 / -1; }
+.down { margin: -4px 0; font-size: 13px; text-align: center; color: var(--muted); }
+
+/* Flow: steps left to right, top to bottom on a phone. */
+.flow { display: flex; gap: 30px; max-width: none; margin: 16px 0; padding: 0; list-style: none; }
+.flow > li { position: relative; flex: 1; min-width: 0; margin: 0; padding: 12px 14px; font-size: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.flow > li.good { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.flow > li.bad { border-color: var(--bad); box-shadow: inset 3px 0 0 var(--bad); }
+.flow strong, .flow small { display: block; }
+.flow small { margin-top: 4px; font-size: 12.5px; color: var(--muted); }
+.flow > li + li::before { content: "→"; position: absolute; top: 50%; left: -22px; transform: translateY(-50%); color: var(--muted); }
+
+/* Phases and decisions: numbered cards, green numbers for steps, ochre for decisions the reader owns. */
+:is(.phases, .decisions) { max-width: none; margin: 12px 0; padding: 0; list-style: none; counter-reset: step; }
+:is(.phases, .decisions) > li { position: relative; max-width: none; margin-bottom: 10px; padding: 12px 14px 12px 52px; counter-increment: step; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+:is(.phases, .decisions) > li::before { content: counter(step); position: absolute; top: 12px; left: 14px; display: grid; place-items: center; width: 24px; height: 24px; font-size: 13px; font-weight: 600; color: var(--accent); border: 1px solid var(--accent); border-radius: 50%; }
+.decisions > li::before { color: var(--warn); border-color: var(--warn); }
+.phases h3 { margin: 0 0 4px; }
+.phases .check, .decisions .default { display: block; margin-top: 2px; font-size: 13.5px; color: var(--muted); }
+
+/* Options table: tr.chosen marks the recommended row. */
+tr.chosen > * { background: var(--accent-soft); }
+tr.chosen > :first-child { box-shadow: inset 3px 0 0 var(--accent); }
+
+/* Metrics: measured numbers in one bordered strip, each with its comparison and source. */
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; margin: 0 0 16px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.metric { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 10px 14px; background: var(--surface); }
+.metric .label { font-size: 13px; line-height: 1.4; color: var(--muted); }
+.metric .value { font-size: 20px; font-weight: 600; line-height: 1.3; font-variant-numeric: tabular-nums; }
+.metric .delta { font-size: 13px; }
+.metric .source { margin-top: auto; padding-top: 4px; font-size: 12.5px; color: var(--muted); }
+
+/* Bars: --value is the bar's share of the full width; add --start for a waterfall. */
+.bars { display: grid; gap: 6px; max-width: 760px; }
+.bar { display: grid; grid-template-columns: minmax(90px, 180px) 1fr minmax(56px, auto); gap: 12px; align-items: center; font-size: 13.5px; }
+.bar .track { position: relative; height: 10px; overflow: hidden; background: var(--sunken); border-radius: 2px; }
+.bar .track::after { content: ""; position: absolute; top: 0; bottom: 0; background: var(--muted); left: calc(var(--start, 0) * 100%); width: calc(var(--value) * 100%); }
+.bar.good .track::after { background: var(--accent); }
+.bar.bad .track::after { background: var(--bad); }
+.bar .num { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+/* Tabs: <div class="tabs"> holding <section data-tab="Label">; all panels show without JavaScript. */
+.tabs > section[data-tab]::before { content: attr(data-tab); display: block; margin: 12px 0 6px; font-weight: 600; }
+.tabs.ready > section[data-tab]::before { display: none; }
+.tabs [role="tablist"] { display: flex; gap: 2px; margin-bottom: 12px; overflow-x: auto; border-bottom: 1px solid var(--border); }
+.tabs [role="tab"] { margin-bottom: -1px; padding: 6px 10px; font: inherit; font-size: 14px; white-space: nowrap; color: var(--muted); background: none; border: 0; border-bottom: 2px solid transparent; cursor: pointer; }
+.tabs [role="tab"][aria-selected="true"] { color: var(--text); border-bottom-color: var(--text); }
+
+/* Draw the difference: the same figure per option, .arch.two side by side; <ins> marks an addition,
+   <del> a removal, each with a sign so colour isn't the only cue. */
+.arch.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+ins, del { text-decoration: none; }
+ins { color: var(--accent); }
+del { color: var(--bad); }
+ins::before { content: "+ "; }
+del::before { content: "− "; }
+
+/* Stack: parts of one whole. Each .stack-bar span sets --value (its share); the .stack-key below names
+   each part with its value, in the same order, so the labels sit outside the bar. Parts take the
+   palette in order; .good, .warn or .bad give a part its meaning, .rest greys it, and a key item
+   marked .empty names the unfilled remainder. */
+.stack { max-width: 760px; margin: 0 0 8px; }
+.stack + .stack { margin-top: 14px; }
+.stack-title { margin: 0 0 6px; font-size: 13.5px; font-weight: 600; }
+.stack-bar { display: flex; height: 12px; overflow: hidden; background: var(--sunken); border-radius: 2px; }
+.stack-bar > span { flex: 0 0 calc(var(--value) * 100%); box-shadow: inset -1px 0 var(--surface); }
+.stack-key { display: flex; flex-wrap: wrap; gap: 2px 16px; max-width: none; margin: 6px 0 0; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
+.stack-key li { margin: 0; }
+.stack-key li::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 2px; background: var(--swatch); }
+.stack-key b { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+:is(.stack-bar > span, .stack-key li):nth-child(6n + 1) { --swatch: var(--cat-1); }
+:is(.stack-bar > span, .stack-key li):nth-child(6n + 2) { --swatch: var(--cat-2); }
+:is(.stack-bar > span, .stack-key li):nth-child(6n + 3) { --swatch: var(--cat-3); }
+:is(.stack-bar > span, .stack-key li):nth-child(6n + 4) { --swatch: var(--cat-4); }
+:is(.stack-bar > span, .stack-key li):nth-child(6n + 5) { --swatch: var(--cat-5); }
+:is(.stack-bar > span, .stack-key li):nth-child(6n + 6) { --swatch: var(--cat-6); }
+:is(.stack-bar > span, .stack-key li).good { --swatch: var(--accent); }
+:is(.stack-bar > span, .stack-key li).warn { --swatch: var(--warn); }
+:is(.stack-bar > span, .stack-key li).bad { --swatch: var(--bad); }
+:is(.stack-bar > span, .stack-key li).rest { --swatch: var(--muted); }
+.stack-key li.empty::before { background: none; box-shadow: inset 0 0 0 1px var(--border); }
+.stack-bar > span { background: var(--swatch); }
+
+/* Sparkline in a .metric: <svg class="spark" viewBox="0 0 120 24"> with a <polyline> and a <circle>
+   on the last point; the .value above is that last point. */
+.spark { display: block; width: 120px; height: 24px; margin: 4px 0 2px; overflow: visible; }
+.spark polyline { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.spark circle { fill: var(--text); }
+.spark.good circle { fill: var(--accent); }
+.spark.bad circle { fill: var(--bad); }
+
+/* Mermaid: kit-js draws it in the kit's font with the card grid's white boxes and borders.
+   class <node> good|warn|bad colours a node. */
+pre.mermaid[data-processed] { margin: 0; padding: 0; text-align: left; background: none; border: 0; overflow-x: auto; }
+pre.mermaid.failed::before { content: attr(data-error); display: block; margin-bottom: 8px; font: 13px/1.4 var(--font); color: var(--bad); white-space: normal; }
+pre.mermaid svg { max-width: 100%; height: auto; }
+pre.mermaid.wide svg { max-width: none; }
+.mermaid .node.good :is(rect, polygon, circle, path) { fill: var(--accent-soft) !important; stroke: var(--accent) !important; }
+.mermaid .node.warn :is(rect, polygon, circle, path) { fill: var(--warn-soft) !important; stroke: var(--warn) !important; }
+.mermaid .node.bad :is(rect, polygon, circle, path) { fill: var(--bad-soft) !important; stroke: var(--bad) !important; }
+.mermaid :is(.edgeLabel, .edgeLabel p, .edgeLabel span) { font-size: 12.5px; color: var(--muted) !important; }
+
+/* Hand-drawn SVG: put these classes on shapes so diagrams follow the theme. */
+.diagram svg { display: block; max-width: 100%; height: auto; font: 13px var(--font); }
+.d-box { fill: var(--surface); stroke: var(--border); }
+.d-good { fill: var(--accent-soft); stroke: var(--accent); }
+.d-line { fill: none; stroke: var(--muted); stroke-width: 1.25; }
+.d-arrow, .d-muted { fill: var(--muted); }
+.d-text { fill: var(--text); }
+
+@media (max-width: 760px) {
+  :root { --gutter: 16px; }
+  main { padding-top: 20px; padding-bottom: 48px; }
+  h1 { font-size: 23px; }
+  h2 { font-size: 18.5px; }
+  .arch, .arch.two { grid-template-columns: 1fr; }
+  .span2 { grid-column: auto; }
+  .flow { flex-direction: column; gap: 22px; }
+  .flow > li + li::before { content: "↓"; top: -20px; left: 50%; transform: translateX(-50%); }
+  .bar { grid-template-columns: 1fr auto; }
+  .bar .track { grid-column: 1 / -1; grid-row: 2; }
+}
+</style>
+  </head>
+  <body>
+    <main>
+      <!-- Sample content: replace all of it. For every other component, see components.html; copy only what the content needs. -->
+      <header>
+        <p class="eyebrow">Plan · 2026-10-13</p>
+        <h1>Render reports in a background job</h1>
+        <p class="lede">Report requests wait for the whole PDF. A job returns the request at once.</p>
+        <dl class="facts">
+          <div><dt>Status</dt><dd><span class="badge warn">Proposed</span></dd></div>
+          <div><dt>As of</dt><dd>2026-10-13; nothing deployed</dd></div>
+          <div><dt>Scope</dt><dd>API and worker; no schema change</dd></div>
+        </dl>
+      </header>
+
+      <div class="callout recommend">
+        <p><strong>What we build.</strong> The API queues the render and returns <code>202</code> with a status URL.</p>
+        <p><strong>Why.</strong> Render takes <strong>250 of 340 ms</strong> of a request today. [source: command, commit, sample size]</p>
+      </div>
+
+      <h2>Where things live after the change</h2>
+      <div class="arch" role="group" aria-label="The browser calls the API, which queues jobs for a new render worker">
+        <div class="box span3">
+          <h3>Browser</h3>
+          <p>Posts <code>/reports</code>, then polls the status URL until the PDF is ready.</p>
+        </div>
+        <div class="down" aria-hidden="true">↓ POST /reports</div>
+        <div class="box">
+          <h3>api</h3>
+          <ul><li>Validates the request</li><li>Queues a job, returns <code>202</code></li></ul>
+          <p class="owner">Service <code>api</code> · unchanged except the route</p>
+        </div>
+        <div class="box new span2">
+          <h3>render-worker <span class="tag new">new</span></h3>
+          <p>Claims a job, renders the PDF, stores it, marks the job done. Retries a failed render at most twice.</p>
+          <p class="owner">Service <code>render-worker</code> · one replica</p>
+        </div>
+      </div>
+      <details>
+        <summary>A concrete request: <code>POST /reports</code> for report 42</summary>
+        <ol>
+          <li><code>api</code> validates <code>{"template": "monthly", "account": 7}</code> and inserts job 42 as <code>queued</code>.</li>
+          <li>It returns <code>202 {"status": "/reports/42"}</code>.</li>
+          <li><code>render-worker</code> claims job 42, stores <code>reports/42.pdf</code> and marks it done.</li>
+          <li>The next poll of <code>/reports/42</code> returns <code>{"state": "done", "url": "…"}</code>.</li>
+        </ol>
+      </details>
+
+      <h2>A job beats a faster renderer</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th scope="col">Option</th><th scope="col">Gives</th><th scope="col">Costs</th></tr></thead>
+          <tbody>
+            <tr class="chosen"><th scope="row">Background job (chosen)</th><td>Requests return at once; renders retry.</td><td>A status URL and polling.</td></tr>
+            <tr><th scope="row">Faster renderer</th><td>No API change.</td><td>Requests still wait for the render.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>A renderer under 50 ms at p95 would change this call.</p>
+
+      <h2>Decisions for you</h2>
+      <ol class="decisions">
+        <li>Keep the synchronous path for existing API keys?<span class="default">Default: yes, for 30 days.</span></li>
+      </ol>
+
+      <details>
+        <summary>How the claims were checked</summary>
+        <p>Verified 0, corrected 0, unsupported 0, unverifiable 0.</p>
+      </details>
+    </main>
+    <script id="kit-js">
+      for (const tabs of document.querySelectorAll(".tabs")) {
+        const panels = [...tabs.querySelectorAll(":scope > section[data-tab]")];
+        const list = document.createElement("div");
+        list.setAttribute("role", "tablist");
+        const select = (index) =>
+          panels.forEach((panel, i) => {
+            panel.hidden = i !== index;
+            list.children[i].setAttribute("aria-selected", String(i === index));
+            list.children[i].tabIndex = i === index ? 0 : -1;
+          });
+        panels.forEach((panel, i) => {
+          const tab = Object.assign(document.createElement("button"), { type: "button", textContent: panel.dataset.tab });
+          tab.setAttribute("role", "tab");
+          tab.addEventListener("click", () => select(i));
+          panel.setAttribute("role", "tabpanel");
+          list.append(tab);
+        });
+        list.addEventListener("keydown", (event) => {
+          const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+          if (!step) return;
+          const next = (panels.findIndex((panel) => !panel.hidden) + step + panels.length) % panels.length;
+          select(next);
+          list.children[next].focus();
+        });
+        tabs.prepend(list);
+        tabs.classList.add("ready");
+        select(0);
+      }
+
+      // Theme: system, light or dark, saved in this browser. The docs hub runs this same code and
+      // sets the theme of the document in its frame; a document opened on its own gets the control.
+      {
+        const root = document.documentElement;
+        // In the hub's frame the hub's bar shows the kind and date, so the page drops its own.
+        if (window !== top) root.dataset.framed = "";
+        const saved = () => {
+          try {
+            return localStorage.getItem("theme") || "system";
+          } catch {
+            return "system";
+          }
+        };
+        const apply = (target, theme) => (theme === "system" ? delete target.dataset.theme : (target.dataset.theme = theme));
+        const frames = () => [...document.querySelectorAll("iframe")].map((frame) => frame.contentDocument?.documentElement).filter(Boolean);
+        apply(root, saved());
+        for (const frame of document.querySelectorAll("iframe")) {
+          frame.addEventListener("load", () => frame.contentDocument && apply(frame.contentDocument.documentElement, saved()));
+        }
+        if (window === top) {
+          const label = Object.assign(document.createElement("label"), { className: "theme" });
+          const select = document.createElement("select");
+          label.append(Object.assign(document.createElement("span"), { textContent: "Theme" }));
+          for (const theme of ["system", "light", "dark"]) {
+            select.append(new Option(theme[0].toUpperCase() + theme.slice(1), theme, false, theme === saved()));
+          }
+          select.addEventListener("change", () => {
+            try {
+              localStorage.setItem("theme", select.value);
+            } catch {}
+            for (const target of [root, ...frames()]) apply(target, select.value);
+          });
+          label.append(select);
+          (document.querySelector("[data-theme-control]") ?? document.querySelector("main") ?? document.body).prepend(label);
+        }
+      }
+
+      // Mermaid, loaded only when the page has a diagram. Without it the source stays readable as code.
+      // Diagrams draw at their natural size in the kit's font and colours, with edge labels wrapped so
+      // long ones don't stretch the drawing; one that would shrink below 80% to fit scrolls sideways.
+      // On a phone, left-to-right flowcharts, subgraphs and state diagrams turn top to bottom. A
+      // diagram that fails to render shows its source and the error instead.
+      {
+        const blocks = [...document.querySelectorAll("pre.mermaid")];
+        const sources = blocks.map((block) => block.textContent);
+        const probe = document.createElement("span");
+        const pixel = Object.assign(document.createElement("canvas"), { width: 1, height: 1 }).getContext("2d", { willReadFrequently: true });
+        // Mermaid's colour maths and its comma-separated palettes need plain hex, so kit colours (some
+        // are color-mix) go through a canvas pixel.
+        const color = (value) => {
+          probe.style.color = value.startsWith("--") ? `var(${value})` : value;
+          pixel.clearRect(0, 0, 1, 1);
+          pixel.fillStyle = getComputedStyle(probe).color;
+          pixel.fillRect(0, 0, 1, 1);
+          const [r, g, b] = pixel.getImageData(0, 0, 1, 1).data;
+          return `#${[r, g, b].map((n) => n.toString(16).padStart(2, "0")).join("")}`;
+        };
+        const soft = (name, share) => color(`color-mix(in oklab, var(${name}) ${share}%, var(--surface))`);
+        const layout = { curve: "basis", wrappingWidth: 130, minNodeWidth: 0, padding: 10, nodeSpacing: 22, rankSpacing: 32, diagramPadding: 4 };
+        let narrow;
+        const source = (i) =>
+          narrow ? sources[i].replace(/^(\s*(?:flowchart|graph)\s+)LR\b/m, "$1TB").replace(/^(\s*direction\s+)LR\b/gm, "$1TB") : sources[i];
+        const fit = () => {
+          if (narrow !== undefined && narrow !== innerWidth < 600) return render();
+          for (const block of blocks) {
+            const svg = block.querySelector("svg");
+            const natural = Number.parseFloat(svg?.style.width) || svg?.viewBox.baseVal?.width;
+            if (natural) block.classList.toggle("wide", natural * 0.8 > block.clientWidth);
+          }
+        };
+        // Sankey has no palette setting, only colours per node name, so name every node from the sources.
+        const sankeyColors = (palette) => {
+          const names = new Set();
+          for (const text of sources.filter((text) => /^\s*sankey/.test(text))) {
+            for (const line of text.trim().split("\n").slice(1)) {
+              const cells = line.match(/("(?:[^"]|"")*"|[^,]*),("(?:[^"]|"")*"|[^,]*),/);
+              cells?.slice(1, 3).forEach((cell) => names.add(cell.trim().replace(/^"|"$/g, "").replaceAll('""', '"')));
+            }
+          }
+          return Object.fromEntries([...names].filter(Boolean).map((name, i) => [name, palette[i % palette.length]]));
+        };
+        const config = (width) => {
+          const background = color("--bg");
+          const [red, green, blue] = [1, 3, 5].map((at) => Number.parseInt(background.slice(at, at + 2), 16));
+          const [text, muted, surface, sunken, border, soft2] = ["--text", "--muted", "--surface", "--sunken", "--border", "--border-soft"].map(color);
+          const palette = [1, 2, 3, 4, 5, 6].map((n) => color(`--cat-${n}`));
+          const tints = [1, 2, 3, 4, 5, 6].map((n) => soft(`--cat-${n}`, 22));
+          const fontFamily = getComputedStyle(document.body).fontFamily;
+          const themeVariables = {
+            darkMode: red * 0.299 + green * 0.587 + blue * 0.114 < 128,
+            background, fontFamily, fontSize: "13.5px", radius: 4, strokeWidth: 1, dropShadow: "none",
+            primaryColor: surface, mainBkg: surface, nodeBkg: surface, primaryBorderColor: border, nodeBorder: border,
+            primaryTextColor: text, nodeTextColor: text, textColor: text, titleColor: muted,
+            secondaryColor: sunken, tertiaryColor: sunken, clusterBkg: "transparent", clusterBorder: border,
+            lineColor: muted, arrowheadColor: muted, edgeLabelBackground: background,
+            noteBkgColor: soft("--warn", 10), noteBorderColor: color("--warn"), noteTextColor: text,
+            errorBkgColor: soft("--bad", 10), errorTextColor: color("--bad"),
+            // Sequence diagrams.
+            actorBkg: surface, actorBorder: border, actorTextColor: text, actorLineColor: border, signalColor: muted, signalTextColor: text,
+            labelBoxBkgColor: surface, labelBoxBorderColor: border, labelTextColor: text, loopTextColor: text,
+            activationBkgColor: sunken, activationBorderColor: border, sequenceNumberColor: background,
+            // Pie, timeline and sankey take the categorical palette.
+            ...Object.fromEntries(palette.flatMap((hue, i) => [[`pie${i + 1}`, hue], [`pie${i + 7}`, tints[i]]])),
+            pieStrokeColor: surface, pieStrokeWidth: "1.5px", pieOuterStrokeColor: border, pieOuterStrokeWidth: "1px", pieOpacity: "1",
+            pieSectionTextColor: background, pieTitleTextColor: text, pieLegendTextColor: text,
+            // Text sizes allow for the pie being drawn at 0.65 scale (see pieScale).
+            pieTitleTextSize: "22px", pieSectionTextSize: "20px", pieLegendTextSize: "20px",
+            ...Object.fromEntries(
+              tints.flatMap((tint, i) =>
+                [i, i + 6].flatMap((n) => [[`cScale${n}`, tint], [`cScaleLabel${n}`, text], [`cScalePeer${n}`, palette[i]], [`cScaleInv${n}`, palette[i]]]),
+              ),
+            ),
+            // Gantt: neutral bars, ochre today line, red critical tasks.
+            gridColor: soft2, sectionBkgColor: background, altSectionBkgColor: surface, sectionBkgColor2: background,
+            taskBkgColor: sunken, taskBorderColor: border, activeTaskBkgColor: soft("--cat-1", 22), activeTaskBorderColor: color("--cat-1"),
+            doneTaskBkgColor: surface, doneTaskBorderColor: border, critBkgColor: soft("--bad", 14), critBorderColor: color("--bad"),
+            todayLineColor: color("--warn"), vertLineColor: muted, excludeBkgColor: sunken,
+            taskTextColor: text, taskTextLightColor: text, taskTextDarkColor: text, taskTextOutsideColor: text, taskTextClickableColor: color("--accent"),
+            // Quadrant chart.
+            quadrant1Fill: surface, quadrant2Fill: sunken, quadrant3Fill: surface, quadrant4Fill: sunken,
+            quadrant1TextFill: muted, quadrant2TextFill: muted, quadrant3TextFill: muted, quadrant4TextFill: muted,
+            quadrantPointFill: text, quadrantPointTextFill: text, quadrantXAxisTextFill: muted, quadrantYAxisTextFill: muted,
+            quadrantInternalBorderStrokeFill: border, quadrantExternalBorderStrokeFill: border, quadrantTitleFill: text,
+            // xychart: grey first, like the kit's bars, then the palette; axes in the border and muted colours.
+            xyChart: {
+              backgroundColor: "transparent", titleColor: text, dataLabelColor: text, legendTextColor: text,
+              xAxisTitleColor: muted, xAxisLabelColor: muted, xAxisTickColor: border, xAxisLineColor: border,
+              yAxisTitleColor: muted, yAxisLabelColor: muted, yAxisTickColor: border, yAxisLineColor: border,
+              plotColorPalette: [muted, ...palette].join(","),
+            },
+          };
+          const natural = { useMaxWidth: false, theme: "base", look: "classic" };
+          const axis = { labelFontSize: 12.5, titleFontSize: 13.5 };
+          return {
+            startOnLoad: false, theme: "base", look: "classic", layout: "dagre", themeVariables,
+            themeCSS: ".edgeLabel .labelBkg { max-width: 96px !important; white-space: normal !important; line-height: 1.35 !important; }",
+            flowchart: { ...natural, ...layout }, state: { ...natural, ...layout },
+            sequence: { ...natural, actorFontSize: 13.5, messageFontSize: 13.5, noteFontSize: 13.5, actorMargin: 40, boxMargin: 8, mirrorActors: false },
+            class: natural, er: { ...natural, fontSize: 13.5 }, timeline: natural, pie: natural, quadrantChart: natural, journey: natural, mindmap: natural,
+            gantt: { ...natural, useWidth: Math.max(width, 560), fontSize: 12.5, sectionFontSize: 13, barHeight: 22, barGap: 6, topPadding: 44, leftPadding: 120 },
+            xyChart: { ...natural, width: Math.min(Math.max(width, 480), 720), height: 240, titleFontSize: 14, legendFontSize: 12.5, xAxis: axis, yAxis: axis },
+            sankey: { ...natural, width: Math.min(Math.max(width, 480), 880), height: 360, linkColor: "source", nodeColors: sankeyColors(palette) },
+          };
+        };
+        const pieScale = 0.65;
+        let pass = 0;
+        const render = async () => {
+          narrow = innerWidth < 600;
+          const run = ++pass;
+          document.body.append(probe);
+          for (const [i, block] of blocks.entries()) {
+            const id = `kit-diagram-${run}-${i}`;
+            block.removeAttribute("data-processed");
+            block.classList.remove("wide", "failed");
+            try {
+              mermaid.initialize(config(block.clientWidth));
+              await mermaid.parse(source(i));
+              const { svg, bindFunctions } = await mermaid.render(id, source(i));
+              if (run !== pass) return;
+              block.innerHTML = svg;
+              bindFunctions?.(block);
+              // Mermaid draws every pie at a fixed 370 px across; show it at about 240 px.
+              const drawn = block.querySelector("svg");
+              if (drawn?.getAttribute("aria-roledescription") === "pie") drawn.style.width = `${Math.round(drawn.viewBox.baseVal.width * pieScale)}px`;
+              block.setAttribute("data-processed", "true");
+            } catch (error) {
+              for (const leftover of document.querySelectorAll(`#${id}, #d${id}`)) leftover.remove();
+              block.textContent = sources[i];
+              block.classList.add("failed");
+              block.dataset.error = `This diagram didn't render: ${String(error?.message ?? error).split("\n")[0]}`;
+            }
+          }
+          probe.remove();
+          fit();
+        };
+        if (blocks.length) {
+          const script = Object.assign(document.createElement("script"), {
+            src: "https://cdn.jsdelivr.net/npm/mermaid@12.2.0/dist/mermaid.min.js",
+            integrity: "sha384-8xUhuLNMjW/cI2Dacg3DR4WliYznvIg0LVG1stctThKD/YVrJFI9TNCFxft5NYgp",
+            crossOrigin: "anonymous",
+            referrerPolicy: "no-referrer",
+          });
+          script.addEventListener("load", () => {
+            render();
+            // Redraw when the theme changes, from the control, the hub or the system.
+            new MutationObserver(render).observe(document.documentElement, { attributeFilter: ["data-theme"] });
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+            addEventListener("resize", fit);
+          });
+          document.head.append(script);
+        }
+      }
+    </script>
+  </body>
+</html>

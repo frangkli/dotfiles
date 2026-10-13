@@ -1,0 +1,119 @@
+/* Hub layout. Colours, type, tags and focus come from the kit (/assets/kit.css).
+   A 44px bar, the sidebar (248), the page and the contents (208). Two text edges on the left: --pad
+   (brand, labels, headings) and --pad + --inset (text inside controls and list items). The bar's trail,
+   the home column and the document share a third: sidebar + --gutter. Spacing steps by 4px. */
+:root { --side: 248px; --toc: 208px; --bar: 44px; --pad: 16px; --inset: 10px; }
+body { height: 100dvh; display: grid; grid-template: var(--bar) minmax(0, 1fr) / minmax(0, 1fr); overflow: hidden; }
+
+button, select, input { height: 32px; padding: 0 calc(var(--inset) - 1px); font: inherit; font-size: 14px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+button { cursor: pointer; }
+input::placeholder { color: var(--muted); }
+/* Selects draw their own chevron (on the label, so it takes the theme's muted colour), inset from
+   the right edge by the same 10px as the text from the left. */
+select { appearance: none; -webkit-appearance: none; padding: 0 calc(var(--inset) + 16px) 0 calc(var(--inset) - 1px); }
+aside label, .bar .theme { position: relative; }
+aside label::after, .bar .theme::after {
+  content: ""; position: absolute; right: var(--inset); bottom: 13px; width: 10px; height: 6px; pointer-events: none;
+  background: var(--muted);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* The bar: brand, where you are, open alone, theme. */
+.bar { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; min-width: 0; padding-right: 8px; font-size: 14px; border-bottom: 1px solid var(--border-soft); }
+.brand { display: flex; align-items: center; align-self: stretch; padding: 0 var(--pad); font-weight: 600; color: var(--text); text-decoration: none; }
+.crumbs { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; white-space: nowrap; color: var(--muted); }
+.crumbs a { color: var(--muted); text-decoration: none; }
+.crumbs a:hover { color: var(--text); }
+.crumbs [aria-current] { overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+.crumbs .sep { color: var(--border); }
+.open { display: grid; place-items: center; width: 30px; height: 30px; color: var(--muted); border-radius: 6px; }
+.open:hover { color: var(--text); background: var(--sunken); }
+.bar .theme { display: block; float: none; margin: 0; }
+.bar .theme::after { bottom: 12px; }
+.bar .theme span, #contents span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.bar .theme select { display: block; height: 30px; margin: 0; padding: 0 calc(var(--inset) + 16px) 0 calc(var(--inset) - 1px); font-size: 13px; } /* over the kit's .theme select */
+#menu, #contents { display: grid; place-items: center; width: 34px; padding: 0; }
+
+/* Sidebar: one inner padding, so controls, highlights and headings share both edges. */
+aside, #toc { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+aside { padding: var(--pad) var(--pad) 24px; font-size: 14px; background: var(--bg); }
+aside form, aside label { display: block; }
+aside input, aside select { display: block; width: 100%; }
+aside label { margin-top: 16px; font-size: 12.5px; line-height: 16px; color: var(--muted); }
+aside label select { margin-top: 4px; }
+.is-home aside form { display: none; }
+.is-home aside label:first-child { margin-top: 0; }
+aside h2, #toc h2 { margin: 24px 0 4px; font-size: 12.5px; font-weight: 600; line-height: 16px; color: var(--muted); }
+.count { font-weight: 400; color: var(--muted); }
+aside .item { display: block; padding: 6px var(--inset); line-height: 20px; color: var(--text); text-decoration: none; border-radius: 6px; }
+aside .item:hover { background: var(--sunken); }
+aside .item.current { background: var(--sunken); font-weight: 600; }
+aside .item .tag { margin-left: 6px; font-weight: 400; }
+
+/* Status markers: small ochre "draft", or grey "local" for a doc that is never committed. */
+.tag:is(.draft, .local) { padding: 0; font-size: 12px; font-weight: 400; vertical-align: baseline; border: 0; }
+
+/* Focus: a 2px ring on the control's own edge, so it never breaks the column. */
+:is(aside, .bar, .list, #toc) :is(a, input, select, button):focus-visible { outline: 2px solid var(--muted); outline-offset: -2px; border-radius: 6px; }
+
+/* Contents. */
+#toc { padding: var(--gutter) 16px 24px 4px; font-size: 13.5px; }
+#toc h2 { margin: 0 0 8px; }
+#toc a { display: block; padding: 4px 0; line-height: 1.4; color: var(--muted); text-decoration: none; }
+#toc a:hover { color: var(--text); }
+#toc a.h3 { padding-left: 12px; }
+
+/* Home, search and worktree pages: one column, a search box, and lists in one bordered card. */
+.main { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.list { flex: 1; overflow-y: auto; padding: var(--gutter) var(--gutter) 56px; }
+.list > * { max-width: 980px; }
+.list h1 { margin-bottom: 4px; }
+.search { display: flex; gap: 8px; margin: 18px 0 8px; }
+.search input { flex: 1; height: 38px; font-size: 15px; }
+.search button { height: 38px; padding: 0 16px; font-weight: 500; color: var(--bg); background: var(--text); border-color: var(--text); }
+.group h2 { margin: 28px 0 10px; font-size: 17px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+.card .item { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 10px 14px; color: var(--text); text-decoration: none; }
+.card .item + .item { border-top: 1px solid var(--border-soft); }
+.card .item:first-child { border-radius: 8px 8px 0 0; }
+.card .item:last-child { border-radius: 0 0 8px 8px; }
+.card time { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.card .body { min-width: 0; }
+.card .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.card .title { font-weight: 600; color: var(--accent); }
+.card .item:hover .title { text-decoration: underline; text-underline-offset: 3px; }
+.card .kind { font-size: 13px; color: var(--muted); }
+.card .path, .card .excerpt { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.card .excerpt { color: var(--text); }
+
+iframe { flex: 1; width: 100%; border: 0; background: var(--bg); }
+
+/* On a phone the sidebar is a drawer and the contents a sheet; wider screens show them as columns. */
+aside { position: fixed; z-index: 3; inset: var(--bar) auto 0 0; width: min(320px, 86vw); transform: translateX(-100%); transition: transform 220ms cubic-bezier(0.32, 0.72, 0, 1); visibility: hidden; }
+.drawer aside { transform: none; visibility: visible; box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.35); }
+#toc { display: none; position: fixed; z-index: 3; top: calc(var(--bar) + 6px); right: 8px; width: min(300px, calc(100vw - 16px)); max-height: 70dvh; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.15); }
+.toc-open #toc { display: block; padding: 14px 16px; }
+@media (prefers-reduced-motion: reduce) { aside { transition: none; } }
+
+@media (max-width: 899px) {
+  .bar { gap: 6px; padding: 0 6px; }
+  .brand { padding: 0 6px; }
+  .crumbs > :not(:last-child) { display: none; }
+  .is-doc .crumbs { visibility: hidden; }
+  .card .item { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .card time { order: 2; font-size: 13px; }
+}
+@media (min-width: 900px) {
+  body { grid-template-columns: var(--side) minmax(0, 1fr); }
+  .brand { width: var(--side); }
+  .crumbs { margin-left: -8px; padding-left: var(--gutter); }
+  aside { position: static; width: auto; transform: none; visibility: visible; border-right: 1px solid var(--border-soft); }
+  #menu { display: none; }
+}
+@media (min-width: 1200px) {
+  .has-toc { grid-template-columns: var(--side) minmax(0, 1fr) var(--toc); }
+  .has-toc #toc { display: block; position: static; width: auto; max-height: none; background: none; border: 0; border-radius: 0; box-shadow: none; }
+  #contents { display: none; }
+}

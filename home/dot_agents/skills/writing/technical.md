@@ -14,7 +14,7 @@ Write an inferred claim in an inferred voice, never in a measured one. Replace a
 
 ## By kind
 
-- **Explanation:** start from what the reader already knows and name the mechanism. Give one concrete case (a real call path, an input and its output) before the general rule. Define each term on first use. When more than two components interact, add a diagram through `show-me` (in chat) or `visual-plan` (in a document).
+- **Explanation:** start from what the reader already knows and name the mechanism. Give one concrete case (a real call path, an input and its output) before the general rule. Define each term on first use. When more than two components interact, add a diagram through `show-me` (in chat) or `visual-doc` (in a document).
 - **Plan:** goals, non-goals, acceptance criteria a command or observation can check, what gets reused or removed, rollout, and risks. Batch the decisions at the end, each with a recommended default. A calling skill's template takes precedence.
 - **Spec:** every requirement can be tested, and the spec ends with a measurable done-predicate. It goes where the repo keeps specs: OpenSpec or Spec Kit if the repo uses one, repo markdown by default, Linear only if the project tracks work there.
 - **Report:** follow the contract below.
@@ -51,6 +51,6 @@ A subagent that writes one of these documents gets this block in its brief, verb
 
 ## Where it goes
 
-Plans and reports the owner reviews are HTML files in the repo's `docs/plans/` or `docs/research/`. Write the content with this file, then hand it to `visual-plan`, which owns the HTML, the file location and the plans hub. Specs and tickets stay markdown, as above. An answer in chat stays in chat.
+Anything the owner reviews or decides on (plans, explainers, tradeoffs, experiment results, audits) is HTML: write the content with this file, then hand it to `visual-doc`, which owns the HTML, the file location and the docs hub link. What later agent steps read (research inputs, specs, architect designs) is Markdown, and tickets go where the spec bullet above says. The docs hub renders HTML and Markdown the same way. An answer in chat stays in chat.
 
 Done when every number has a unit and a source, every measured claim names its command or conditions, the text ends with decisions or "Nothing needs you", `ste-lint` reports no hard finding you haven't fixed or kept for a reason, and the AI-tell pass is done. End the chat reply with the AI-tell proof line from SKILL.md.
