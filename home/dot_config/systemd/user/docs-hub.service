@@ -2,7 +2,7 @@
 Description=Docs hub: plans, research and specs from every checkout
 
 [Service]
-# Port 7777 is what `tailscale serve --service=svc:docs` points at.
+# Tailnet-only HTTPS on the same port: `tailscale serve --bg --https=7777 http://127.0.0.1:7777`.
 ExecStart=%h/.local/share/vite-plus/bin/node %h/.local/share/docs-hub/server.mjs --port 7777
 Restart=on-failure
 
