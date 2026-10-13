@@ -1,0 +1,5 @@
+#!/bin/sh
+# Claude Code billed to the API key from fnox instead of the subscription.
+# T3 starts it with a bare PATH, so put the user tool dirs first.
+PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
+exec fnox exec -- claude "$@"
