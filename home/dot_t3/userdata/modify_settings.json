@@ -15,4 +15,5 @@
     | setValueAtPath "storageCleanup.worktreeAfterDays" 10
     | setValueAtPath "storageCleanup.worktreeOnDelete" true
     | setValueAtPath "backgroundActivity" (dict "schemaVersion" 1 "profile" "performance" "overrides" dict)
+    | setValueAtPath "providerInstances.claudeAgent_claude_api" (dict "driver" "claudeAgent" "displayName" "Claude API" "enabled" true "config" (dict "binaryPath" "claude-api"))
     | toPrettyJson -}}
