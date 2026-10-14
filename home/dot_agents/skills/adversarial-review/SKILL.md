@@ -21,7 +21,7 @@ Done when you can name the base and head commits (or the plan file) and state th
 
 Start every lane in one message, so they run in parallel; start the `ocr` command in the background in that same message. Each lane is a fresh subagent that receives the artifact, the contract and its lane brief from [lanes.md](lanes.md), wrapped in [reviewer-brief.md](reviewer-brief.md), and nothing else. Paste both verbatim and fill only the bracketed fields: an added pointer ("in particular…", "here: timers…") or a trimmed list steers the lane as surely as your own conclusions would.
 
-- **Code change:** correctness and security, structure, test integrity, and idioms; blast radius for a small change whose safety rests on one fact; the `ocr` lane.
+- **Code change:** correctness and security, structure, test integrity, and idioms; blast radius for a small change whose safety rests on one fact; GitHub Actions when it touches `.github/workflows/**`; the `ocr` lane.
 - **Plan or spec:** problem fit, correctness of the design, operational burden, and overengineering.
 - **High-risk change** (auth, data, money, migrations, concurrency, public contracts): add the other vendor's model as one more lane, per [cross-model.md](cross-model.md).
 

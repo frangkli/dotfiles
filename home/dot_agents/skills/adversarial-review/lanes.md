@@ -50,13 +50,17 @@ Listing callers is quick; the job is the breakage a search won't show. Find the 
 
 ### `ocr`
 
-Run open-code-review on the same base and head, with the plan or contract as background:
+Run open-code-review on the same base and head. ocr takes one background file, so write the plan or contract, followed by the repo's `REVIEW_RULES.md` when it exists, to `.context/adversarial-review/<slug>/background.md` and pass that:
 
 ```bash
-ocr review --from <base> --to <head> --background-file <plan-or-contract.md> --format json --audience agent
+ocr review --from <base> --to <head> --background-file .context/adversarial-review/<slug>/background.md --format json --audience agent
 ```
 
 Exit code 0 doesn't prove coverage. `ocr review --preview` with the same refs lists the files ocr's rules select; changed files it leaves out (typically tests and docs) are excluded by design, so note them, since the test-integrity lane covers tests. A previewed file missing from the output's `coverage.completed`, or listed under `failed`, wasn't reviewed, and the lane reports it as a partial gap by name. If `ocr` isn't installed, can't reach its model (`ocr llm test` fails) or lacks credentials, record the lane as BLOCKED, which makes it a gap.
+
+### GitHub Actions (changes that touch `.github/workflows/**`)
+
+Run the `gha-security-review` skill on the changed workflow files and report its findings with their exploitation scenarios.
 
 ## Plans and specs
 
