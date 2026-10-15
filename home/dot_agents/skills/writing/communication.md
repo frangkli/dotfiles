@@ -20,6 +20,6 @@ Done when the final audit finds no §1 to §5 or §22 tell, no dash outside code
 
 ## Return
 
-The final message, ready to paste, with its subject line for email. Under it, one line listing any `[confirm: …]` gaps and assumptions, or "No gaps.", then the AI-tell proof line from SKILL.md, outside the message. Show the draft and the audit only when asked.
+The final message, ready to paste, with its subject line for email. Under it, one line listing any `[confirm: …]` gaps and assumptions, or "No gaps." Show the draft and the audit only when asked.
 
 The owner sends the message. Sending is outreach, a manual step, so return the text even when a send tool is available, unless the owner asked you to send it.

@@ -42,4 +42,4 @@ Done when the step 2 list and these four checks pass, and the AI-tell pass is do
 
 ## Return
 
-For an edit, the changed file plus a short summary: what you verified, and anything wrong you found in the existing doc. For a new page, the page and the same summary. End the chat reply with the AI-tell proof line from SKILL.md.
+For an edit, the changed file plus a short summary: what you verified, and anything wrong you found in the existing doc. For a new page, the page and the same summary.

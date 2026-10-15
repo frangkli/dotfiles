@@ -53,4 +53,4 @@ A subagent that writes one of these documents gets this block in its brief, verb
 
 Anything the owner reviews or decides on (plans, explainers, tradeoffs, experiment results, audits) is HTML: write the content with this file, then hand it to `visual-doc`, which owns the HTML, the file location and the docs hub link. What later agent steps read (research inputs, specs, architect designs) is Markdown, and tickets go where the spec bullet above says. The docs hub renders HTML and Markdown the same way. An answer in chat stays in chat.
 
-Done when every number has a unit and a source, every measured claim names its command or conditions, the text ends with decisions or "Nothing needs you", `ste-lint` reports no hard finding you haven't fixed or kept for a reason, and the AI-tell pass is done. End the chat reply with the AI-tell proof line from SKILL.md.
+Done when every number has a unit and a source, every measured claim names its command or conditions, the text ends with decisions or "Nothing needs you", `ste-lint` reports no hard finding you haven't fixed or kept for a reason, and the AI-tell pass is done.
