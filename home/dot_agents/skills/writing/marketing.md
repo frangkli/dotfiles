@@ -33,4 +33,4 @@ Once shaping starts, the fragments file is read-only. Re-read the article from d
 
 ## Return
 
-The piece, in a file for anything long or in chat for short copy, plus a list of claims that need the owner's confirmation. End the chat reply with the AI-tell proof line from SKILL.md.
+The piece, in a file for anything long or in chat for short copy, plus a list of claims that need the owner's confirmation.
