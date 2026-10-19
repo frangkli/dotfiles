@@ -6,6 +6,7 @@ fd = "latest" # Ubuntu installs it as fdfind
 yq = "latest" # mikefarah's; Ubuntu's yq package is a different tool
 atuin = "latest" # Ubuntu's predates built-in bash support (18.18)
 ast-grep = "latest"
+sccache = "latest"
 uv = "latest"
 chezmoi = "latest"
 prek = "latest"
