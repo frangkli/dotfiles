@@ -1,5 +1,5 @@
-// The docs hub: serves every repo's docs/plans, docs/research and docs/specs, read live from each
-// checkout and worktree (unmerged branches included), plus docs that are never committed: each main
+// The docs hub: serves every repo's docs/ and internal/docs/, read live from each checkout and
+// worktree (unmerged branches included), plus docs that are never committed: each main
 // checkout's flat docs/local folder and the flat notes folder for docs about no repo. Read-only,
 // loopback only.
 //
@@ -9,10 +9,10 @@
 // /~notes/<file> for notes. Git forbids "~" in branch names, so neither collides with a branch.
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { access, readdir, readFile, realpath, stat } from "node:fs/promises";
+import { access, lstat, readdir, readFile, realpath, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { homedir } from "node:os";
-import { basename, dirname, extname, join, posix, relative, sep } from "node:path";
+import { basename, dirname, extname, join, posix, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs, promisify } from "node:util";
 
@@ -27,8 +27,17 @@ const { values: options } = parseArgs({
 
 const here = dirname(fileURLToPath(import.meta.url));
 const run = promisify(execFile);
-// The kind a document gets when it doesn't declare one.
+// Committed docs: everything under docs/, and under internal/docs/ for repos published by an export
+// that drops internal/. docs/local is the main checkout's uncommitted folder, listed on its own.
+const docRoots = ["docs", "internal/docs"];
+const rootOf = (path) => (path.startsWith("internal/docs/") ? "internal/docs" : "docs");
+const isDocPath = (path) => /^(internal\/)?docs\/./.test(path) && !path.startsWith("docs/local/");
+// The kind a document gets when it doesn't declare one, from the folder under docs/ it sits in.
 const folders = { plans: "plan", research: "research", specs: "spec" };
+const folderKind = (path) => {
+  const folder = path.replace(/^(internal\/)?docs\//, "").split("/")[0];
+  return Object.hasOwn(folders, folder) ? folders[folder] : "note";
+};
 const kindLabels = {
   plan: "Plans", explainer: "Explainers", tradeoff: "Tradeoffs",
   research: "Research", experiment: "Experiments", spec: "Specs", note: "Notes",
@@ -103,7 +112,7 @@ async function findRepos() {
 }
 
 const docBlobs = async (dir, commit) => {
-  const output = await git(dir, "ls-tree", "-r", "-z", commit, "--", "docs");
+  const output = await git(dir, "ls-tree", "-r", "-z", commit, "--", "docs", "internal/docs");
   return new Map(output.split("\0").filter(Boolean).map((line) => [line.split("\t")[1], line.split(/[ \t]/)[2]]));
 };
 
@@ -126,21 +135,15 @@ async function forkBlobs(dir, commit) {
 
 // A docs folder counts only if its real path stays inside the worktree.
 async function folderRoot(worktreeDir, folder) {
-  const [root, dir] = await Promise.all([realpath(worktreeDir), realpath(join(worktreeDir, "docs", folder))]).catch(() => []);
+  const [root, dir] = await Promise.all([realpath(worktreeDir), realpath(join(worktreeDir, folder))]).catch(() => []);
   return dir?.startsWith(root + sep) ? dir : undefined;
 }
 
-// readdir's Dirents describe the link itself, so symlinks are never followed.
-async function walk(dir) {
-  const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
-  const nested = await Promise.all(
-    entries.map((entry) => {
-      if (entry.name.startsWith(".")) return [];
-      if (entry.isDirectory()) return walk(join(dir, entry.name));
-      return entry.isFile() ? [join(dir, entry.name)] : [];
-    }),
-  );
-  return nested.flat();
+// A worktree's docs, committed or not, minus what .gitignore drops (a docs site's build output or
+// node_modules). Git lists a symlinked folder as one entry, so symlinks are never followed.
+async function docFiles(dir) {
+  const output = await git(dir, "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--deduplicate", "--", ...docRoots).catch(() => "");
+  return output.split("\0").filter((path) => /\.(md|html)$/.test(path) && isDocPath(path) && !/(^|\/)\./.test(path));
 }
 
 // A flat folder of uncommitted docs counts only if its real path exists and, for docs/local, stays
@@ -177,20 +180,16 @@ async function scan(repos) {
     const algorithm = [...merged.values()][0]?.length === 64 ? "sha256" : "sha1";
     for (const worktree of repo.worktrees) {
       const inherited = await forkBlobs(worktree.dir, commit);
-      for (const folder of Object.keys(folders)) {
-        const root = await folderRoot(worktree.dir, folder);
-        for (const file of root ? await walk(root) : []) {
-          if (!/\.(md|html)$/.test(file)) continue;
-          const [content, info] = await Promise.all([readFile(file), stat(file)]).catch(() => []);
-          if (!content) continue;
-          const path = `docs/${folder}/${relative(root, file)}`;
-          const blob = createHash(algorithm).update(`blob ${content.length}\0`).update(content).digest("hex");
-          const { title, kind, text } = parseDocument(content.toString("utf8"), path);
-          const date = /\d{4}-\d{2}-\d{2}/.exec(path)?.[0] ?? new Date(info.mtimeMs).toISOString().slice(0, 10);
-          const doc = { repo: repo.name, worktree, path, place: `${repo.name} · ${worktree.key} · ${path}`, title: title || basename(path), text, date };
-          const isMerged = merged.get(path) === blob || inherited.get(path) === blob;
-          docs.push({ ...doc, kind: kind?.toLowerCase() || folders[folder], mtime: info.mtimeMs, merged: isMerged });
-        }
+      for (const path of await docFiles(worktree.dir)) {
+        const file = join(worktree.dir, path);
+        const [content, info] = await Promise.all([readFile(file), lstat(file)]).catch(() => []);
+        if (!content || !info.isFile()) continue;
+        const blob = createHash(algorithm).update(`blob ${content.length}\0`).update(content).digest("hex");
+        const { title, kind, text } = parseDocument(content.toString("utf8"), path);
+        const date = /\d{4}-\d{2}-\d{2}/.exec(path)?.[0] ?? new Date(info.mtimeMs).toISOString().slice(0, 10);
+        const doc = { repo: repo.name, worktree, path, place: `${repo.name} · ${worktree.key} · ${path}`, title: title || basename(path), text, date };
+        const isMerged = merged.get(path) === blob || inherited.get(path) === blob;
+        docs.push({ ...doc, kind: kind?.toLowerCase() || folderKind(path), mtime: info.mtimeMs, merged: isMerged });
       }
     }
   }
@@ -223,8 +222,8 @@ function route(pathname, repos) {
   const worktree = repo?.worktrees
     .toSorted((a, b) => b.key.length - a.key.length)
     .find((candidate) => tail === candidate.key || tail.startsWith(`${candidate.key}/`));
-  const path = worktree ? tail.slice(worktree.key.length + 1) : /(?:^|\/)(docs\/.*)$/.exec(tail)?.[1];
-  const valid = /^docs\/(plans|research|specs)\/./.test(path) && posix.normalize(path) === path && !path.includes("\0");
+  const path = worktree ? tail.slice(worktree.key.length + 1) : /(?:^|\/)((?:internal\/)?docs\/.*)$/.exec(tail)?.[1];
+  const valid = isDocPath(path ?? "") && posix.normalize(path) === path && !path.includes("\0");
   return { repo, worktree, path: valid ? path : undefined, extra: tail !== (worktree?.key ?? "") };
 }
 
@@ -237,7 +236,7 @@ async function resolveFile(worktree, path) {
     if (!file || dirname(file) !== root) return undefined;
     return (await stat(file)).isFile() ? { file, directory: false } : undefined;
   }
-  const root = await folderRoot(worktree.dir, path.split("/")[1]);
+  const root = await folderRoot(worktree.dir, rootOf(path));
   const file = root && (await realpath(join(worktree.dir, path)).catch(() => undefined));
   if (!file?.startsWith(root + sep)) return undefined;
   const info = await stat(file);
