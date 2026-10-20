@@ -38,4 +38,7 @@
     | setValueAtPath "hooks.PreToolUse" (list $atuin)
     | setValueAtPath "hooks.PostToolUse" (list $atuin $designEdit)
     | setValueAtPath "hooks.Stop" (list $designStop) -}}
+{{- range $name, $value := .toolEnv -}}
+{{-   $config = $config | setValueAtPath (printf "shell_environment_policy.set.%s" $name) $value -}}
+{{- end -}}
 {{- toToml $config -}}

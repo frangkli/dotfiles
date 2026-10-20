@@ -1,0 +1,11 @@
+# Every login shell reads this, so keep it POSIX and silent.
+for dir in "$HOME/.cargo/bin" "$HOME/.local/share/mise/shims" "$HOME/.local/bin"; do
+  case ":$PATH:" in *":$dir:"*) ;; *) PATH="$dir:$PATH" ;; esac
+done
+if [ -f "$HOME/.config/vite-plus/env" ]; then . "$HOME/.config/vite-plus/env"; fi
+export EDITOR=nvim
+{{- range $name, $value := .toolEnv }}
+export {{ $name }}={{ $value }}
+{{- end }}
+
+if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then . "$HOME/.bashrc"; fi
