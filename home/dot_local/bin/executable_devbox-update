@@ -34,6 +34,7 @@ if [ -n "$changed" ]; then echo "Skills updated: $(echo $changed)"; fi
 claude plugin marketplace update
 claude plugin update impeccable@impeccable
 claude plugin update ponytail@ponytail
+claude plugin update rust-analyzer-lsp@claude-plugins-official
 codex plugin marketplace upgrade
 codex plugin add ponytail@ponytail
 npx -y impeccable@latest install --providers=codex --scope=global --no-hooks -y
