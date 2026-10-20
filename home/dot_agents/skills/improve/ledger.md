@@ -9,7 +9,7 @@ One JSON file per run, at `.context/improve/<slug>/ledger.json`. `.context/` is 
   "guarded": { "path/outside/scope": "<sha256 at baseline>" },
   "decisions": ["user rulings, verbatim; binding on every round"],
   "rounds": [
-    { "n": 1, "type": "review", "open": { "critical": 0, "major": 3, "minor": 2 }, "new": 5, "reopened": 0, "refiled_rejected": 0 }
+    { "n": 1, "type": "review", "head": "<commit reviewed>", "open": { "critical": 0, "major": 3, "minor": 2 }, "new": 5, "reopened": 0, "refiled_rejected": 0 }
   ],
   "findings": {
     "src/billing/charge.ts:42:missing-idempotency": {

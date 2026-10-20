@@ -50,7 +50,7 @@ Listing callers is quick; the job is the breakage a search won't show. Find the 
 
 ### `ocr`
 
-Run open-code-review on the same base and head. ocr takes one background file, so write the plan or contract, followed by the repo's `REVIEW_RULES.md` when it exists, to `.context/adversarial-review/<slug>/background.md` and pass that:
+Run open-code-review on the same base and head. ocr takes one background file, so write the plan or contract, followed by the repo's `REVIEW_RULES.md` when it exists and `improve`'s ledger when there is one, to `.context/adversarial-review/<slug>/background.md` and pass that:
 
 ```bash
 ocr review --from <base> --to <head> --background-file .context/adversarial-review/<slug>/background.md --format json --audience agent
