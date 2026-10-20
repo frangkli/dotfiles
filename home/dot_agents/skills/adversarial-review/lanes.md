@@ -42,7 +42,7 @@ Check that the tests prove the change.
 
 ### Idioms
 
-Check the changed lines against the language's house idioms. For each language the change touches, load its language skill's `references/review.md` (TypeScript: `typescript/references/review.md`, plus `references/effect-review.md` in a package that imports `effect`) and apply every item to code the change adds or modifies. Review only idiom and style; design belongs to the structure lane. The evidence for a finding is the review.md item it breaks and the line that breaks it, in place of a path to failure; severity is minor or info. A language with no `references/review.md` gets PASS with "no review.md for <language>".
+Check the changed lines against the language's house idioms. For each language the change touches, load its language skill's `references/review.md` (TypeScript: `typescript/references/review.md`, plus `references/effect-review.md` in a package that imports `effect`) and apply every item to code the change adds or modifies. Apply the repo's own style or conventions document too, when AGENTS.md names one or the root has one (for example `STYLE.md`). Review only idiom and style; design belongs to the structure lane. The evidence for a finding is the review.md or repo document item it breaks and the line that breaks it, in place of a path to failure; severity is minor or info. A language with no `references/review.md` and no repo document gets PASS with "no review.md for <language>".
 
 ### Blast radius (small changes whose safety rests on one fact)
 
