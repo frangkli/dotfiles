@@ -7,6 +7,9 @@
 {{- /* impeccable runs from its plugin; this hides the Codex copy in ~/.agents/skills. */ -}}
 {{- /* atuin logs agent shell commands, kept out of your Ctrl-R. */ -}}
 {{- $atuin := dict "matcher" "^Bash$" "hooks" (list (dict "type" "command" "command" "atuin hook claude-code")) -}}
+{{- range $name, $value := .toolEnv -}}
+{{-   $settings = $settings | setValueAtPath (printf "env.%s" $name) $value -}}
+{{- end -}}
 {{- $settings
     | setValueAtPath "attribution" (dict "commit" "" "pr" "" "sessionUrl" false)
     | setValueAtPath "disableClaudeAiConnectors" true
