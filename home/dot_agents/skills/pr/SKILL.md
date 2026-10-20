@@ -29,7 +29,7 @@ Done when the branch is named, the file list is written down, and `.context/` is
 
 ## 2. Review
 
-Run `adversarial-review` on the change. It fixes what it confirms through `improve`. Skip it only when it already ran on this exact change (its report names the current head and nothing changed since), or the task set a lighter review.
+Run `adversarial-review` on the change. It fixes what it confirms through `improve`. Skip it only when it already ran on this exact change (its report names the current head and nothing changed since), or the task itself waived or replaced the review.
 
 Done when the review reports converged. If it escalates, stop and report the escalation; ship after the user rules on it.
 
