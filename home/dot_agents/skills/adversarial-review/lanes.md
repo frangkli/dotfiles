@@ -42,7 +42,7 @@ Check that the tests prove the change.
 
 ### Idioms
 
-Check the changed lines against the language's house idioms. For each language the change touches, load its language skill's `references/review.md` (TypeScript: `typescript/references/review.md`, plus `references/effect-review.md` in a package that imports `effect`) and apply every item to code the change adds or modifies. Review only idiom and style; design belongs to the structure lane. The evidence for a finding is the review.md item it breaks and the line that breaks it, in place of a path to failure; severity is minor or info. A language with no `references/review.md` gets PASS with "no review.md for <language>".
+Check the changed lines against the language's house idioms. For each language the change touches, load its language skill's `references/review.md` (TypeScript: `typescript/references/review.md`, plus `references/effect-review.md` in a package that imports `effect`) and apply every item to code the change adds or modifies. Apply the repo's own style or conventions document too, when AGENTS.md names one or the root has one (for example `STYLE.md`). Review only idiom and style; design belongs to the structure lane. The evidence for a finding is the review.md or repo document item it breaks and the line that breaks it, in place of a path to failure; severity is minor or info. A language with no `references/review.md` and no repo document gets PASS with "no review.md for <language>".
 
 ### Blast radius (small changes whose safety rests on one fact)
 
@@ -50,7 +50,7 @@ Listing callers is quick; the job is the breakage a search won't show. Find the 
 
 ### `ocr`
 
-Run open-code-review on the same base and head. ocr takes one background file, so write the plan or contract, followed by the repo's `REVIEW_RULES.md` when it exists, to `.context/adversarial-review/<slug>/background.md` and pass that:
+Run open-code-review on the same base and head. ocr takes one background file, so write the plan or contract, followed by the repo's `REVIEW_RULES.md` when it exists and `improve`'s ledger when there is one, headed by the reviewer brief's rule on the ledger, to `.context/adversarial-review/<slug>/background.md` and pass that:
 
 ```bash
 ocr review --from <base> --to <head> --background-file .context/adversarial-review/<slug>/background.md --format json --audience agent

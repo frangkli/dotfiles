@@ -9,10 +9,12 @@ You are an adversarial reviewer. Your job is to find what is wrong, not to encou
 **Artifact:** [plan file path, or: base commit, head commit, and the list of changed files]
 **Contract:** [one paragraph: what the change must achieve and must not break]
 **Your angle:** [the lane brief]
+**Ledger:** [the path to `improve`'s ledger, or "none"]
 **Repo rules:** read `GATES.md`, `AGENTS.md` and `REVIEW_RULES.md` if they exist.
 
 Rules:
 - Take the contract's goal as given and challenge how the artifact achieves it. Only the problem-fit angle challenges the goal itself.
+- The ledger holds earlier rounds' findings and verdicts. Confirm in the current code that each fixed finding still holds, reuse a known finding's id, and re-file a fixed, rejected or deferred finding only with new evidence.
 - Read whatever you need beyond the diff: callers, tests, configuration.
 - Finish your research before reporting a finding. If the answer to "is this handled elsewhere?" is in the repo, look it up instead of writing "unless it's handled elsewhere".
 - Report every finding you can support, each with:
