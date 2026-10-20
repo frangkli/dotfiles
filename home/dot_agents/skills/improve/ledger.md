@@ -1,6 +1,6 @@
 # Ledger
 
-One JSON file per run, at `.context/improve/<slug>/ledger.json`. `.context/` is ignored by git. The ledger is what makes verdicts stick and what lets a run resume after compaction or an escalation.
+One JSON file per run, at `.context/improve/<slug>/ledger.json`, where `<slug>` is the branch name with `/` as `-`, or a short name for the paths given. `.context/` is ignored by git. The ledger is what makes verdicts stick and what lets a run resume after compaction or an escalation.
 
 ```json
 {
@@ -8,8 +8,9 @@ One JSON file per run, at `.context/improve/<slug>/ledger.json`. `.context/` is 
   "scope": ["src/billing/**"],
   "guarded": { "path/outside/scope": "<sha256 at baseline>" },
   "decisions": ["user rulings, verbatim; binding on every round"],
+  "outcome": "converged | escalated | halted, written when the run stops",
   "rounds": [
-    { "n": 1, "type": "review", "head": "<commit reviewed>", "open": { "critical": 0, "major": 3, "minor": 2 }, "new": 5, "reopened": 0, "refiled_rejected": 0 }
+    { "n": 1, "type": "review", "head": "<snapshot reviewed>", "open": { "critical": 0, "major": 3, "minor": 2 }, "new": 5, "reopened": 0, "refiled_rejected": 0 }
   ],
   "findings": {
     "src/billing/charge.ts:42:missing-idempotency": {
@@ -26,6 +27,16 @@ One JSON file per run, at `.context/improve/<slug>/ledger.json`. `.context/` is 
   }
 }
 ```
+
+**Snapshots.** Fixes stay uncommitted until the run finishes, so each review records the tree it saw as a commit no branch points to, made without touching the index:
+
+```bash
+GIT_INDEX_FILE=$(mktemp -u) sh -c 'git add -A && git commit-tree "$(git write-tree)" -p HEAD -m "improve snapshot"; rm -f "$GIT_INDEX_FILE"'
+```
+
+The fix delta is `git diff <last round's head> <new snapshot> -- <scope>`, and `ocr` takes the two snapshots as `--from` and `--to`. A round with no `head` sends the next round to a full review.
+
+**Unfinished.** A ledger with no `outcome`, or `halted`, belongs to a run that was cut off.
 
 **Ids.** `file:line:class`, where class is a short kebab-case label for the defect. When the line moves, match on `file` and `class` if exactly one open finding fits.
 
