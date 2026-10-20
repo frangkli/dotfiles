@@ -7,7 +7,7 @@ description: Adversarial review of a plan, spec or code change before it ships. 
 
 Several fresh reviewers each attack one angle of the artifact. You verify what they claim, judge it, and report a finished verdict. On a code change, you then fix the verified findings with `improve`.
 
-**Findings mode.** When `improve` calls this skill as its reviewer, run steps 1–5 and return the verified findings with their severities and buckets. Skip steps 6 and 7: `improve` owns the fixing and the report.
+**Findings mode.** When `improve` calls this skill as its reviewer, run steps 1–5 and return the review size with the fact that decided it, the bite test's result when one ran, and the verified findings with their severities and buckets. Skip steps 6 and 7: `improve` owns the fixing and the report.
 
 ## 1. Scope and contract
 
@@ -19,9 +19,12 @@ Done when you can name the base and head commits (or the plan file) and state th
 
 ## 2. Launch the lanes
 
-Start every lane in one message, so they run in parallel; start the `ocr` command in the background in that same message. Each lane is a fresh subagent that receives the artifact, the contract and its lane brief from [lanes.md](lanes.md), wrapped in [reviewer-brief.md](reviewer-brief.md), and nothing else. Paste both verbatim and fill only the bracketed fields: an added pointer ("in particular…", "here: timers…") or a trimmed list steers the lane as surely as your own conclusions would.
+Start every lane in one message, so they run in parallel; start the `ocr` command, when the size includes it, in the background in that same message. Each lane is a fresh subagent that receives the artifact, the contract and its lane brief from [lanes.md](lanes.md), wrapped in [reviewer-brief.md](reviewer-brief.md), and nothing else. Paste both verbatim and fill only the bracketed fields: an added pointer ("in particular…", "here: timers…") or a trimmed list steers the lane as surely as your own conclusions would.
 
-- **Code change:** correctness and security, structure, test integrity, and idioms; blast radius for a small change whose safety rests on one fact; GitHub Actions when it touches `.github/workflows/**`; the `ocr` lane.
+- **Code change:** size it first, then launch that size's lanes.
+  - **Light:** under 300 added plus deleted lines, not counting lockfiles; no runtime code or tests; nothing high-risk (below) and nothing touching security, privacy, permissions or data retention. For example config, CI, docs, ignore rules or dependency bumps. Scripts, service units, and git or agent hooks are runtime code, except a one- or two-line edit that copies a pattern already in the same file. Lanes, and only these: one reviewer whose reviewer brief holds both the correctness and security brief and the blast radius brief; GitHub Actions when it touches `.github/workflows/**`. When the change adds a check (a lint rule, a CI gate), prove it bites in step 4, in a scratch worktree: break the rule it enforces and see the check fail. A check that doesn't fail is a confirmed finding.
+  - **Full:** every other change. Lanes: correctness and security, structure, test integrity, and idioms; blast radius for a small change whose safety rests on one fact; GitHub Actions when it touches `.github/workflows/**`; the `ocr` lane.
+  - In `improve`'s later rounds, size the change again from the base to the current head. Once a run is full, it stays full.
 - **Plan or spec:** problem fit, correctness of the design, operational burden, and overengineering.
 - **High-risk change** (auth, data, money, migrations, concurrency, public contracts): add the other vendor's model as one more lane, per [cross-model.md](cross-model.md).
 
@@ -53,7 +56,7 @@ Done when all four lists are written in your reply, an empty one as "none", befo
 ## 6. Act
 
 - **Plan or spec:** report only (step 7). The author revises the plan.
-- **Code change:** fixing is part of this skill, so don't stop at the report or ask first. With the four lists already in your reply, hand the Act on findings to `improve`, scoped to the change's files, together with the contract. This review counts as improve's first review; improve runs every later review as this skill in findings mode, with all the code-change lanes, and commits when it converges. Report after `improve` finishes, including its outcome. Fix nothing yourself, however small: a fix made outside `improve` never gets reviewed. If Act on is empty, say so and skip `improve`.
+- **Code change:** fixing is part of this skill, so don't stop at the report or ask first. With the four lists already in your reply, hand the Act on findings to `improve`, scoped to the change's files, together with the contract. This review counts as improve's first review; improve runs every later review as this skill in findings mode, with the lanes step 2 picks for the change's size, and commits when it converges. Report after `improve` finishes, including its outcome. Fix nothing yourself, however small: a fix made outside `improve` never gets reviewed. If Act on is empty, say so and skip `improve`.
 - A finding that can only be fixed by dropping or narrowing a contract requirement is a decision for the user, not an Act on item.
 
 ## 7. Report

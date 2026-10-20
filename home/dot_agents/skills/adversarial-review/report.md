@@ -3,7 +3,7 @@
 A review report is finished work. The reader should never need to ask "did you check?" or "what does this mean?". Write its prose per the `writing` skill's technical mode ([../writing/technical.md](../writing/technical.md)), with the order below in place of its report contract.
 
 1. **Verdict first.** One or two sentences: is the artifact sound, and what must change before it ships.
-2. **Coverage.** Each lane with its status and finding count, any gaps and why, and the base and head commits (or plan file) reviewed.
+2. **Coverage.** The review size (light or full), the fact that decided it, and the bite test's result when one ran; each lane with its status and finding count, any gaps and why, and the base and head commits (or plan file) reviewed.
 3. **Act on**, then **Consider**, then **Noted**, each under its own heading even when empty. Each finding stands alone:
    - what is wrong and where (`file:line` or plan section);
    - why it matters: the concrete failing case or its impact;
