@@ -1,10 +1,12 @@
 # Ledger
 
-One JSON file per run, at `.context/improve/<slug>/ledger.json`, where `<slug>` is the branch name with `/` as `-`, or a short name for the paths given. `.context/` is ignored by git. The ledger is what makes verdicts stick and what lets a run resume after compaction or an escalation.
+One JSON file per run, at `.context/improve/<slug>/ledger.json`, where `<slug>` is the branch name, or the given paths joined with `-`, with each `/` as `-`. `.context/` is ignored by git. The ledger is what makes verdicts stick and what lets a run resume after compaction or an escalation.
 
 ```json
 {
   "base": "<commit>",
+  "contract": "the caller's contract, verbatim, or null",
+  "lens": false,
   "scope": ["src/billing/**"],
   "guarded": { "path/outside/scope": "<sha256 at baseline>" },
   "decisions": ["user rulings, verbatim; binding on every round"],
@@ -31,10 +33,10 @@ One JSON file per run, at `.context/improve/<slug>/ledger.json`, where `<slug>` 
 **Snapshots.** Fixes stay uncommitted until the run finishes, so each review records the tree it saw as a commit no branch points to, made without touching the index:
 
 ```bash
-GIT_INDEX_FILE=$(mktemp -u) sh -c 'git add -A && git commit-tree "$(git write-tree)" -p HEAD -m "improve snapshot"; rm -f "$GIT_INDEX_FILE"'
+sh -c 'idx=$(mktemp -u) && cp "$(git rev-parse --git-path index)" "$idx" && export GIT_INDEX_FILE="$idx" && git add -A && git commit-tree "$(git write-tree)" -p HEAD -m "improve snapshot"; s=$?; rm -f "$idx"; exit $s'
 ```
 
-The fix delta is `git diff <last round's head> <new snapshot> -- <scope>`, and `ocr` takes the two snapshots as `--from` and `--to`. A round with no `head` sends the next round to a full review.
+Every round's head is a snapshot, full rounds included: a delta round reviews `git diff <last round's head> <new snapshot> -- <scope>`, a full round reviews `<base>` to the new snapshot, and `ocr` takes the same pair as `--from` and `--to`. A failed snapshot halts the run. A round with no `head` sends the next round to a full review.
 
 **Unfinished.** A ledger with no `outcome`, or `halted`, belongs to a run that was cut off.
 
