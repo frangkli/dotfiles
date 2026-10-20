@@ -1,3 +1,8 @@
+# Interactive bash reads this, T3's terminal included, and so does ~/.profile.
+{{- range $name, $value := .toolEnv }}
+export {{ $name }}={{ $value }}
+{{- end }}
+
 # Agents load this too: they stop here, and nothing below may shadow a real command.
 case $- in *i*) ;; *) return ;; esac
 [ -n "$CLAUDECODE$CODEX_THREAD_ID" ] && return
