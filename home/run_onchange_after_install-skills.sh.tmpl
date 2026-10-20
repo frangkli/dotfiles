@@ -16,4 +16,6 @@ codex plugin marketplace add https://github.com/DietrichGebert/ponytail.git
 codex plugin add ponytail@ponytail
 # Codex gets impeccable from its own installer; its hooks are declared in ~/.codex/config.toml.
 npx -y impeccable@latest install --providers=codex --scope=global --no-hooks -y
+# Stacked PRs; bootstrap logs gh in before the first apply.
+gh extension list | grep -q github/gh-stack || gh extension install github/gh-stack
 {{ end -}}
