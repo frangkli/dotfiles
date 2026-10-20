@@ -39,3 +39,4 @@ codex plugin marketplace upgrade
 codex plugin add ponytail@ponytail
 npx -y impeccable@latest install --providers=codex --scope=global --no-hooks -y
 codex-trust-hooks
+gh extension upgrade --all
