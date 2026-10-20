@@ -33,7 +33,7 @@ Start every lane in one message, so they run in parallel; start the `ocr` comman
 - **Plan or spec:** problem fit, correctness of the design, operational burden, and overengineering.
 - **High-risk change** (auth, data, money, migrations, concurrency, public contracts): add the other vendor's model as one more lane, per [cross-model.md](cross-model.md).
 
-Save each lane's report under `.context/adversarial-review/<slug>/round-<n>/` as it returns; a rerun on the same head reuses the saved reports rather than relaunching those lanes. Done when every lane has returned PASS, ISSUES or BLOCKED with the base and head commits it reviewed. Respawn a lane once if it returns without them. A lane that fails twice is a **gap**, and a gap is unknown, never clean.
+Done when every lane has returned PASS, ISSUES or BLOCKED with the base and head commits it reviewed. Respawn a lane once if it returns without them. A lane that fails twice is a **gap**, and a gap is unknown, never clean.
 
 ## 3. Fold in other reviewers
 
