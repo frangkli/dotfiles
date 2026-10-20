@@ -4,5 +4,8 @@ for dir in "$HOME/.cargo/bin" "$HOME/.local/share/mise/shims" "$HOME/.local/bin"
 done
 if [ -f "$HOME/.config/vite-plus/env" ]; then . "$HOME/.config/vite-plus/env"; fi
 export EDITOR=nvim
+{{- range $name, $value := .toolEnv }}
+export {{ $name }}={{ $value }}
+{{- end }}
 
 if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then . "$HOME/.bashrc"; fi
