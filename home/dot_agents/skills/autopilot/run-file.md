@@ -27,4 +27,4 @@ Budget: <tokens or time, or none>
 |---|---|---|---|---|
 
 ## Pickup
-<only while paused: where the run is, what is verified at which SHA, what was in flight, the next action, gotchas>
+<while paused or at a phase handover: where the run is, what is verified at which SHA, what was in flight, the phase's cost, the next action, gotchas>

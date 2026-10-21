@@ -8,6 +8,7 @@ Only these, batched into as few blocked tickets as possible:
 - **Manual operations:** credentials, accounts, billing or paid access, CAPTCHA or 2FA, production changes, external outreach.
 - **Real product forks:** a choice the spec doesn't settle, and that no prototype or measurement can settle.
 - **Ambiguous spec lines:** two readings that lead to different observable behaviour.
+- **High-impact interfaces:** the exact types of a public API, shared contract or schema, before their unit is built ([../orchestrate/brief.md](../orchestrate/brief.md)).
 
 Each becomes a ticket with status `manual` or `blocked`, linked as blocking the tickets it holds up. It contains:
 - the exact action or question;
