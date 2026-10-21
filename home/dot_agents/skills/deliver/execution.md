@@ -20,11 +20,11 @@ Done when every phase's CHECKs pass on the integrated head with their output sho
 ## 8. Integrate and review
 
 1. Fetch trunk, rebase, and re-run the checks covering anything that moved.
-2. Run `adversarial-review` on the change: base is the merge base with trunk, head is `HEAD`, and the contract is the approved plan. Its lanes include the review tools the repo has configured, with their coverage inspected. It hands verified findings to `improve`, which fixes them until the findings converge.
+2. Run `adversarial-review` on the change: base is the merge base with trunk, head is `HEAD`, and the contract is the approved plan. Its lanes include the review tools the repo has configured, with their coverage inspected. It hands verified findings to `improve`, which fixes them in its fixed rounds.
 3. Record refuted findings with their evidence in the log. If `improve` escalates, treat it as a ruling or, when it meets a reopen trigger, as a decision for the user.
 4. Run the full readiness check once on the head that `improve` left.
 
-Done when `improve` reports converged on the current head and the full readiness check passed on that same head.
+Done when `improve` reports done on the current head and the full readiness check passed on that same head.
 
 ## 9. Ship
 

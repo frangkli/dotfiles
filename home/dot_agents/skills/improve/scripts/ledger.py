@@ -110,6 +110,7 @@ def verdict(state, fid, status, reason):
 def outcome(state, value):
     ledger = read(state)
     ledger["outcome"] = value
+    ledger["head"] = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
     write(state, ledger)
 
 
