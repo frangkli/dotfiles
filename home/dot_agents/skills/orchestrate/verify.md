@@ -2,7 +2,7 @@
 
 A worker's report is a claim. The verdict comes from what you run yourself on the candidate SHA.
 
-1. **Check the candidate.** The worktree is clean, and its HEAD equals the reported SHA. Read `git log --oneline <base>..<sha>`. Compare `git diff --name-only <base>...<sha>` with SCOPE: a file outside it means the verdict is `failed` (scope).
+1. **Check the candidate.** The worktree is clean, its HEAD equals the reported SHA, and your own checkout is unchanged, since a worker that missed its `cd` commits there. Read `git log --oneline <base>..<sha>`. Compare `git diff --name-only <base>...<sha>` with SCOPE: a file outside it means the verdict is `failed` (scope).
 2. **Re-run the CHECK** in the unit's worktree at that SHA. It passes only when the command exits 0 **and** the expected text appears in its output; a non-zero exit fails even if the text appears. For a CHECK that asserts something is absent, first show it can detect a known case (for example, run it on the base, where the thing still exists), because a wrong path or pattern also prints nothing.
 3. **Run the surface.** If the unit changes behaviour on an app surface, run the project's `verify` skill on it.
 4. **Read the diff** against ACCEPTANCE. Units touching auth, data, money, migrations, concurrency or public contracts also get `adversarial-review`. Add the other vendor's model only for high-risk diffs.
