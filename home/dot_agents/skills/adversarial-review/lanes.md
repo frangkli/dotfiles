@@ -1,12 +1,12 @@
 # Lanes
 
-Each lane is one subagent with one angle. Paste the lane's brief into [reviewer-brief.md](reviewer-brief.md).
+Each lane is one subagent with one angle. Paste the lane's brief into [reviewer-brief.md](reviewer-brief.md), after the packet. The bug pass is correctness and security, test integrity, `ocr` and Codex; the combined reviewer gets the correctness and security brief and the test integrity brief together.
 
 ## Code changes
 
 ### Correctness and security
 
-Find what breaks. Review only code the change adds or modifies, and read beyond the diff to see how it is called.
+Find what breaks. Review only code the change adds or modifies, and use the packet's uses list to see how it is called.
 
 - **Logic:** wrong results, unhandled states, off-by-one and boundary cases, error paths that hide a failure.
 - **Concurrency and retries:** races, missing idempotency, retried non-idempotent work, missing timeouts or cancellation, unbounded queues or memory.
@@ -18,31 +18,26 @@ Find what breaks. Review only code the change adds or modifies, and read beyond 
 
 When the change clearly intends something risky (removing a flag, deleting a safeguard) and keeps it well contained, that is the intent, not a finding, unless the author seems unaware of the consequences.
 
-### Structure
-
-Find what makes the code harder to change next time. Prefer a few high-conviction findings over a list of cosmetic notes.
-
-- A file pushed past roughly a thousand lines.
-- Special cases bolted into unrelated flows, and feature checks scattered through shared code.
-- Logic in the wrong layer; a duplicated copy of a helper that already exists.
-- Wrappers, adapters or casts that only paper over a mismatched contract.
-- A simpler idea that would remove the problem rather than tidy it: deleting a layer of indirection, or reshaping the state so conditionals disappear.
-
-Rank remedies by how much they delete.
-
 ### Test integrity
 
-Check that the tests prove the change.
+Check that the tests prove the change, and that each test earns its place.
 
 - **Refute the verification.** Did the claimed checks actually run, exercise the changed path, and touch the real artifact rather than a fixture or a cached output? A check that failed to start counts as no check.
 - **Weakened tests.** Assertions loosened, expected values changed, tests skipped or deleted, or inputs special-cased in the same change as the code, without a stated reason.
 - **Vacuous tests.** Tests that would still pass if the subject returned nothing or a constant.
 - **Held-out input.** For each changed behaviour, name one input the tests don't cover and check it by hand.
 - **Scope against the contract.** Changed files outside the contract's reach, and any requirement that was narrowed or quietly reinterpreted.
+- **Value**, minor findings only. Each added test answers four questions: which behaviour it protects, which credible regression turns it red, why existing coverage doesn't already catch that, and whether it needs a seam (an export, flag or hook) no production caller uses. A test missing an answer, a near-duplicate, or one that breaks under a behaviour-preserving refactor is a finding; [../test-audit/catalog.md](../test-audit/catalog.md) lists the usual patterns.
 
-### Idioms
+### Design and style
 
-Check the changed lines against the language's house idioms. For each language the change touches, load its language skill's `references/review.md` (TypeScript: `typescript/references/review.md`, plus `references/effect-review.md` in a package that imports `effect`) and apply every item to code the change adds or modifies. Apply the repo's own style or conventions document too, when AGENTS.md names one or the root has one (for example `STYLE.md`). Review only idiom and style; design belongs to the structure lane. The evidence for a finding is the review.md or repo document item it breaks and the line that breaks it, in place of a path to failure; severity is minor or info. A language with no `references/review.md` and no repo document gets PASS with "no review.md for <language>".
+Find what will be costly to change later, and what breaks the repo's conventions. Check the code against the repo's style or conventions document and, for each language the change touches, its language skill's `references/review.md` (TypeScript also `references/effect-review.md` in a package that imports `effect`); the packet lists the paths.
+
+- **Full depth on public interfaces, shared types, contracts and schemas:** names, which module owns the data, what a caller must know to use it, invalid states the types allow, and what a later change would have to break.
+- **Elsewhere, only findings with a concrete cost:** logic in the wrong layer; a duplicate of a helper that already exists; special cases bolted into unrelated flows; wrappers or casts that paper over a mismatched contract; a simpler shape that deletes a layer or a set of conditionals. Rank remedies by how much they delete.
+- **Style:** every item of the documents above that the added or modified lines break.
+
+The evidence for a finding is the document item it breaks and the line that breaks it, or the concrete later change it makes costly, in place of a path to failure. A design problem in a public interface can be major; style items are minor or info.
 
 ### Blast radius (small changes whose safety rests on one fact)
 
@@ -50,17 +45,21 @@ Listing callers is quick; the job is the breakage a search won't show. Find the 
 
 ### `ocr`
 
-Run open-code-review on the same base and head. ocr takes one background file, so write the plan or contract, followed by the repo's `REVIEW_RULES.md` when it exists and `improve`'s ledger when there is one, headed by the reviewer brief's rule on the ledger, to `.context/adversarial-review/<slug>/background.md` and pass that:
+Run open-code-review on the same base and head. ocr takes one background file, and it warns once that file passes about 2,000 characters, so keep it short. Write the contract, the three wording rules from [../improve/ledger.md](../improve/ledger.md), the repo's `REVIEW_RULES.md` Known non-issues when it has them, and the known list (`python3 ~/.agents/skills/improve/scripts/ledger.py known <state> <characters left>`) to `<state>/round-<n>/ocr-background.md`, and pass that:
 
 ```bash
-ocr review --from <base> --to <head> --background-file .context/adversarial-review/<slug>/background.md --format json --audience agent
+timeout 900 ocr review --from <base> --to <head> --background-file <state>/round-<n>/ocr-background.md --format json --audience agent > <state>/round-<n>/raw/ocr.json
 ```
 
-Exit code 0 doesn't prove coverage. `ocr review --preview` with the same refs lists the files ocr's rules select; changed files it leaves out (typically tests and docs) are excluded by design, so note them, since the test-integrity lane covers tests. A previewed file missing from the output's `coverage.completed`, or listed under `failed`, wasn't reviewed, and the lane reports it as a partial gap by name. If `ocr` isn't installed, can't reach its model (`ocr llm test` fails) or lacks credentials, record the lane as BLOCKED, which makes it a gap.
+As soon as it finishes, read it and write its findings in the lane result format to `<state>/round-<n>/ocr.json`; an unread result is a gap. Exit code 0 doesn't prove coverage. `ocr review --preview` with the same refs lists the files ocr's rules select; changed files it leaves out (typically tests and docs) are excluded by design, so note them, since the test-integrity lane covers tests. A previewed file missing from the output's `coverage.completed`, or listed under `failed`, wasn't reviewed, and the lane reports it as a partial gap by name. If `ocr` isn't installed, can't reach its model (`ocr llm test` fails) or lacks credentials, record the lane as BLOCKED, which makes it a gap.
+
+### Codex
+
+The other vendor's model, on the bug pass: [cross-model.md](cross-model.md).
 
 ### GitHub Actions (changes that touch `.github/workflows/**`)
 
-Run the `gha-security-review` skill on the changed workflow files and report its findings with their exploitation scenarios.
+Run the `gha-security-review` skill on the changed workflow files, under the reviewer brief, and write its findings with their exploitation scenarios to the lane's result file.
 
 ## Plans and specs
 

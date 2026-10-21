@@ -1,13 +1,13 @@
 ---
 name: test-audit
-description: Judge whether tests earn their place. Use when a change adds or edits tests, when proving a regression test for a bug fix, or when sweeping a suite for low-value, duplicate or implementation-coupled tests and the test-only code they keep alive.
+description: Judge whether tests earn their place. Use when sweeping a suite or path for low-value, duplicate or implementation-coupled tests and the test-only code they keep alive, when a change adds test infrastructure or a large batch of tests, when asked to audit tests, or when proving a regression test for a bug fix. Ordinary per-change review gets the same value bar from adversarial-review's test-integrity lane.
 ---
 
 # Test audit
 
 A test earns its place when it fails on a credible regression that nothing else catches, through a seam production code already uses. This skill applies that bar in two modes:
 
-- **Gate:** the tests a change adds or edits. Run it before review, on the diff from the merge base.
+- **Gate:** the tests a change adds or edits, on the diff from the merge base. For a change that adds test infrastructure or a large batch of tests, or when asked; every other change gets this bar from `adversarial-review`'s test-integrity lane.
 - **Sweep:** the tests that already exist, across a path or the whole repo. Follow [sweep.md](sweep.md).
 
 Few well-evidenced verdicts beat a long speculative list, and "every test earns its place" is a valid result.
@@ -44,7 +44,7 @@ Record: `Regression proof: fails at HEAD yes · passes at base yes | unavailable
 1. List every test the change adds or edits (`git diff --name-only <merge-base>` filtered to test files, then the changed cases inside them).
 2. For each, answer the four questions. A test with a missing answer is extended into an existing test, moved to the real boundary, or removed, with the reason. Rename a test whose name doesn't state the behavior it protects.
 3. Check each against [catalog.md](catalog.md). A match fails the gate unless the retention bar names the contract the test guards.
-4. For a test you doubt, break the subject in a scratch worktree (return a constant, delete the guarded branch). The test must go red; if it stays green, it protects nothing.
+4. For a test you doubt, break the subject in a scratch `git worktree` under `.context/`, never `/tmp` (return a constant, delete the guarded branch). The test must go red; if it stays green, it protects nothing.
 5. For every regression test, record the regression proof.
 6. Edited tests: an assertion weakened, an expected value changed or a case deleted needs a stated behavior change. Otherwise restore it and fix the code.
 

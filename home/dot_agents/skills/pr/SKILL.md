@@ -23,7 +23,7 @@ Take a finished change to a green pull request: reviewed, committed in phases th
 
 - `git fetch origin`. On the base branch, create `<type>/<3-to-6-word-kebab-slug>` (add the tracker key when the task has one; add `-2` on a name collision).
 - List the change's files: commits since `git merge-base origin/<base> HEAD`, plus `git status --porcelain`. Leave out scratch files, logs and unrelated edits, and note what you left out.
-- Use `.context/pr/<branch>/` for message files, the body and the ledger. If `git check-ignore -q .context` fails, add `.context/` to `$(git rev-parse --git-common-dir)/info/exclude`.
+- Use `.context/pr/<branch>/` for message files and the body; the ledger lives in the PR's state folder ([babysit.md](babysit.md)). If `git check-ignore -q .context` fails, add `.context/` to `$(git rev-parse --git-common-dir)/info/exclude`.
 
 Done when the branch is named, the file list is written down, and `.context/` is ignored.
 
@@ -31,7 +31,7 @@ Done when the branch is named, the file list is written down, and `.context/` is
 
 Run `adversarial-review` on the change. It fixes what it confirms through `improve`. Skip it only when it already ran on this exact change (its report names the current head and nothing changed since), or the task itself waived or replaced the review.
 
-Done when the review reports converged. If it escalates, stop and report the escalation; ship after the user rules on it.
+Done when the review reports done. If it escalates, stop and report the escalation; ship after the user rules on it.
 
 ## 3. Commit in phases
 
@@ -42,7 +42,7 @@ Done when every commit passes its check and `git rev-parse HEAD^{tree}` equals t
 ## 4. Rebase and push
 
 1. `git fetch origin && git rebase origin/<base>`. If this rebase moved the branch, re-run the per-commit check from commits.md.
-2. Run the full readiness check on the head. A failure in code the change doesn't touch: re-run that suite on `origin/<base>` in a scratch worktree. If it fails there too, or on a rerun of the head, it isn't this change's; record the evidence for the report and carry on. A failure only the change causes goes back to step 3.
+2. Run the full readiness check on the head. A failure in code the change doesn't touch: re-run that suite on `origin/<base>` in a scratch `git worktree` under `.context/`, never `/tmp`. If it fails there too, or on a rerun of the head, it isn't this change's; record the evidence for the report and carry on. A failure only the change causes goes back to step 3.
 3. `git push --force-with-lease -u origin <branch>`, through the remote as configured. If the push is refused or the push URL is disabled, stop and report; that is the owner's setting.
 
 Done when `git ls-remote origin refs/heads/<branch>` shows your local `HEAD`.

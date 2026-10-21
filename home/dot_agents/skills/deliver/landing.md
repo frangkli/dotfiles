@@ -4,7 +4,7 @@ Steps 10–11. Run the pre-merge checks in every case. Merge only when the plan'
 
 ## 10. Merge
 
-1. **Independent verdict on the exact head.** A fresh subagent that wrote none of the code checks the head SHA: required checks green on that SHA, review converged on that SHA, and the done-predicate's checks that can run before production passing (the `verify` skill against a local or preview environment where one exists). It returns PASS or FAIL with what it ran. Record the head SHA, the trunk SHA, and the patch-id: `git diff <trunk>...HEAD | git patch-id --stable`.
+1. **Independent verdict on the exact head.** A fresh subagent that wrote none of the code checks the head SHA: required checks green on that SHA, `improve` done on that SHA, and the done-predicate's checks that can run before production passing (the `verify` skill against a local or preview environment where one exists). It returns PASS or FAIL with what it ran. Record the head SHA, the trunk SHA, and the patch-id: `git diff <trunk>...HEAD | git patch-id --stable`.
 2. **After any later rebase,** recompute the patch-id. Same patch: the verdict stands; re-run CI and mergeability. Different patch: get a new verdict. The one exception is a patch where only tests, docs or lint configuration moved and the checks show no behaviour change.
 3. **Right before merging,** fetch trunk and confirm both:
    - `git merge-tree --write-tree origin/<trunk> HEAD` exits 0;

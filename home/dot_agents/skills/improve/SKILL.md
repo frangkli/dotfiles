@@ -1,31 +1,37 @@
 ---
 name: improve
-description: Review-and-fix loop that runs until findings converge. Use to improve, clean up or harden a module, system or repo, to fix the findings of a review, or as the fix step of adversarial-review and pr.
+description: Review, verify and fix loop with a fixed round budget. Use to improve, clean up or harden a module, system or repo, to fix the findings of a review, or as the fix step of adversarial-review and pr.
 ---
 
 # Improve
 
-A loop of fresh reviewers and fixers over one scope. A findings ledger keeps every verdict, and the loop stops on convergence, not on a round count. It ends only after a review, so no unreviewed fix ever counts as done.
+Fresh reviewers find defects, a fresh verifier confirms them and a fresh fixer fixes them, over one scope. A run has one full review round and one confirming round, and a third round only when the confirming round confirms a new critical or major finding. A low-risk, low-impact change gets no confirming review: the verifier alone checks its fixes. Either way, no unchecked fix counts as done.
 
 ## Inputs
 
 - **Target:** the branch's change by default, or the paths you were given.
 - **Scope:** path globs the fixer may touch. Default: the target's directories, wide enough to put tests next to the code.
-- **Reviewer:** `adversarial-review` in findings mode by default, or the findings you were handed (from a review, a PR's bots, or a maintenance pass with [lens.md](lens.md)). Handed findings count as the first review; every later review is still `adversarial-review` in findings mode, which never calls `improve` back.
+- **Reviewer:** `adversarial-review`. When it hands you its review, that review was round 1 of this run, already verified and recorded in the state folder: continue from its `next.md` at step 4. Findings handed over from anywhere else (a PR's bots, a person, a maintenance pass with [lens.md](lens.md)) are round 1's candidates: write them as `round-1/handed.json`, build round 1's packet with `adversarial-review`'s packet command, pick risk and impact with its table, and start at step 3.
 - **Contract:** what the change must achieve and must not break, when the caller has one. Fixes keep every requirement in it.
 - **Base:** the commit to diff against.
+- **State folder:** the run's `state/<ticket>/` when an orchestrator passes one, otherwise `$(git rev-parse --path-format=absolute --git-common-dir)/improve/<slug>/`. It lives outside the worktree, so an agent resumed in any worktree of the repo finds it. Layout, formats and the `ledger.py` commands: [ledger.md](ledger.md).
 
 ## Steps
 
-1. **Baseline.** Load the ledger at `.context/improve/<slug>/ledger.json` if it's unfinished: that's how a run cut off by a session or usage limit resumes, from the ledger's next step, never from round 1; after a fix round, that's the scope guard (step 7). Otherwise rename a finished one to `ledger-<n>.json` and start a new ledger, copying its `decisions` and rejected findings, so settled verdicts stick. A new ledger records the base commit, the contract, whether the lens is in use, and a snapshot of the tree as round 1's head, and stores hashes of the untracked files outside the scope in its `guarded` map. Format and merge rules: [ledger.md](ledger.md).
-2. **Review.** Round 1 runs every lane the reviewer picks for the target, each a fresh subagent, and so does the first review after findings handed over from outside `adversarial-review` (a PR's bots, a person, a lens pass). Each later round reviews only the fix delta, from the last review round's snapshot to a new one, with the lanes `adversarial-review` picks for a delta (usually one combined lane), and confirms that earlier fixes still hold. A round reviews the whole target with every lane again only when its delta touches high-risk or high-importance code, as `adversarial-review` defines them, or the previous review round was a delta round whose triage verified a new critical or major. A minor never starts a round. Each reviewer gets the round's diff, the scope and the whole ledger. It reports every defect with a severity, confirms which earlier fixes still hold by reading the current code, reuses a known finding's id, re-files a settled (fixed, rejected or deferred) finding only with new evidence, and writes nothing.
-3. **Merge** the findings into the ledger.
-4. **Triage.** Verify each new critical or major finding: trace it, or run the cheap check. Reject the false ones with the reason, which the ledger keeps. Structural suggestions that don't fix a concrete defect go in as minor, so the loop doesn't widen its own scope. A finding whose only fix drops or narrows a contract requirement isn't sent to the fixer: escalate it.
-5. **Stop check.** If no critical or major finding is open, go to step 9. Otherwise check the stop table below.
-6. **Fix.** A fresh fixer gets only the open critical and major findings, under [fixer-brief.md](fixer-brief.md).
-7. **Scope guard.** Compare `git diff --name-only <base>` and the untracked files against the scope globs, and re-hash the guarded untracked files. Any change outside the scope halts the run. Leave it in place and report it; the user decides whether to revert.
-8. **Back to step 2.**
-9. **Finish.** Spot-check one pinned fix: in a scratch worktree, put that file back to its base version and confirm its test fails. Remove any comment or name that narrates the loop. Commit once (`fix: …`, or the repo's convention): running `improve` is the request to commit, so don't wait to be asked. Report.
+1. **Baseline.** If the state folder holds an unfinished run ([ledger.md](ledger.md) says when), continue from its `next.md`, never from round 1. Otherwise, if a finished ledger ended `done` and its `head` is an ancestor of `HEAD` (`git merge-base --is-ancestor`), the change only grew since that run: round 1's base is that head. After a rebase, or a run that ended any other way, round 1 uses the target's base. Move the finished ledger aside, keeping its `decisions` and its refuted and deferred findings, and run `ledger.py init`. Commit the target's uncommitted in-scope changes as a `wip:` save point, so every round reviews a commit; running `improve` is the request to commit. Add the contract and the hashes of the untracked files outside the scope to the ledger.
+2. **Review.** Every round calls `adversarial-review` in findings mode, unless it already ran round 1 itself. For round 1, pass the target's base; it picks the lanes from its risk and impact table. Later rounds call it with its base set to the last reviewed head, so the packet, `ocr` and every lane see only the fix diff, plus the round number and the ids the fixes claim to close. The lanes: one combined reviewer, plus the bug-pass lanes scoped to the same diff when it touches high-risk code, plus design-and-style when the run uses the lens. When round 1 picked no confirming round (low risk, low impact), skip the lanes and go to step 3 with no candidates.
+3. **Verify.** `ledger.py candidates <state> <n>`, then one fresh verifier under [the verifier brief](../adversarial-review/verifier-brief.md) gets the round's packet, the lane results, the candidates and the closing ids. It confirms or refutes each candidate, checks each closing fix, and writes `verified-<n>.json`. Then `ledger.py apply <state> <n> <head>`. Read only the verifier's summary. This is the round's only verifier.
+4. **Decide.**
+   - No critical or major open: go to step 7.
+   - A confirmed finding whose only fix drops or narrows a contract requirement: escalate it, and send the rest on.
+   - After round 1: fix.
+   - After the confirming round: a new critical or major, or a fix that didn't hold, means fix, then the third and last round. Any other critical or major still open stops the run.
+   - After the third round: anything critical or major still open stops the run.
+5. **Fix.** One fresh fixer gets the verified records under [fixer-brief.md](fixer-brief.md). It never re-identifies a problem, may try more than one fix, and commits each fix as a local `fixup!` save point; nothing is pushed. Record each rejection and deferral with `ledger.py verdict`, and write the ids it claims fixed into `next.md` as the next round's closing list.
+6. **Scope guard.** Compare `git diff --name-only <base>` and the untracked files against the scope globs, and re-hash the guarded files. A change outside the scope halts the run; leave it in place and report it. Otherwise back to step 2.
+7. **Finish.** Spot-check one pinned fix: in a scratch worktree under the state folder's `scratch/`, put that file back to its base version and confirm its test fails. Remove any comment or name that narrates the loop. Fold the save points with `git -c sequence.editor=: rebase --interactive --autosquash <base>`, and give a remaining `wip:` commit a real message (`fix: …`, or the repo's convention). Run `ledger.py outcome`, remove the scratch worktrees, and report.
+
+After each step, rewrite `next.md`: the step just finished, the next one, the last reviewed head, the closing ids, and any lane still running. Run every long command under `timeout`. The same check failing twice with the same error halts the run as blocked, with both attempts.
 
 Run the repo's cheapest relevant checks while fixing, and its full readiness check once at the end, as `GATES.md` describes.
 
@@ -33,18 +39,15 @@ Run the repo's cheapest relevant checks while fixing, and its full readiness che
 
 | Outcome | When | Report |
 |---|---|---|
-| **Converged** | The last review left no critical or major finding open | Rounds, remaining minor findings, ledger path |
-| **Escalated: not converging** | The open critical and major count didn't fall across three reviews in a row | The finding ids, and the design decision that's needed |
-| **Escalated: recurring** | One finding stayed open through three reviews in a row | Same |
-| **Escalated: relocated** | One finding was marked fixed in two different rounds | Same |
+| **Done** | A review round left no critical or major open | Rounds, open minor findings, state folder path |
+| **Escalated: still open** | A critical or major is open when step 4 stops the run, including one the fixer rejected as outside the scope | Each finding by title and id, and the decision that's needed |
 | **Escalated: impossible** | The fixer says a finding is real but blocked by a documented guarantee | The guarantee and the finding |
 | **Escalated: contract** | The only fix for a finding drops or narrows a contract requirement | The requirement, the finding, and the options |
 | **Escalated: design** | The fixer rejects a finding as "needs a decision": its root cause is a design problem a local fix would only route around | The finding, the design problem, and the fixer's options with a recommended default |
-| **Escalated: unstable reviewer** | Reviews exceed twice the first review's critical-and-major count plus three, or that count alternates up and down across four reviews | The pattern: the reviewer keeps producing fresh findings rather than the code getting worse |
-| **Halted** | A change outside the scope, or a reviewer or fixer that died or couldn't run (including a usage limit) | What happened, from the ledger; nothing reverted. Running `improve` again continues from the ledger once the cause is cleared: the outside change reverted, or the scope widened in the ledger |
+| **Halted** | A change outside the scope, a reviewer, verifier or fixer that died or couldn't run (including a usage limit), or a check that failed twice with the same error | What happened, from the ledger; nothing reverted. Running `improve` again continues from `next.md` once the cause is cleared |
 
-Write the outcome to the ledger's `outcome`. An escalation is never reported as success. To continue after one, start a fresh run with the user's ruling added to the new ledger's `decisions` as binding.
+An escalation is never reported as success. To continue after one, start a fresh run with the user's ruling added to the new ledger's `decisions` as binding.
 
 ## Report
 
-Follow [the review report format](../adversarial-review/report.md), including its writing rules: outcome first, then what was fixed (each with its pin), what's left and why, and decisions that need the user.
+Follow [the review report format](../adversarial-review/report.md), including its writing rules: outcome first, then what was fixed (each with its pin), what's left and why, and decisions that need the user. Name every finding by its title, with its id beside it.

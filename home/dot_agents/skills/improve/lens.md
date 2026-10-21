@@ -1,6 +1,6 @@
 # Maintenance lens
 
-For a maintenance or system-improvement pass with no review findings to start from. The reviewer looks for structure and quality, in this order, and each fix keeps behaviour unchanged. Idiom and style findings come from `adversarial-review`'s idioms brief, which a lens run adds to the lanes of every later review, so this lens stays on design.
+For a maintenance or system-improvement pass with no review findings to start from. The reviewer looks for structure and quality, in this order, and each fix keeps behaviour unchanged. Style findings come from `adversarial-review`'s design-and-style reviewer, which a lens run adds to its confirming round, so this lens stays on design.
 
 1. **Delete** dead code, unused options and exports, and unused files. First check for uses a search won't show: public APIs, generated code, reflection, serialisation, plugins.
 2. **Collapse** wrappers with one caller, adapters with only one implementation, and layers that repeat the methods beneath them. Test: can a new reader find where a value comes from and what can change it in under a minute?
