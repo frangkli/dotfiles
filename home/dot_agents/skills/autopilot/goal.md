@@ -1,5 +1,7 @@
 # Setting the goal
 
+Only a single-phase run sets a goal. A run with more than one phase follows the no-goal row.
+
 The goal's objective is one line under 4,000 characters, made of four parts joined with "and": the end state, the checks with their output shown, what stays untouched, and when to stop. Details live in the run file, which the objective names. Instructions for this session only (a dry start, a pause) stay out of the objective, which outlives the session.
 
 ```text
@@ -14,6 +16,6 @@ Claude Code's goal is judged by a separate model that reads only the transcript 
 |---|---|---|
 | Claude Code | The user types `/goal <objective>`. Without a user present, propose it with the goal tool (ProposeGoal) for one-key approval | `/goal clear`, or the judge finds the condition met |
 | Codex | `create_goal` with the objective, plus `token_budget` when the user gave a budget (`orchestrate` stops spawning at about 70% of it) | `update_goal` with `complete` when the predicate holds, or `blocked` once the stop clause holds (not on the first sight of a blocker) |
-| No goal feature | Use the predicate as the loop condition, and resume from the run file on each scheduled wake | When the predicate holds or the stop clause fires |
+| No goal feature, or more than one phase | Use the predicate as the loop condition, wake on worker events and the heartbeat, and hand over to a fresh session at each phase boundary. With a budget, check the spend since the run's `Started` time with `phase_cost.py` at every heartbeat and before each new wave | When the predicate holds or the stop clause fires |
 
 If the harness can't set the goal from this session, give the user the one line to paste, and start working toward the predicate meanwhile.
