@@ -21,9 +21,9 @@ Work the unresolved threads, the review bodies and top-level comments that raise
 
 ## Triage
 
-For each one: restate the claim in one sentence; check whether a later commit in the PR already handles it; then verify it by running it when that's cheap (the test it names, a script, a request), or by tracing the call path.
+Restate each claim in one sentence, with its path, line and thread id, and write them as one lane result, `round-<n>/bots.json`, in the PR's state folder ([../improve/ledger.md](../improve/ledger.md)). A thread already in the ledger keeps its ledger title, so its id stays the same across passes. Build the round's packet for the head, run `ledger.py candidates <state> <n>`, send the packet and `round-<n>/candidates.json` to one fresh verifier under [the verifier brief](../adversarial-review/verifier-brief.md), then `ledger.py apply <state> <n> <head>`. Its verified records decide each outcome: a confirmed finding is fixed or asked, a refuted one is dismissed with the verifier's disproof.
 
-- **fix:** a confirmed defect (wrong behaviour, a security or data problem, a race), or a small change that clearly lowers risk without changing the intent. Fix it with a test that fails before the fix, as a fixup to the commit that owns the code.
+- **fix:** a confirmed defect (wrong behaviour, a security or data problem, a race), or a small change that clearly lowers risk without changing the intent. Hand the fix items to one fresh fixer under [`improve`'s fixer brief](../improve/fixer-brief.md): each fix gets a test that fails before it, as a fixup to the commit that owns the code.
 - **dismiss:** verified not a defect, or a match for a Known non-issue whose "Skip when" holds and whose "Do not skip when" doesn't. The reply gives the disproof: the command and its output, or the line that guarantees the behaviour.
 - **ask:** the user decides. Record it as a decision with your recommendation, leave the thread open, and keep working the rest. Use it for anything novel or ambiguous, anything that would change the product's intent, and every finding in the **high-risk areas** that you'd otherwise dismiss.
 

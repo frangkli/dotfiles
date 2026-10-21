@@ -1,3 +1,3 @@
 interface:
   display_name: "Improve"
-  short_description: "Review and fix until findings converge"
+  short_description: "Review, verify and fix in a fixed number of rounds"

@@ -8,7 +8,7 @@ Declare one in your reply before the first look at the PR.
 
 | Mode | For | Does | Stops when |
 |---|---|---|---|
-| **drive** | Shipping, "get it green" | Full passes, waiting on the CI watch | Converged, escalated or stopped (stop table) |
+| **drive** | Shipping, "get it green" | Full passes, waiting on the CI watch | Green, escalated or stopped (stop table) |
 | **background** | The user or the task carries on with other work | Full passes, with the CI watch run as a background job; one pass each time it returns | Same as drive |
 | **threads-only** | "Answer the review comments" | Threads only: no CI work, no rebase | Every thread fixed, dismissed or asked |
 | **check** | "Is it green?", small or docs-only PRs | One read-only status pass and a report | After the pass |
@@ -75,7 +75,7 @@ When Greptile hasn't reviewed this PR, it isn't a gate; the report says it didn'
 
 ## Stop rule
 
-Track the loop in [`improve`'s ledger format](../improve/ledger.md) at `.context/pr/<branch>/ledger.json`. Each bot pass (the bots' reviews of one head) is a review round. Each thread or summary concern is a finding, with its id `file:line:class`, or the thread id when it has no line. Severity comes from the bot or from your triage; fix and ask items are blocking.
+Track the loop in [`improve`'s ledger format](../improve/ledger.md), in the PR's state folder: `improve`'s default, with `-pr` added to the slug. Each bot pass (the bots' reviews of one head) is a review round. Each thread or summary concern is a finding with its id from `ledger.py id`, keeping the thread id in its record; one with no path uses the PR number as its path. Severity comes from the bot or from the verifier; fix and ask items are blocking.
 
 | Outcome | When |
 |---|---|

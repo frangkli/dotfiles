@@ -3,15 +3,15 @@
 A review report is finished work. The reader should never need to ask "did you check?" or "what does this mean?". Write its prose per the `writing` skill's technical mode ([../writing/technical.md](../writing/technical.md)), with the order below in place of its report contract.
 
 1. **Verdict first.** One or two sentences: is the artifact sound, and what must change before it ships.
-2. **Coverage.** The lanes picked (where the review sits between light and full), the fact that decided them, and the bite test's result when one ran; each lane with its status and finding count, any gaps and why, and the base and head commits (or plan file) reviewed.
-3. **Act on**, then **Consider**, then **Noted**, each under its own heading even when empty. Each finding stands alone:
+2. **Coverage.** The lanes picked, with the risk and impact facts that decided them; each lane not launched and why; the bite test's result when one ran; each lane with its status and finding count, any gaps and why, and the base and head commits (or plan file) reviewed.
+3. **Act on**, then **Consider**, then **Noted**, each under its own heading even when empty. Each finding stands alone, named by its title with its id beside it:
    - what is wrong and where (`file:line` or plan section);
    - why it matters: the concrete failing case or its impact;
-   - the evidence: what you ran or traced, and what it showed;
+   - the evidence: the verifier's trigger and what it showed;
    - the fix, and roughly what it costs;
    - which lanes or reviewers raised it.
 4. **Dismissed**, each with its reason.
-5. **What `improve` did** (code changes), under its own heading: its outcome and round count, the findings it fixed with their pins and commit, and anything it escalated.
+5. **What `improve` did** (code changes), under its own heading: its outcome and rounds, the findings it fixed with their pins and commit, and anything it escalated.
 6. **Decisions for the user**, if any: each with the options, a recommended default, and what happens under each. If nothing needs the user, say so.
 
 Everything you could check yourself is checked before you report. Never end with "next, verify X" or "confirm Y": do it, or say what blocked you.
