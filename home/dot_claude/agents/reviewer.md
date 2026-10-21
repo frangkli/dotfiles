@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: One review lane for the adversarial-review and improve skills. Give it the round's packet, then a filled-in reviewer brief.
+description: One review lane for the adversarial-review and improve skills. Give it its group's packet, then a filled-in reviewer brief.
 tools: Read, Grep, Glob, Bash, Write
 model: opus
 ---

@@ -17,7 +17,7 @@ Several fresh reviewers each attack one angle of the artifact, and a fresh verif
 - **Contract.** One paragraph of intent: what the change must achieve and what it must not break, drawn from the plan, the spec, the PR body or the commits. Ask only if none of these exist.
 - **State folder.** The caller's, or `improve`'s default ([../improve/ledger.md](../improve/ledger.md)). Outside findings mode, start round 1 with `ledger.py init`. Lane results, the packet and the verifier's records go there.
 - **Groups.** For a code change, sort the changed files into high risk and the rest, by the risk test in step 2. A file with any high-risk change is high risk. When every file lands on one side, there is one group.
-- **Packet.** Build one per group each round, and give every lane of a group the same bytes. The high-risk packet shows each hunk's enclosing function; the other takes `--lines 10`, which roughly halves it:
+- **Packet.** In round 1, build one per group, and give every lane of a group the same bytes. The high-risk packet shows each hunk's enclosing function; the other takes `--lines 10`, which is smaller when functions are long. A confirming round builds one packet of the fix diff (step 2):
 
   ```bash
   python3 ~/.agents/skills/adversarial-review/scripts/packet.py --base <base> --head <head> --scope <the group's files> [--lines 10] \
@@ -30,7 +30,7 @@ Done when you can name the base and head commits (or the plan file), state the c
 
 Start every lane in one message, so they run in parallel; start `ocr` and Codex, when picked, in the background in that same message. Each lane is a fresh subagent whose brief is its group's packet, then [reviewer-brief.md](reviewer-brief.md) with its lane brief from [lanes.md](lanes.md), and nothing else. Paste them verbatim and fill only the bracketed fields: an added pointer ("in particular…") or a trimmed list steers the lane as surely as your own conclusions would.
 
-- **Code change:** two questions pick each group's lanes. A lane both groups pick runs once, on both packets.
+- **Code change:** two questions pick each group's lanes. A lane both groups pick runs once, on both packets. The combined reviewer is its own lane (`combined.json`), apart from the bug pass. `ocr` has no file filter, so it reviews the whole change.
   - **Risk:** how bug-prone the code is. Code that parses input, runs queries, acts on git, files, auth, money or data, handles concurrency or migrations, or has complex logic with many edge cases is high risk. Risk sets the bug pass: correctness and security, test integrity, `ocr`, Codex ([cross-model.md](cross-model.md)), and a confirming round in `improve`.
   - **Impact:** how costly the code is to change later: public interfaces, shared types, contracts, schemas, wire formats. Impact sets the design pass: the design-and-style reviewer at full depth. The design review that matters most happens before code, with the owner seeing the types; this lane checks the code kept to it.
 
@@ -61,21 +61,21 @@ Done when every candidate is confirmed (with a trigger and evidence), refuted (w
 
 Sort the verified findings into four buckets:
 
-- **Act on:** confirmed and worth fixing now. A minor belongs here only when its fix is a one-line change. If this holds more than five items, filter harder or say why.
+- **Act on:** confirmed and worth fixing now. A minor belongs here only when its fix changes one line of code (its pin test aside). If this holds more than five items, filter harder or say why.
 - **Consider:** real, but a judgement call or out of the change's scope.
 - **Noted:** true and minor, or minor and unverifiable.
 - **Dismissed:** refuted, hypothetical, a matter of taste ("I would have done it differently"), listed under Known non-issues in `REVIEW_RULES.md`, or about code the change didn't touch. Each with its reason; this list is what lets the reader trust the rest.
 
 Rank a finding higher when two lanes raised it independently. Scrutinise security and data findings harder before dismissing them, not less.
 
-Record each confirmed finding left out of Act on with `ledger.py verdict <state> <id> deferred <bucket>`, so `improve` doesn't pick it up.
+Record each confirmed finding, and each unverifiable minor or info, left out of Act on with `ledger.py verdict <state> <id> deferred <bucket>`, so `improve` doesn't pick it up.
 
 Done when all four lists are written in your reply, an empty one as "none", before anything goes to `improve`.
 
 ## 6. Act
 
 - **Plan or spec:** report only (step 7), then `ledger.py outcome <state> done`. The author revises the plan.
-- **Code change:** fixing is part of this skill, so don't stop at the report or ask first. With the four lists already in your reply, write `next.md` (round 1 verified, step 4 next, the head reviewed, the lanes picked and whether a confirming round runs) and hand the Act on findings to `improve`, scoped to the change's files, together with the contract and the state folder. This review is `improve`'s round 1; `improve` continues at its step 4, runs its confirming round as this skill in findings mode, and commits when it's done. Report after `improve` finishes, including its outcome. Fix nothing yourself, however small: a fix made outside `improve` never gets reviewed. If Act on is empty, say so, run `ledger.py outcome <state> done` and skip `improve`.
+- **Code change:** fixing is part of this skill, so don't stop at the report or ask first. With the four lists already in your reply, write `next.md` (round 1 verified, step 4 next, the head reviewed, the lanes picked, the high-risk files and whether a confirming round runs) and hand the Act on findings to `improve`, scoped to the change's files, together with the contract and the state folder. This review is `improve`'s round 1; `improve` continues at its step 4, runs its confirming round as this skill in findings mode, and commits when it's done. Report after `improve` finishes, including its outcome. Fix nothing yourself, however small: a fix made outside `improve` never gets reviewed. If Act on is empty, say so, run `ledger.py outcome <state> done` and skip `improve`.
 - A finding that can only be fixed by dropping or narrowing a contract requirement is a decision for the user, not an Act on item.
 
 ## 7. Report
