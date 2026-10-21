@@ -13,7 +13,7 @@ Declare one in your reply before the first look at the PR.
 | **threads-only** | "Answer the review comments" | Threads only: no CI work, no rebase | Every thread fixed, dismissed or asked |
 | **check** | "Is it green?", small or docs-only PRs | One read-only status pass and a report | After the pass |
 
-Default to drive for a PR you just opened, and to check for a small or docs-only one. Answer the user's questions mid-loop and carry on. In a stack, work only the lowest unmerged PR.
+Default to drive for a PR you just opened, and to check for a small or docs-only one. Answer the user's questions mid-loop and carry on. In a stack, work only the lowest unmerged PR, and restack per [stacks.md](stacks.md).
 
 ## Reviewers
 
