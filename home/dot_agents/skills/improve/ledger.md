@@ -4,7 +4,7 @@ One folder per ticket, outside the worktree: the run's `state/<ticket>/` when an
 
 | File | Written by | Read by |
 |---|---|---|
-| `round-<n>/packet.md` | the packet script, once per round | every lane of that round, the verifier |
+| `round-<n>/packet.md` | the packet script, once per round, or as `packet-risky.md` and `packet-rest.md` when the change splits into groups | each lane of its group, the verifier |
 | `ledger.json` | `ledger.py` | every reviewer, `ocr` and Codex included |
 | `round-<n>/<lane>.json` | each lane, when it returns | `ledger.py candidates`; a resumed run reruns only lanes whose file is missing |
 | `round-<n>/raw/` | `ocr` and Codex, before their output is converted to a lane file | the agent converting it |

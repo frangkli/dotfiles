@@ -1,11 +1,12 @@
 """Build the review packet every lane of one round starts from.
 
-  packet.py --base <commit> --head <commit> --out <file>
+  packet.py --base <commit> --head <commit> --out <file> [--lines <n>]
             [--scope <pathspec>...] [--spec <file>[#<heading>]...] [--ledger <ledger.json>]
 
 The packet holds facts only, never the author's conclusions: the diff hunks with their
-enclosing functions, the changed public items and where they're used, the spec sections
-the ticket names, the ledger's open and settled findings, and the rule files to read.
+enclosing functions (or <n> lines of context with --lines), the changed public items and
+where they're used, the spec sections the ticket names, the ledger's open and settled
+findings, and the rule files to read.
 """
 import argparse
 import json
@@ -79,13 +80,15 @@ def main():
     p.add_argument("--scope", nargs="*", default=[])
     p.add_argument("--spec", action="append", default=[])
     p.add_argument("--ledger")
+    p.add_argument("--lines", type=int)
     a = p.parse_args()
 
     root = Path(git("rev-parse", "--show-toplevel").strip())
     files = git("diff", "--name-only", a.base, a.head, "--", *a.scope).split()
     code = [f for f in files if Path(f).suffix in CODE]
     other = [f for f in files if Path(f).suffix not in CODE]
-    diff = (git("diff", "--function-context", a.base, a.head, "--", *code) if code else "") + \
+    context = f"-U{a.lines}" if a.lines is not None else "--function-context"
+    diff = (git("diff", context, a.base, a.head, "--", *code) if code else "") + \
            (git("diff", "-U5", a.base, a.head, "--", *other) if other else "")
     parts = [f"# Review packet\n\nBase {a.base}, head {a.head}. Changed files:\n"
              + "\n".join(f"- {f}" for f in files)]
@@ -105,7 +108,8 @@ def main():
     items = public_items(diff)
     parts.append("## Changed public items and their uses\n\n" + ("\n\n".join(
         f"### {n}\n```\n{uses(n, a.head)}\n```" for n in items) or "none"))
-    parts.append(f"## Diff (code with enclosing functions)\n\n```diff\n{diff}```")
+    shown = f"{a.lines} lines of context" if a.lines is not None else "enclosing functions"
+    parts.append(f"## Diff (code with {shown})\n\n```diff\n{diff}```")
 
     Path(a.out).write_text("\n\n".join(parts) + "\n")
     print(f"{a.out}: {len(files)} files, {len(items)} public items")

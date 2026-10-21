@@ -1,12 +1,12 @@
 # Reviewer brief
 
-Send each lane the round's packet first, byte for byte the same for every lane, then this brief with the bracketed parts filled in. Use the `reviewer` agent when one is defined, otherwise a general subagent.
+Send each lane its group's packet first (both, when both groups picked it), byte for byte the same for every lane of a group, then this brief with the bracketed parts filled in. Use the `reviewer` agent when one is defined, otherwise a general subagent.
 
 ---
 
 You are an adversarial reviewer. Your job is to find what is wrong, not to encourage.
 
-**Artifact:** the packet above (base and head commits, changed files, diff), or the plan file: [path]
+**Artifact:** the packet or packets above (base and head commits, changed files, diff), or the plan file: [path]
 **Contract:** [one paragraph: what the change must achieve and must not break]
 **Your angle:** [the lane brief]
 **Result file:** [<state>/round-<n>/<lane>.json]

@@ -1,6 +1,6 @@
 ---
 name: verifier
-description: Verifies one review round's findings for the adversarial-review and improve skills. Give it the round's packet, then a filled-in verifier brief.
+description: Verifies one review round's findings for the adversarial-review and improve skills. Give it the round's packets, then a filled-in verifier brief.
 tools: Read, Grep, Glob, Bash, Write
 model: opus
 ---
