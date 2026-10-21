@@ -8,8 +8,8 @@ Declare one in your reply before the first look at the PR.
 
 | Mode | For | Does | Stops when |
 |---|---|---|---|
-| **drive** | Shipping, "get it green" | Full passes, waiting on the CI watch | Green, escalated or stopped (stop table) |
-| **background** | The user or the task carries on with other work | Full passes, with the CI watch run as a background job; one pass each time it returns | Same as drive |
+| **drive** | Shipping, "get it green" | Full passes, one each time the CI watch wakes you, reporting only at the stop | Green, escalated or stopped (stop table) |
+| **background** | The user or the task carries on with other work | Full passes as in drive, reporting each one briefly | Same as drive |
 | **threads-only** | "Answer the review comments" | Threads only: no CI work, no rebase | Every thread fixed, dismissed or asked |
 | **check** | "Is it green?", small or docs-only PRs | One read-only status pass and a report | After the pass |
 
@@ -37,7 +37,7 @@ Each push restarts every check and bot, so a pass pushes at most once, with ever
 
 ## CI
 
-Watch with `gh pr checks <n> --watch --fail-fast`; it blocks until the checks finish or one fails. Then read the full set: `gh pr checks <n> --json name,bucket,state,workflow,link`.
+Wait without blocking the turn. Under T3 Code, call `watch_pull_request` and end the turn; it wakes you when checks finish, a reviewer comments or the branch conflicts, and `unwatch_pull_request` releases it when you hand back. Elsewhere, run `gh pr checks <n> --watch --fail-fast` as a background command where the harness wakes you when it exits, or in the foreground where it doesn't. Before ending the turn after a push, confirm the checks registered (the No checks rule below). Then read the full set: `gh pr checks <n> --json name,bucket,state,workflow,link`.
 
 For each failure, read the failing step: `gh run view <run-id> --log-failed` for a GitHub Actions run (the run id is in the link); for any other check, its link and `gh api repos/{owner}/{repo}/check-runs/<id>`. When the `ci-reader` agent is defined, have it read the logs, and open a log yourself only when its report leaves the cause unclear. Run the stale-base and red-base checks yourself. Review and bot comments still go through the verifier ([threads.md](threads.md)).
 

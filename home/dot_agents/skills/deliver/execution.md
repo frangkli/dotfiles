@@ -5,7 +5,7 @@ Steps 7–9, after the user approves the plan. Work within the approved scope; t
 ## 7. Build
 
 - First, commit the approved plan on its own (`docs: add plan for <slug>` or the repo's convention), before any implementation commit, so the build starts from a recorded plan.
-- If the harness has a native goal mechanism, set the goal from the done-predicate. Print each check's output in the transcript, since the goal's judge reads only the transcript.
+- If the plan has one phase and the harness has a native goal mechanism, set the goal from the done-predicate. Print each check's output in the transcript, since the goal's judge reads only the transcript. With more than one phase, set no goal, and hand over to a fresh session at each phase boundary per `orchestrate`'s Long runs.
 - Hand bounded units (research, implementation, tests, independent review) to subagents through `orchestrate`: one brief and one worktree per unit, a pilot unit before fan-out, phases in the plan's order. Do a unit yourself when briefing it would take longer than doing it.
 - Write code and its tests together, following the design section's conventions. Reuse the repo's helpers, types and modules before adding new ones.
 - After the code works, re-read the diff against the language skill's `references/review.md` (for TypeScript, `typescript/references/review.md`, plus `references/effect-review.md` in Effect code) and fix what it flags.

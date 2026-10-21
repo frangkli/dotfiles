@@ -1,3 +1,3 @@
 interface:
   display_name: "Autopilot"
-  short_description: "Drive a spec's tickets to done under a native goal"
+  short_description: "Drive a spec's tickets to done unattended"

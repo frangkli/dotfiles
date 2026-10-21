@@ -7,7 +7,8 @@
 
 Spec: <path or link> · Tickets: <directory or Linear project> · Branch: <integration branch> · Base: <sha>
 Predicate: <text>, N = <n>
-Goal: <objective line> (set <date> in <harness>)
+Goal: <objective line> (set <date> in <harness>), or none: <n> phases
+Started: <date -Iseconds>
 Budget: <tokens or time, or none>
 
 ## Standing orders
