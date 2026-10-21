@@ -11,7 +11,7 @@ Take a finished change to a green pull request: reviewed, committed in phases th
 
 **Repo facts come from the repo.**
 - **Checks:** `GATES.md`. If the repo has none, take them from AGENTS.md, its `verify` skill and its CI workflows, and say which you used. Run the cheapest check that covers each commit, and the full readiness check once on the final head before each push.
-- **Base branch:** `gh repo view --json defaultBranchRef`, unless the PR stacks on another branch.
+- **Base branch:** `gh repo view --json defaultBranchRef`, unless the PR stacks on another branch ([stacks.md](stacks.md)).
 - **Review bots:** found from the repo's config and recent PRs, as [babysit.md](babysit.md) describes.
 
 **Throughout.**
