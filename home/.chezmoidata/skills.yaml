@@ -17,7 +17,7 @@ skills:
     - review-animations
   getsentry/cli: [sentry-cli]
   getsentry/skills: [gha-security-review]
-  Leonxlnx/taste-skill: [brandkit]
+  Leonxlnx/imagegen-skills: [brandkit]
   neondatabase/agent-skills: [neon, neon-postgres]
   nutlope/variate: [variate]
   trailofbits/skills: [open-sourcing]
