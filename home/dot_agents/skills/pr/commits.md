@@ -30,7 +30,7 @@ Commit each fix as `git commit --fixup=<commit it belongs to>`. Before the batch
 
 ## Messages
 
-Follow the repo's own rules first (a commitlint config, recent `git log`). Otherwise:
+Have the `writer` agent draft each message, subject and body, when one is defined: give it the commit's diff summary, why it exists, the repo's rules or this section, and the message file's path. Follow the repo's own rules first (a commitlint config, recent `git log`). Otherwise:
 
 - **Subject:** `type(scope): subject`, at most about 70 characters, imperative, no trailing period, naming the real symbol or area that carries the change. Types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `build`, `ci`, `chore`. Add `!` and a `BREAKING CHANGE:` footer only when an external contract breaks.
 - **Body:** why the commit exists and what a reader of `git log` needs: the constraint, the obvious alternative and why it lost, the evidence. Wrapped at 72 columns. Leave out a restatement of the subject or a file list.

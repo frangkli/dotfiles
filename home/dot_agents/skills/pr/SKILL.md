@@ -42,7 +42,7 @@ Done when every commit passes its check and `git rev-parse HEAD^{tree}` equals t
 ## 4. Rebase and push
 
 1. `git fetch origin && git rebase origin/<base>`. If this rebase moved the branch, re-run the per-commit check from commits.md.
-2. Run the full readiness check on the head. A failure in code the change doesn't touch: re-run that suite on `origin/<base>` in a scratch `git worktree` under `.context/`, never `/tmp`. If it fails there too, or on a rerun of the head, it isn't this change's; record the evidence for the report and carry on. A failure only the change causes goes back to step 3.
+2. Run the full readiness check on the head. A failure in code the change doesn't touch: re-run that suite on `origin/<base>` in a scratch `git worktree` under `$(git rev-parse --git-common-dir)/scratch/`, never `/tmp`. If it fails there too, or on a rerun of the head, it isn't this change's; record the evidence for the report and carry on. A failure only the change causes goes back to step 3.
 3. `git push --force-with-lease -u origin <branch>`, through the remote as configured. If the push is refused or the push URL is disabled, stop and report; that is the owner's setting.
 
 Done when `git ls-remote origin refs/heads/<branch>` shows your local `HEAD`.
