@@ -1,6 +1,6 @@
 # PR body
 
-A cover note a reviewer reads in one minute with the diff open: why, what changed, scope, blast radius and real evidence. Write it to `.context/pr/<branch>/body.md` and pass it with `--body-file`.
+A cover note a reviewer reads in one minute with the diff open: why, what changed, scope, blast radius and real evidence. Write it to `.context/pr/<branch>/body.md` and pass it with `--body-file`. Have the `writer` agent draft it when one is defined: give it the facts for each section, this file and the output path, then check its draft against the diff.
 
 If the repo has a PR template (`.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/`, `docs/pull_request_template.md`), fill it in and put these sections inside it.
 

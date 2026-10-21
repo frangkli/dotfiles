@@ -6,6 +6,7 @@
 {{- /* Transcripts are kept: retro, prevent-repeats and AgentsView read them. */ -}}
 {{- /* impeccable runs from its plugin; this hides the Codex copy in ~/.agents/skills. */ -}}
 {{- /* atuin logs agent shell commands, kept out of your Ctrl-R. */ -}}
+{{- /* ponytail's subagent hook injects only where this matches: all but the role agents in ~/.claude/agents. */ -}}
 {{- $atuin := dict "matcher" "^Bash$" "hooks" (list (dict "type" "command" "command" "atuin hook claude-code")) -}}
 {{- range $name, $value := .toolEnv -}}
 {{-   $settings = $settings | setValueAtPath (printf "env.%s" $name) $value -}}
@@ -21,6 +22,7 @@
     | setValueAtPath "env.GIT_TERMINAL_PROMPT" "0"
     | setValueAtPath "env.GIT_ADVICE" "0"
     | setValueAtPath "env.PYTHONUNBUFFERED" "1"
+    | setValueAtPath "env.PONYTAIL_SUBAGENT_MATCHER" "^(?!(?:reviewer|verifier|fixer|writer|ci-reader)$)"
     | setValueAtPath "hooks.PreToolUse" (list $atuin)
     | setValueAtPath "hooks.PostToolUse" (list $atuin)
     | setValueAtPath "hooks.PostToolUseFailure" (list $atuin)
