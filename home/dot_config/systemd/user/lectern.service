@@ -1,5 +1,5 @@
 [Unit]
-Description=Docs hub: docs/ and internal/docs/ from every checkout
+Description=Lectern: docs/ and internal/docs/ from every checkout
 
 [Service]
 # Lectern, built by build-lectern. Tailnet-only HTTPS on the same port: `tailscale serve --bg --https=7777 http://127.0.0.1:7777`.

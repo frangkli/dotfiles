@@ -1,2 +1,3 @@
-# The docs hub's old server, before it moved to workspace/lectern.
+# Retired: the old server and unit that Lectern replaced.
 .local/share/docs-hub
+.config/systemd/user/docs-hub.service
