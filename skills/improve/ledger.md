@@ -8,8 +8,8 @@ One folder per ticket, outside the worktree: the run's `state/<ticket>/` when an
 | `ledger.json` | `ledger.py` | every reviewer, `ocr` and Codex included |
 | `round-<n>/<lane>.json` | each lane, when it returns | `ledger.py candidates`; a resumed run reruns only lanes whose file is missing |
 | `round-<n>/raw/` | `ocr` and Codex, before their output is converted to a lane file | the agent converting it |
-| `round-<n>/candidates.json` | `ledger.py candidates` | the verifier |
-| `verified-<n>.json` | the verifier | `ledger.py apply`, the fixer |
+| `round-<n>/candidates.json`, and `candidates-<k>.json` per shard | `ledger.py candidates` | the verifiers |
+| `verified-<n>.json`, or `verified-<n>-<k>.json` per shard | the verifiers | `ledger.py apply`, the fixer |
 | `next.md` | the run, after each step | a resumed or replacement agent |
 | `scratch/<name>/` | a shared reference or scratch build, as a `git worktree` | every lane that needs it; removed when the run finishes |
 
@@ -54,7 +54,7 @@ One folder per ticket, outside the worktree: the run's `state/<ticket>/` when an
 2. Raise a refuted or deferred finding again only if the code got worse, marked `"worse": true` with what changed.
 3. Never restate an earlier finding in new words.
 
-**Merging.** `candidates` merges a round's lane files into one list, credits every lane that raised the same id, and drops candidates whose id is already fixed, refuted or deferred unless marked worse. The verifier folds rewordings and same-round duplicates into one id. `apply` records its verdicts (`confirmed` and `unverifiable` stay open, `refuted`, `fixed`) and the round's head and lanes; it fails if `verified-<n>.json` is missing, so a dead verifier halts the run instead of passing it. Only the verifier marks a finding fixed: a fixer's "fixed" stays open until the next round's verifier confirms it holds. `verdict` records a fixer's rejection (still open) or deferral.
+**Merging.** `candidates` merges a round's lane files into one list, credits every lane that raised the same id, and drops candidates whose id is already fixed, refuted or deferred unless marked worse. The verifier folds rewordings and same-round duplicates into one id. `apply` records its verdicts (`confirmed` and `unverifiable` stay open, `refuted`, `fixed`) and the round's head and lanes; it fails if `verified-<n>.json` is missing, or with shards if any shard's `verified-<n>-<k>.json` is, so a dead verifier halts the run instead of passing it. Shards split by path, so a duplicate across two files can reach two verifiers and stay two records. Only the verifier marks a finding fixed: a fixer's "fixed" stays open until the next round's verifier confirms it holds. `verdict` records a fixer's rejection (still open) or deferral.
 
 **Known list.** `ocr` can't take the whole ledger, so its background file gets `ledger.py known <state> <chars>`: one line per finding, open ones first, cut to the characters left under ocr's limit of about 2,000.
 

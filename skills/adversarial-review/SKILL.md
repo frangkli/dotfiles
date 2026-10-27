@@ -53,7 +53,7 @@ After the lanes return (not before), read the review bots' and humans' comments 
 
 ## 4. Verify
 
-Merge the round's candidates (`python3 ~/.agents/skills/improve/scripts/ledger.py candidates <state> 1`), then send the round's packets, the lane results and `round-1/candidates.json` to one fresh verifier under [verifier-brief.md](verifier-brief.md). It drops known findings, confirms or refutes each candidate, and writes `verified-1.json`. Record it with `ledger.py apply <state> 1 <head>`. You read its summary, not the lanes' full output. For a plan or spec, the verifier checks each claim against the plan and the code that exists today.
+Merge the round's candidates (`python3 ~/.agents/skills/improve/scripts/ledger.py candidates <state> 1 <shards>`, with one shard per 10 candidates, at most 4, and 1 up to 12 candidates). The split keeps each file's candidates in one shard. Send the round's packets, the lane results and one candidates file (`round-1/candidates.json`, or `candidates-<k>.json` when split) to each fresh verifier under [verifier-brief.md](verifier-brief.md), all in parallel. Each drops known findings, confirms or refutes its candidates, and writes `verified-1.json` or `verified-1-<k>.json`. Record them with `ledger.py apply <state> 1 <head>`, which reads them all. You read their summaries, not the lanes' full output. For a plan or spec, the verifier checks each claim against the plan and the code that exists today.
 
 Done when every candidate is confirmed (with a trigger and evidence), refuted (with the evidence) or unverifiable (with what blocked it).
 
