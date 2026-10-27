@@ -8,7 +8,7 @@
 .config/systemd
 .local/bin/codex-trust-hooks
 .local/bin/devbox-update
-.local/share/docs-hub
+workspace/lectern
 .opencodereview
 .t3
 workspace/fstack

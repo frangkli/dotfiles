@@ -1,0 +1,21 @@
+{{ if lookPath "systemctl" -}}
+#!/bin/sh -l
+# Builds the docs hub when workspace/lectern has moved since the last build, then restarts it. Runs on
+# every apply and compares commits itself, so it works whenever chezmoi pulls externals. Sorts before
+# enable-docs-hub. It builds beside the live dist/ and swaps only on success, so a failed build leaves
+# the hub running.
+set -e
+cd "$HOME/workspace/lectern"
+built="${XDG_STATE_HOME:-$HOME/.local/state}/lectern-built"
+head=$(git rev-parse HEAD)
+[ "$(cat "$built" 2>/dev/null)" = "$head" ] && exit 0
+trap 'rm -rf dist.new' EXIT
+pnpm install --frozen-lockfile
+pnpm build --outDir dist.new
+rm -rf dist
+mv dist.new dist
+mkdir -p "$(dirname "$built")"
+echo "$head" > "$built"
+systemctl --user daemon-reload
+systemctl --user restart docs-hub.service
+{{ end -}}
