@@ -2,11 +2,13 @@
 """Trusts the Codex hooks these dotfiles install, the same way approving them in /hooks does.
 
 Codex trusts each hook by a hash of its definition, so this runs after installs and updates.
-Hooks from config files and the listed plugins are trusted. Glen's plugin copy stays untrusted:
-its hooks.json entries already record every turn.
+Hooks from config files, including each trusted project's .codex/hooks.json, and the listed
+plugins are trusted. Glen's plugin copy stays untrusted: its hooks.json entries already record
+every turn.
 """
 import json
 import subprocess
+import tomllib
 from pathlib import Path
 
 TRUSTED_PLUGINS = {"ponytail@ponytail"}
@@ -29,7 +31,9 @@ def call(request_id, method, params):
 try:
     call(1, "initialize", {"clientInfo": {"name": "codex-trust-hooks", "version": "1"}})
     server.stdin.write(json.dumps({"method": "initialized"}) + "\n")
-    hooks = call(2, "hooks/list", {"cwds": [str(Path.home())]})["data"][0]["hooks"]
+    projects = tomllib.loads((Path.home() / ".codex/config.toml").read_text()).get("projects", {})
+    cwds = [str(Path.home())] + [p for p, v in projects.items() if v.get("trust_level") == "trusted" and Path(p).is_dir()]
+    hooks = [hook for entry in call(2, "hooks/list", {"cwds": cwds})["data"] for hook in entry["hooks"]]
     pending = {
         hook["key"]: {"trusted_hash": hook["currentHash"]}
         for hook in hooks
