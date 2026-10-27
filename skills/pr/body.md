@@ -1,50 +1,53 @@
 # PR body
 
-The body lets the owner understand the PR without reading the code: what it does, why, how it works, and every change a user or caller can see. Write it to `.context/pr/<branch>/body.md` and pass it with `--body-file`. Have the `writer` agent draft it when one is defined: give it the facts for each section, this file and the output path, then check its draft against the diff.
+The body lets the owner understand the PR in a couple of minutes without reading the code: why it exists, what it changes and how much, what someone using it sees change, how it was tested, and what could break. Reviewer detail goes in a collapsed section at the end. Write it to `.context/pr/<branch>/body.md` and pass it with `--body-file`. Have the `writer` agent draft it when one is defined: give it the facts for each section, this file and the output path, then check its draft against the diff.
 
 If the repo has a PR template (`.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/`, `docs/pull_request_template.md`), fill it in and put these sections inside it.
 
 **Title:** the same rules as a commit subject ([commits.md](commits.md)). For a one-commit PR, use that commit's subject.
 
 ```markdown
-## Why
+## Summary
 
-<the problem, the approach, and what the PR builds on>
+<one or two short paragraphs: what exists today and what is wrong or missing, who hits it and why it matters now, then what the PR does about it and what it builds on or unblocks>
 
-## What changed
+**Size:** <files, +added −removed>, mostly in <where>.
 
-<every change in the diff, grouped by area>
+## Changes
 
-## Scope
+- **<Area>** (<main change | supporting>)
+  - <one line per change; a user-visible change starts with **Visible:** and gives before → after>
+- **Other small changes**
+  - <one line each, starting with the bold area it touches>
 
-<what it covers, and what it deliberately leaves out>
+## Testing
 
-## Blast radius
+<how it was tested, in plain words>
 
-**Door:** <one-way | two-way>. <who or what it touches, and the one fact that makes it safe>
+## Scope and risk
 
-## Evidence
+- **Scope:** <what this covers, and what it leaves out on purpose>
+- **Risk:** <easy to undo or not; what breaks if it is wrong, and why that is unlikely>
 
-- <what you ran>: <before> → <after>
+<details><summary>Reviewer notes</summary>
+
+<only what a line-by-line reviewer needs>
+
+</details>
 ```
 
 ## Sections
 
-- **Names:** describe each thing in words the reader knows. A PR number, ticket ID or code never stands alone: write what it is beside it, as in "#32 (renames the `diff` tables' change column to `status`)". Give a module, type or term the reader may not know one clause on what it holds or does.
-- **Why:** the reader's problem, in the repo's domain words (its glossary or CONTEXT.md), the approach, and the PRs or code this PR builds on. No commit hashes or history of the work.
-- **What changed:** cover the whole diff, grouped by area, with one `###` subsection per area when there are more than three. For each change, give before → after and the reason. List every change that a user or caller can see, even a one-word change: CLI output, exit codes, error codes and messages, config and public signatures. When there are several, use a before → after table. Name the parts that are pure moves or re-indentation, and give the command that shows the real change (`git diff -w`, `git diff --color-moved`). Put what a reviewer should check beside the change it concerns; there is no separate review-focus section. Name both sides of a rename. Use a visual when it's clearer than prose: pseudocode for logic, a call tree for control flow, a file tree for layout, a `diff` block for a shape that changed. Usually one visual, rarely two.
-- **Length** follows the diff: a few lines for a one-line fix, as long as the done test below needs for a large refactor. Cut restatement, never coverage.
-- **Scope:** always present. Name the follow-ups and known gaps. Link each plan, report or spec the branch adds or changes under `docs/` as a GitHub file link at the branch head.
-- **Tradeoffs** (optional, after Scope): only the alternatives a reviewer would otherwise ask about.
-- **Blast radius:** a two-way door is cheap to reverse by reverting. A one-way door is not: a destructive migration, data written in a new format, a removed public API, messages or emails sent. Name what breaks if the change is wrong (an API's consumers, stored data, a deploy, a layout on small screens) and the one fact the change is safe because of, with how far you proved it: stated, pointed at the line, ran a script against the real code, reproduced in the app. Check this section hardest when it says "two-way, small".
-- **Evidence:** real behaviour, before and after, strongest first:
-  1. a screenshot or recording, for a visual change;
-  2. the test that failed before and passes now, by name, with its assertion as pseudocode;
-  3. command output or a request against the running app that changed.
+- **Names:** describe each thing in words the reader knows. A PR number, ticket ID or code never stands alone: write what it is beside it, as in "#32 (renames the `diff` tables' change column to `status`)".
+- **Summary:** the context a reader needs to care, in the repo's domain words: what exists, what is wrong or missing, who hits it, and why now. Then the approach, and what the PR builds on or unblocks. No history of the work, no commit hashes. The **Size** line comes from `git diff --shortstat <base>...HEAD`.
+- **Changes:** one top-level bullet per area with its name in bold, ordered by size and tagged *main change* or *supporting*, so the reader sees the scale without reading further. One to four one-line nested bullets per area: say what changed, not every function or file. An area with only one change goes under a last **Other small changes** bullet instead, each line starting with the area in bold. A one-area PR uses plain bullets with no area. Use no headings below the `##` sections. Mark every change a user or caller can see (CLI output, exit codes, error codes and messages, config, public signatures) with **Visible:** and before → after in a few words. A fix found in review that changed behaviour gets its own small area.
+- **Testing:** say how the change was tested, not which tests ran. Name the kinds of testing (unit tests, integration tests, new fixture files or rule fixtures, snapshot tests, a benchmark, a run against a real repository or the running app, a manual check) and, for each, the behaviours it covers in plain words. For new fixtures, say what they contain and what they prove, as in "two fixture repos, one with an excluded `vendor/` folder, check that its files reach no rule". Give a number only for performance (one number with its unit, before → after) or a bug's before → after. A screenshot or recording for a visual change. No test names, no lists of passing suites; lint, type checks and CI status show on the PR already.
+- **Scope and risk:** two short bullets. Scope names what is in and what is deliberately left out, including follow-ups and known limits, and links each plan, report or spec the branch adds under `docs/` as a GitHub file link at the branch head. Risk says whether reverting undoes it (it doesn't for a destructive migration, data written in a new format, a removed public API or messages sent), what breaks if it is wrong, and the one fact that makes it safe.
+- **Reviewer notes** (optional, collapsed): pure moves and the command that shows the real change (`git diff -w`, `git diff --color-moved`), renames with both names, a visual of a changed shape or flow, and anything a reviewer should check closely. Short bullets; leave it out when there is nothing.
 
-  Lint, type checks, the unit suite and CI status are shown by the checks themselves; leave them out. For performance, one number with its unit, before → after.
+**Length:** the part above Reviewer notes fits in about 40 lines for a large PR. A one-line fix needs only Summary and Testing. Cut detail, never a visible change or an area.
 
-Done when a reader who has read only the body can say what each commit does, and no hunk in the diff surprises them. A delivery brief may add facts or sections; it does not cap the length or replace these sections.
+Done when a reader who reads only the part above Reviewer notes can say what the PR does, which areas changed and how much, what users see change, how it was tested and what could break.
 
 Long logs, review ledgers, full hashes and per-file checklists go in a linked file, not the body. Notes to yourself and open blockers go in your report; the body is for the reviewer.
 
