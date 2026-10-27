@@ -3,3 +3,9 @@
 type = "git-repo"
 url = "https://github.com/frangkli/fstack.git"
 pull.args = ["--ff-only"]
+
+# The docs hub, edited in this checkout. `chezmoi update -R` pulls it; build-lectern builds it and restarts the hub.
+["workspace/lectern"]
+type = "git-repo"
+url = "https://github.com/frangkli/lectern.git"
+pull.args = ["--ff-only"]
