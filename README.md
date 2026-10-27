@@ -43,7 +43,7 @@ Process scales with the task, from nothing for a small fix to research through t
 
 - A docs hub serves every worktree's plans live, so agents reply with a link instead of starting a server.
 - Agent commands are searchable in [atuin](https://atuin.sh), and sessions are kept for `retro` and `tune-up` to learn from.
-- [AgentsView](https://github.com/wesm/agentsview) tracks sessions, cost and tool errors.
+- [AgentsView](https://github.com/kenn-io/agentsview) tracks sessions, cost and tool errors.
 - A short global `AGENTS.md` keeps threads off each other's processes and dev servers.
 - Secrets come from Infisical through [fnox](https://github.com/jdx/fnox) at run time, so no config file holds a key.
 - `codex-trust-hooks` re-approves this repo's Codex hooks after every update.

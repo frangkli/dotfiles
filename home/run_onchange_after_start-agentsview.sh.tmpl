@@ -1,0 +1,9 @@
+{{ if lookPath "systemctl" -}}
+#!/bin/sh
+# Sorts after install-mise-tools, which installs AgentsView.
+# Reruns whenever the rendered unit changes, as when the box joins Tailscale: {{ includeTemplate "dot_config/systemd/user/agentsview.service.tmpl" . | sha256sum }}
+set -e
+systemctl --user daemon-reload
+systemctl --user enable agentsview.service
+systemctl --user restart agentsview.service
+{{ end -}}

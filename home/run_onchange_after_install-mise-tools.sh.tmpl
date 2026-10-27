@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -l
 # Reruns whenever the mise config changes: {{ include "dot_config/mise/config.toml" | sha256sum }}
 set -e
 mise=$(command -v mise || echo "$HOME/.local/bin/mise")
