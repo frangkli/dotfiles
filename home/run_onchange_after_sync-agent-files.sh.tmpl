@@ -1,15 +1,16 @@
 {{ if eq .chezmoi.os "linux" -}}
+{{- $fstack := joinPath .chezmoi.homeDir "workspace/fstack" -}}
 {{- $sum := "" -}}
-{{- range concat (glob (joinPath .chezmoi.workingTree "skills/**")) (glob (joinPath .chezmoi.workingTree "claude/agents/**")) -}}
+{{- range concat (glob (joinPath $fstack "skills/**")) (glob (joinPath $fstack "agents/**")) -}}
 {{-   if not (stat .).isDir }}{{ $sum = print $sum . (include . | sha256sum) }}{{ end -}}
 {{- end -}}
 #!/bin/sh
-# Copies our skills and Claude agents into place. To retire one, delete it here and list it in .chezmoiremove.
+# Copies fstack's skills and Claude agents into place. To retire one, delete it there and list it in .chezmoiremove.
 # Reruns when any of them changes: {{ $sum | sha256sum }}
 set -e
 mkdir -p "$HOME/.agents/skills" "$HOME/.claude/agents"
-for entry in {{ joinPath .chezmoi.workingTree "skills" | quote }}/*; do
+for entry in {{ joinPath $fstack "skills" | quote }}/*; do
   rsync -a --delete "$entry" "$HOME/.agents/skills/"
 done
-rsync -a {{ joinPath .chezmoi.workingTree "claude/agents" | quote }}/ "$HOME/.claude/agents/"
+rsync -a {{ joinPath $fstack "agents" | quote }}/ "$HOME/.claude/agents/"
 {{ end -}}
