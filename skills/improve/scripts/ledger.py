@@ -2,8 +2,9 @@
 
   ledger.py id <path> <title>                      print a finding's id
   ledger.py init <state> <base> <scope>...         start a ledger
-  ledger.py candidates <state> <round>             merge round-<n>/*.json into round-<n>/candidates.json
-  ledger.py apply <state> <round> <head>           apply verified-<n>.json and record the round
+  ledger.py candidates <state> <round> [shards]    merge round-<n>/*.json into round-<n>/candidates.json,
+                                                   and with shards > 1 split it by path into candidates-<k>.json
+  ledger.py apply <state> <round> <head>           apply verified-<n>.json or every verified-<n>-<k>.json, and record the round
   ledger.py verdict <state> <id> <status> <reason> record a fixer's rejection or deferral
   ledger.py outcome <state> <done|escalated|halted>
   ledger.py known <state> [max_chars]              open and settled findings, for ocr's background file
@@ -51,9 +52,9 @@ def init(state, base, scope):
     write(state, ledger)
 
 
-def candidates(state, n):
+def candidates(state, n, shards=1):
     findings = read(state)["findings"]
-    files = [f for f in sorted((state / f"round-{n}").glob("*.json")) if f.name != "candidates.json"]
+    files = lane_files(state, n)
     if not files:
         sys.exit(f"no lane results in round-{n}/")
     merged, dropped = {}, []
@@ -76,14 +77,38 @@ def candidates(state, n):
             entry["lanes"].append(result.get("lane", f.stem))
     (state / f"round-{n}" / "candidates.json").write_text(json.dumps(list(merged.values()), indent=2))
     print(f"{len(merged)} candidates, {len(dropped)} dropped as settled")
+    for old in (state / f"round-{n}").glob("candidates-*.json"):
+        old.unlink()
+    if shards > 1:
+        # Keep each path in one shard, so one verifier sees every claim about a file; fill the smallest shard first.
+        by_path = {}
+        for c in merged.values():
+            by_path.setdefault(c["path"], []).append(c)
+        parts = [[] for _ in range(shards)]
+        for group in sorted(by_path.values(), key=len, reverse=True):
+            min(parts, key=len).extend(group)
+        parts = [part for part in parts if part]
+        for k, part in enumerate(parts, 1):
+            (state / f"round-{n}" / f"candidates-{k}.json").write_text(json.dumps(part, indent=2))
+        print(f"split into {len(parts)} shards of", ", ".join(str(len(part)) for part in parts))
     for d in dropped:
         print("  dropped", d)
+
+
+def lane_files(state, n):
+    return [f for f in sorted((state / f"round-{n}").glob("*.json")) if not f.name.startswith("candidates")]
 
 
 def apply(state, n, head):
     ledger = read(state)
     findings, counts = ledger["findings"], {}
-    for v in json.loads((state / f"verified-{n}.json").read_text()):
+    whole = state / f"verified-{n}.json"
+    shards = len(list((state / f"round-{n}").glob("candidates-*.json")))
+    files = [whole] if whole.exists() else [state / f"verified-{n}-{k}.json" for k in range(1, shards + 1)]
+    missing = [f.name for f in files if not f.exists()] or ([] if files else [whole.name])
+    if missing:
+        sys.exit("missing " + ", ".join(missing))
+    for v in (v for f in files for v in json.loads(f.read_text())):
         counts[v["verdict"]] = counts.get(v["verdict"], 0) + 1
         entry = findings.setdefault(v["id"], {"rounds_seen": []})
         entry.update({k: v[k] for k in v if k not in ("id", "verdict")})
@@ -92,7 +117,7 @@ def apply(state, n, head):
             entry["reason"] = v.get("reason", "unverifiable")
         if n not in entry["rounds_seen"]:
             entry["rounds_seen"].append(n)
-    lanes = [f.stem for f in sorted((state / f"round-{n}").glob("*.json")) if f.name != "candidates.json"]
+    lanes = [f.stem for f in lane_files(state, n)]
     ledger["rounds"] = [r for r in ledger["rounds"] if r["n"] != n] + [{"n": n, "head": head, "lanes": lanes, "verdicts": counts}]
     write(state, ledger)
     open_ = [f for f in findings.values() if f["status"] == "open" and f.get("severity") in ("critical", "major")]
@@ -138,7 +163,7 @@ if __name__ == "__main__":
     elif cmd == "init":
         init(Path(args[0]), args[1], args[2:])
     elif cmd == "candidates":
-        candidates(Path(args[0]), int(args[1]))
+        candidates(Path(args[0]), int(args[1]), int(args[2]) if len(args) > 2 else 1)
     elif cmd == "apply":
         apply(Path(args[0]), int(args[1]), args[2])
     elif cmd == "verdict":
