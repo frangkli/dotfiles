@@ -11,6 +11,7 @@ packages:
     - zoxide
     - htop
     - postgresql-client
+    - rsync
   brew:
     - tmux
     - neovim
