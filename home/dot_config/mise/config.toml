@@ -27,3 +27,4 @@ fnox = "latest"
 infisical = "latest"
 age = "latest"
 "github:kenn-io/agentsview" = "latest"
+"github:entireio/cli" = "latest" # ships entire and git-remote-entire, which git needs for entire:// remotes
