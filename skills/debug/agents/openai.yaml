@@ -1,3 +1,0 @@
-interface:
-  display_name: "Debug"
-  short_description: "Diagnose hard bugs and regressions"

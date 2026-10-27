@@ -1,3 +1,0 @@
-interface:
-  display_name: "Adversarial Review"
-  short_description: "Stress-test a plan or code change before it ships"

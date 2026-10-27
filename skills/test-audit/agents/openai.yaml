@@ -1,3 +1,0 @@
-interface:
-  display_name: "Test Audit"
-  short_description: "Judge whether tests earn their place and prove regressions"

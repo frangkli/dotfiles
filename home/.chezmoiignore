@@ -11,4 +11,5 @@
 .local/share/docs-hub
 .opencodereview
 .t3
+workspace/fstack
 {{ end }}

@@ -9,7 +9,6 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply frangkli
 It asks for your name and email up front, so you don't need to fork it to fix my git config. Macs skip the agent stuff.
 
 - `home/`: configs, scripts and services. App-owned settings get only the keys in `home/.chezmoitemplates/`.
-- `skills/` and `claude/agents/`: my agent skills and Claude subagents, copied into place on every apply.
 - `infra/`: the box, a GCP VM set up with OpenTofu and cloud-init.
 
 ## Why
@@ -30,14 +29,7 @@ I usually have a dozen threads going at once, each in its own worktree.
 
 ## Skills
 
-Process scales with the task, from nothing for a small fix to research through tickets for a new product:
-
-- `council` asks five framings, has them review each other blind, and keeps the disagreements.
-- `arena` judges competing builds against a rubric written before any of them started.
-- `prevent-repeats` finds mistakes agents keep repeating and adds a check that fails on a real past one.
-- `verify-create` generates a `verify` skill per project that drives the app the way a user would.
-- `readiness` scores how well agents can work in a repo and fixes the gaps.
-- `wait-what` makes the agent stop and re-pitch when its last message didn't land.
+My skills and Claude subagents live in [fstack](https://github.com/frangkli/fstack). The box keeps a checkout at `~/workspace/fstack` and copies them into place on every apply.
 
 ## Around the agents
 

@@ -1,0 +1,5 @@
+# Our skills and Claude agents, edited in this checkout. `chezmoi update -R` pulls it; the sync script copies it into place.
+["workspace/fstack"]
+type = "git-repo"
+url = "https://github.com/frangkli/fstack.git"
+pull.args = ["--ff-only"]

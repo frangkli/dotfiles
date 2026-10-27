@@ -1,3 +1,0 @@
-interface:
-  display_name: "PR"
-  short_description: "Ship a change as a phased PR and babysit it to green"
