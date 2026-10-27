@@ -4,6 +4,9 @@
 # Keeps the folder passed to `chezmoi init --source` when this config is regenerated.
 sourceDir = {{ .chezmoi.workingTree | quote }}
 
+# Keeps managed files at 644 and folders at 755 under a 0002 login umask.
+umask = 0o022
+
 [data]
     name = {{ $name | quote }}
     email = {{ $email | quote }}
