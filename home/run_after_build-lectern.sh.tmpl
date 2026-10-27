@@ -5,7 +5,7 @@
 # enable-lectern. It builds beside the live dist/ and swaps only on success, so a failed build leaves
 # Lectern running.
 set -e
-# A new box gets Vite+, and so pnpm, by hand after its first apply; the next apply builds.
+# install-agent-clis installs Vite+, and so pnpm, first; if that failed, the next apply builds.
 command -v pnpm >/dev/null || { echo "build-lectern: no pnpm yet, skipping; install Vite+ and apply again" >&2; exit 0; }
 cd "$HOME/workspace/lectern"
 built="${XDG_STATE_HOME:-$HOME/.local/state}/lectern-built"
