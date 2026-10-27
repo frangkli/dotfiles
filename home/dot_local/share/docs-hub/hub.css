@@ -1,124 +1,220 @@
-/* Hub layout. Colours, type, tags and focus come from the kit (/assets/kit.css).
-   A 44px bar, the sidebar (248), the page and the contents (208). Two text edges on the left: --pad
-   (brand, labels, headings) and --pad + --inset (text inside controls and list items). The bar's trail,
-   the home column and the document share a third: sidebar + --gutter. Spacing steps by 4px. */
-:root { --side: 248px; --toc: 208px; --bar: 44px; --pad: 16px; --inset: 10px; }
-body { height: 100dvh; display: grid; grid-template: var(--bar) minmax(0, 1fr) / minmax(0, 1fr); overflow: hidden; }
+/* The hub, on the kit's tokens (/assets/kit.css). A bar sits on every page and the library at the
+   left; the page is one centred column, and a document adds its contents at the right. Lists of
+   documents are plain lists: no rules, no boxes, space between entries. Controls are square-cornered
+   (6px at most). Colour appears only where it means something: ochre for drafts, blue for new and
+   updated, green for merged. */
+:root { --row-x: 16px; --bar: 64px; --nav: 232px; --toc: 200px; --toc-gap: 32px; --control: 6px; }
+[data-hub] { scroll-padding-top: calc(var(--bar) + 24px); }
 
-button, select, input { height: 32px; padding: 0 calc(var(--inset) - 1px); font: inherit; font-size: 14px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
-button { cursor: pointer; }
-input::placeholder { color: var(--muted); }
-/* Selects draw their own chevron (on the label, so it takes the theme's muted colour), inset from
-   the right edge by the same 10px as the text from the left. */
-select { appearance: none; -webkit-appearance: none; padding: 0 calc(var(--inset) + 16px) 0 calc(var(--inset) - 1px); }
-aside label, .bar .theme { position: relative; }
-aside label::after, .bar .theme::after {
-  content: ""; position: absolute; right: var(--inset); bottom: 13px; width: 10px; height: 6px; pointer-events: none;
-  background: var(--muted);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+.hub-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.hub-skip { position: fixed; z-index: 50; top: 12px; left: 12px; padding: 8px 14px; font: 500 14px var(--font); color: var(--bg); background: var(--ink); border-radius: var(--control); text-decoration: none; transform: translateY(-200%); }
+.hub-skip:focus { transform: none; }
+.hub-i { width: 15px; height: 15px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+/* The hub's lists start bare; :where keeps this reset below any class that styles a list. */
+:where(.hub-bar, .hub-nav, .hub-rail, .hub-page) :is(ul, ol) { max-width: none; margin: 0; padding: 0; list-style: none; }
+:where(.hub-bar, .hub-nav, .hub-rail, .hub-page) li { margin: 0; padding: 0; }
+.hub-warn { color: var(--warn); }
+
+/* Moving between pages: the old page holds until the new one is ready, then swaps at once, with no fade. */
+@view-transition { navigation: auto; }
+::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none; }
+
+/* Controls. Hover and press states change at once: a list is scanned fast, and a fade reads as lag. */
+.hub-button { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; font: 500 13px/1 var(--font); color: var(--ink); text-decoration: none; white-space: nowrap; background: var(--bg); border: 1px solid var(--border); border-radius: var(--control); cursor: pointer; }
+.hub-button:hover { background: var(--sunken); }
+.hub-button .hub-i { width: 14px; height: 14px; }
+.hub-search label { display: flex; align-items: center; gap: 8px; width: 240px; height: 34px; padding: 0 6px 0 10px; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: var(--control); cursor: text; }
+.hub-search label:hover { border-color: color-mix(in oklab, var(--ink) 30%, var(--bg)); }
+.hub-search label:focus-within { border-color: var(--ink); }
+.hub-search input { flex: 1; min-width: 0; height: 100%; padding: 0; font: inherit; font-size: 14px; letter-spacing: -0.01em; color: var(--ink); background: none; border: 0; outline: 0; }
+.hub-search input::placeholder { color: var(--muted); }
+.hub-search kbd { font-size: 11px; color: var(--muted); }
+.hub-search label:focus-within kbd { visibility: hidden; }
+.hub-search-lg { margin-top: 24px; }
+.hub-search-lg label { width: auto; height: 40px; padding: 0 8px 0 12px; }
+.hub-search-lg input { font-size: 15px; }
+
+/* A menu: a button that opens a list beneath it. */
+.hub-menu { position: relative; display: inline-block; margin: 0; border: 0; }
+.hub-menu > summary { list-style: none; height: 28px; min-height: 0; padding: 0 8px; font-size: 14px; }
+.hub-menu > summary::-webkit-details-marker { display: none; }
+.hub-menu > summary::before { content: none; }
+.hub-menu .hub-chevron { width: 12px; height: 12px; color: var(--muted); }
+.hub-menu[open] > summary { background: var(--sunken); }
+.hub-menu-list { position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; min-width: 340px; max-height: 60vh; padding: 4px; overflow-y: auto; background: var(--bg); border: 1px solid var(--border); border-radius: var(--control); box-shadow: 0 8px 24px color-mix(in oklab, var(--ink) 10%, transparent); }
+.hub-menu-list a { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 7px 8px; font-size: 14px; line-height: 1.4; color: var(--text); text-decoration: none; border-radius: 4px; }
+.hub-menu-list a:hover { background: var(--sunken); }
+.hub-menu-list a[aria-current] { font-weight: 600; color: var(--ink); }
+.hub-menu-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hub-menu-meta { display: flex; flex: none; gap: 10px; font-size: 13px; font-weight: 400; color: var(--muted); }
+
+/* The bar. */
+.hub-bar { position: sticky; z-index: 20; top: 0; display: flex; align-items: center; gap: 24px; height: var(--bar); padding: 0 20px 0 24px; font: 14px/1.4 var(--font); letter-spacing: -0.01em; background: var(--bg); border-bottom: 1px solid var(--border-soft); }
+.hub-mark { flex: none; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); text-decoration: none; }
+.hub-crumbs { flex: 1; min-width: 0; }
+.hub-crumbs ol { display: flex; align-items: center; white-space: nowrap; }
+.hub-crumbs li { display: flex; flex: none; min-width: 0; white-space: nowrap; color: var(--muted); }
+.hub-crumbs li:last-child { flex: 0 1 auto; }
+.hub-crumbs li + li::before { content: "/"; margin: 0 8px; color: var(--border); }
+.hub-crumbs a { color: var(--text-2); text-decoration: none; }
+.hub-crumbs a:hover { color: var(--ink); }
+.hub-crumbs [aria-current] { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; color: var(--ink); }
+.hub-tools { display: flex; align-items: center; gap: 12px; flex: none; }
+/* The theme control arrives with kit-js; its space is held so the bar never shifts. */
+[data-theme-control] { display: flex; min-width: 98px; height: 30px; }
+.hub-bar .theme { float: none; gap: 4px; margin: 0; border: 0; border-radius: 0; overflow: visible; }
+.hub-bar .theme button { width: 30px; height: 30px; color: var(--muted); border: 0; border-radius: var(--control); }
+.hub-bar .theme button:hover { color: var(--ink); background: var(--sunken); }
+.hub-bar .theme button[aria-pressed="true"] { color: var(--ink); background: var(--sunken); }
+
+/* The library, at the left of every page. */
+.hub-nav { font-size: 14px; line-height: 20px; }
+.hub-nav h2 { margin: 24px 0 6px; padding: 0 10px; font-size: 14px; font-weight: 600; line-height: 20px; letter-spacing: -0.01em; color: var(--ink); border: 0; }
+.hub-nav a { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 6px 10px; color: var(--text); text-decoration: none; border-radius: var(--control); }
+.hub-nav a:hover, .hub-nav a[aria-current] { background: var(--sunken); }
+.hub-nav a[aria-current] { color: var(--ink); }
+.hub-nav a:active { background: var(--border); }
+.hub-index-n { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Index pages: one column, its head, then the table. The kit centres a document's header; the hub's
+   own head reads from the left. */
+.hub-page { box-sizing: border-box; max-width: var(--page); margin: 0 auto; padding: 48px var(--gutter) 120px; outline: 0; }
+.hub-head { display: block; margin: 0; text-align: left; }
+.hub-head h1 { margin: 0; font-size: var(--fs-h1); font-weight: 600; line-height: 1.4; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.hub-sub { max-width: none; margin: 4px 0 0; font-size: 16px; color: var(--text-2); }
+.hub-sub .hub-menu { margin-left: 2px; vertical-align: middle; }
+/* Filters: kinds as tabs on a rule, then the two statuses as toggles. */
+.hub-filters { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 8px 24px; margin-top: 20px; border-bottom: 1px solid var(--border); }
+.hub-filters ul { display: flex; flex-wrap: wrap; gap: 0 20px; }
+.hub-filters a { display: inline-flex; align-items: baseline; gap: 5px; margin-bottom: -1px; padding: 10px 0 9px; font-size: 14px; font-weight: 500; color: var(--muted); text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent; }
+.hub-filters a:hover { color: var(--ink); }
+.hub-filters a[aria-current] { color: var(--ink); border-bottom-color: var(--ink); }
+.hub-filters ul + ul { gap: 6px; padding-bottom: 8px; }
+.hub-filters ul + ul li { display: flex; }
+.hub-filters ul + ul a { align-items: center; height: 28px; margin: 0; padding: 0 10px; font-size: 13px; color: var(--text); border: 1px solid var(--border); border-radius: var(--control); }
+.hub-filters ul + ul a:hover { background: var(--sunken); }
+.hub-filters ul + ul a[aria-current] { color: var(--bg); background: var(--ink); border-color: var(--ink); }
+.hub-filters ul + ul a[aria-current] .hub-n { color: inherit; opacity: 0.7; }
+.hub-n { font-size: 12.5px; font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hub-filters .is-draft a::before { content: ""; width: 6px; height: 6px; background: var(--warn); border-radius: 50%; }
+@media (max-width: 1099px) {
+  .hub-filters { display: block; border: 0; }
+  .hub-filters ul:first-child { border-bottom: 1px solid var(--border); }
+  .hub-filters ul + ul { padding: 10px 0 0; }
 }
-svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
 
-/* The bar: brand, where you are, open alone, theme. */
-.bar { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; min-width: 0; padding-right: 8px; font-size: 14px; border-bottom: 1px solid var(--border-soft); }
-.brand { display: flex; align-items: center; align-self: stretch; padding: 0 var(--pad); font-weight: 600; color: var(--text); text-decoration: none; }
-.crumbs { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; white-space: nowrap; color: var(--muted); }
-.crumbs a { color: var(--muted); text-decoration: none; }
-.crumbs a:hover { color: var(--text); }
-.crumbs [aria-current] { overflow: hidden; text-overflow: ellipsis; color: var(--text); }
-.crumbs .sep { color: var(--border); }
-.open { display: grid; place-items: center; width: 30px; height: 30px; color: var(--muted); border-radius: 6px; }
-.open:hover { color: var(--text); background: var(--sunken); }
-.bar .theme { display: block; float: none; margin: 0; }
-.bar .theme::after { bottom: 12px; }
-.bar .theme span, #contents span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.bar .theme select { display: block; height: 30px; margin: 0; padding: 0 calc(var(--inset) + 16px) 0 calc(var(--inset) - 1px); font-size: 13px; } /* over the kit's .theme select */
-#menu, #contents { display: grid; place-items: center; width: 34px; padding: 0; }
+/* Documents as a list. Each entry is the title, its status and its time on one line, then the
+   summary, then what and where it is. The whole entry is the link; hovering fades in a grey panel
+   that reaches --row-x past the column, so the text stays on the column's edge.
+   A group's heading holds under the bar while its entries scroll past. */
+.hub-group h2 { position: sticky; z-index: 2; top: var(--bar); display: flex; align-items: baseline; gap: 8px; margin: 0; padding: 40px 0 8px; font-size: 14px; font-weight: 600; line-height: 20px; letter-spacing: 0; color: var(--ink); background: var(--bg); }
+.hub-group:first-child h2 { padding-top: 28px; }
+.hub-group-note { font-weight: 420; color: var(--muted); }
+.hub-group-n { margin-left: auto; font-size: 13px; font-weight: 420; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hub-list { display: grid; gap: 4px; margin: 0 calc(var(--row-x) * -1); }
+.hub-item { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; padding: 14px var(--row-x) 16px; border-radius: var(--control); transition: background-color 200ms ease-out; }
+.hub-item:hover { background: var(--sunken); transition-duration: 100ms; }
+.hub-item > p { max-width: none; margin-bottom: 0; grid-column: 1; }
+.hub-item > time { grid-row: 1; grid-column: 2; font-size: 13px; line-height: 24px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hub-item-head { font-size: 16px; line-height: 24px; }
+.hub-title { font-weight: 600; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+.hub-title::after { content: ""; position: absolute; inset: 0; }
+.hub-title:focus-visible { outline: 0; }
+.hub-title:focus-visible::after { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: var(--control); }
+.hub-flag { margin-left: 8px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.hub-flag.draft { color: var(--warn); }
+.hub-flag.unread { color: var(--info); }
+.hub-summary { margin-top: 6px; overflow: hidden; font-size: 14px; line-height: 22px; color: var(--text-2); text-overflow: ellipsis; white-space: nowrap; }
+.hub-meta { display: flex; flex-wrap: wrap; align-items: center; margin-top: 8px; font-size: 13px; line-height: 20px; color: var(--muted); }
+.hub-meta > span { display: inline-flex; align-items: center; min-width: 0; }
+.hub-meta > span + span::before { content: "·"; margin: 0 8px; }
+.hub-branch { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; }
+.hub-branch .hub-i { width: 12px; height: 12px; }
+.hub-path { font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere; }
+.hub-results { padding-top: 12px; }
+.hub-list mark { padding: 0; color: var(--ink); background: var(--border); }
+.hub-results .hub-summary { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.hub-num { text-align: right; font-variant-numeric: tabular-nums; }
+.hub-more { margin-top: 24px; }
+.hub-empty { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+.hub-empty-title { margin-bottom: 4px; font-size: 17px; font-weight: 600; color: var(--ink); }
 
-/* Sidebar: one inner padding, so controls, highlights and headings share both edges. */
-aside, #toc { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
-aside { padding: var(--pad) var(--pad) 24px; font-size: 14px; background: var(--bg); }
-aside form, aside label { display: block; }
-aside input, aside select { display: block; width: 100%; }
-aside label { margin-top: 16px; font-size: 12.5px; line-height: 16px; color: var(--muted); }
-aside label select { margin-top: 4px; }
-.is-home aside form { display: none; }
-.is-home aside label:first-child { margin-top: 0; }
-aside h2, #toc h2 { margin: 24px 0 4px; font-size: 12.5px; font-weight: 600; line-height: 16px; color: var(--muted); }
-.count { font-weight: 400; color: var(--muted); }
-aside .item { display: block; padding: 6px var(--inset); line-height: 20px; color: var(--text); text-decoration: none; border-radius: 6px; }
-aside .item:hover { background: var(--sunken); }
-aside .item.current { background: var(--sunken); font-weight: 600; }
-aside .item .tag { margin-left: 6px; font-weight: 400; }
-aside .folder { margin: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
-aside .folder > summary { margin: 0; padding: 6px var(--inset); line-height: 20px; font-size: inherit; font-weight: 400; color: var(--text); border-radius: 6px; cursor: pointer; }
-aside .folder > summary:hover { background: var(--sunken); }
-aside .folder > summary .count { color: var(--muted); }
-aside .folder > :not(summary) { margin-left: 12px; }
+/* A document: the rail of contents and details. The contents sit on a light track, and the section
+   in view is marked on it in black. */
+.hub-rail { font-size: 14px; line-height: 20px; }
+.hub-rail h2 { margin: 0 0 8px; padding: 0; font-size: 13px; font-weight: 500; line-height: 1.4; letter-spacing: 0; color: var(--muted); border: 0; }
+.hub-rail-box { margin: 0; }
+.hub-toc h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.hub-toc ol { box-shadow: inset 2px 0 var(--border-soft); }
+.hub-toc li + li { margin-top: 12px; }
+.hub-toc a { display: block; padding-left: 20px; letter-spacing: -0.01em; color: var(--muted); text-decoration: none; }
+.hub-toc a:hover { color: var(--ink); }
+.hub-toc a[aria-current] { color: var(--ink); box-shadow: inset 2px 0 var(--ink); }
+.hub-toc .h3 a { padding-left: 32px; }
+.hub-copy { height: 28px; margin-top: 20px; padding: 0 10px; font-size: 12.5px; }
+.hub-copy .hub-i { width: 13px; height: 13px; }
+:is(.hub-details, .hub-versions) { margin-top: 32px; }
+.hub-details dl { display: grid; gap: 12px; margin: 0; max-width: none; font-size: 13px; line-height: 1.4; }
+.hub-details dt { font-size: 12px; color: var(--muted); }
+.hub-details dd { display: flex; flex-direction: column; gap: 1px; min-width: 0; margin: 1px 0 0; color: var(--ink); }
+.hub-note { font-size: 12px; color: var(--muted); }
+.hub-details code { padding: 0; font-size: 11.5px; color: var(--text-2); background: none; overflow-wrap: anywhere; }
+.hub-state.draft { color: var(--warn); }
+.hub-state.merged { color: var(--good); }
+.hub-versions a { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; font-size: 13px; color: var(--ink); text-decoration: none; }
+.hub-versions a:hover span { text-decoration: underline; }
+.hub-versions time { flex: none; font-size: 12px; color: var(--muted); }
 
-/* Status markers: small ochre "draft", or grey "local" for a doc that is never committed. */
-.tag:is(.draft, .local) { padding: 0; font-size: 12px; font-weight: 400; vertical-align: baseline; border: 0; }
-
-/* Focus: a 2px ring on the control's own edge, so it never breaks the column. */
-:is(aside, .bar, .list, #toc) :is(a, input, select, button):focus-visible { outline: 2px solid var(--muted); outline-offset: -2px; border-radius: 6px; }
-
-/* Contents. */
-#toc { padding: var(--gutter) 16px 24px 4px; font-size: 13.5px; }
-#toc h2 { margin: 0 0 8px; }
-#toc a { display: block; padding: 4px 0; line-height: 1.4; color: var(--muted); text-decoration: none; }
-#toc a:hover { color: var(--text); }
-#toc a.h3 { padding-left: 12px; }
-
-/* Home, search and worktree pages: one column, a search box, and lists in one bordered card. */
-.main { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
-.list { flex: 1; overflow-y: auto; padding: var(--gutter) var(--gutter) 56px; }
-.list > * { max-width: 980px; }
-.list h1 { margin-bottom: 4px; }
-.search { display: flex; gap: 8px; margin: 18px 0 8px; }
-.search input { flex: 1; height: 38px; font-size: 15px; }
-.search button { height: 38px; padding: 0 16px; font-weight: 500; color: var(--bg); background: var(--text); border-color: var(--text); }
-.group h2 { margin: 28px 0 10px; font-size: 17px; }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
-.card .item { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 10px 14px; color: var(--text); text-decoration: none; }
-.card .item + .item { border-top: 1px solid var(--border-soft); }
-.card .item:first-child { border-radius: 8px 8px 0 0; }
-.card .item:last-child { border-radius: 0 0 8px 8px; }
-.card time { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.card .body { min-width: 0; }
-.card .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
-.card .title { font-weight: 600; color: var(--accent); }
-.card .item:hover .title { text-decoration: underline; text-underline-offset: 3px; }
-.card .kind { font-size: 13px; color: var(--muted); }
-.card .path, .card .excerpt { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
-.card .excerpt { color: var(--text); }
-
-iframe { flex: 1; width: 100%; border: 0; background: var(--bg); }
-
-/* On a phone the sidebar is a drawer and the contents a sheet; wider screens show them as columns. */
-aside { position: fixed; z-index: 3; inset: var(--bar) auto 0 0; width: min(320px, 86vw); transform: translateX(-100%); transition: transform 220ms cubic-bezier(0.32, 0.72, 0, 1); visibility: hidden; }
-.drawer aside { transform: none; visibility: visible; box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.35); }
-#toc { display: none; position: fixed; z-index: 3; top: calc(var(--bar) + 6px); right: 8px; width: min(300px, calc(100vw - 16px)); max-height: 70dvh; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.15); }
-.toc-open #toc { display: block; padding: 14px 16px; }
-@media (prefers-reduced-motion: reduce) { aside { transition: none; } }
-
-@media (max-width: 899px) {
-  .bar { gap: 6px; padding: 0 6px; }
-  .brand { padding: 0 6px; }
-  .crumbs > :not(:last-child) { display: none; }
-  .is-doc .crumbs { visibility: hidden; }
-  .card .item { grid-template-columns: minmax(0, 1fr); gap: 2px; }
-  .card time { order: 2; font-size: 13px; }
-}
-@media (min-width: 900px) {
-  body { grid-template-columns: var(--side) minmax(0, 1fr); }
-  .brand { width: var(--side); }
-  .crumbs { margin-left: -8px; padding-left: var(--gutter); }
-  aside { position: static; width: auto; transform: none; visibility: visible; border-right: 1px solid var(--border-soft); }
-  #menu { display: none; }
+/* Where things sit. The library is fixed at the left once there is room for it beside the column;
+   a document's rail is fixed at the right of its column, and the pair centres in what is left. */
+.hub-nav { display: none; }
+@media (min-width: 1100px) {
+  .hub-nav { position: fixed; z-index: 10; top: var(--bar); bottom: 0; left: 0; display: block; width: var(--nav); padding: 28px 12px 32px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  [data-hub]:not([data-hub="doc"]) .hub-page { margin-left: max(var(--nav), calc((100vw - var(--page)) / 2)); }
+  [data-hub="doc"] .hub-nav { display: none; }
 }
 @media (min-width: 1200px) {
-  .has-toc { grid-template-columns: var(--side) minmax(0, 1fr) var(--toc); }
-  .has-toc #toc { display: block; position: static; width: auto; max-height: none; background: none; border: 0; border-radius: 0; box-shadow: none; }
-  #contents { display: none; }
+  [data-hub="doc"] { --main-left: max(0px, calc((100vw - var(--page) - var(--toc-gap) - var(--toc)) / 2)); }
+  .hub-rail { position: fixed; top: var(--bar); bottom: 0; left: calc(var(--main-left) + var(--page) + var(--toc-gap)); width: var(--toc); padding: 32px 0 32px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+  .hub-rail ~ main { margin-left: var(--main-left); margin-right: auto; }
+  .hub-rail-box { border: 0; }
+  .hub-rail-box > summary { display: none; }
+  .hub-rail-box > summary + * { margin-top: 0; }
 }
+@media (min-width: 1440px) {
+  [data-hub="doc"] { --main-left: calc((100vw - var(--page)) / 2); }
+  [data-hub="doc"] .hub-nav { display: block; }
+}
+@media (max-width: 1099px) {
+  [data-hub]:not([data-hub="doc"]) .hub-nav { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 16px; max-width: var(--page); margin: 0 auto; padding: 20px var(--gutter) 0; }
+  .hub-nav h2 { margin: 0; padding: 0; font-weight: 500; color: var(--muted); }
+  .hub-nav ul { display: flex; flex-wrap: wrap; gap: 2px 16px; }
+  .hub-nav a { gap: 6px; padding: 2px 0; }
+  .hub-nav a:hover, .hub-nav a[aria-current] { background: none; }
+  .hub-nav a[aria-current] .hub-index-name { text-decoration: underline; text-underline-offset: 0.25em; }
+  .hub-page { padding-top: 28px; }
+}
+@media (max-width: 1199px) {
+  .hub-rail { max-width: var(--page); margin: 0 auto; padding: 16px var(--gutter) 0; }
+  .hub-rail-box[open] { padding-bottom: 16px; }
+  .hub-rail-box > summary + * { margin-top: 8px; }
+}
+@media (max-width: 759px) {
+  .hub-bar { position: static; flex-wrap: wrap; gap: 10px 12px; height: auto; padding: 12px 16px; }
+  .hub-tools { display: contents; }
+  [data-theme-control] { order: 1; margin-left: auto; }
+  .hub-bar .hub-search { order: 3; flex-basis: 100%; }
+  .hub-search label { width: auto; }
+  .hub-search input { font-size: 16px; }
+  .hub-crumbs { order: 4; flex-basis: 100%; }
+  .hub-crumbs:empty { display: none; }
+  .hub-page { padding: 24px var(--gutter) 72px; }
+  .hub-head h1 { font-size: 26px; }
+  .hub-filters ul:first-child { flex-wrap: nowrap; margin: 0 calc(var(--gutter) * -1); padding: 0 var(--gutter); overflow-x: auto; scrollbar-width: none; }
+  .hub-group h2 { top: 0; }
+  :root { --row-x: 12px; }
+  .hub-item { column-gap: 12px; }
+  .hub-summary { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .hub-menu-list { min-width: min(340px, calc(100vw - 32px)); }
+}
+@media print { .hub-bar, .hub-nav, .hub-rail, .hub-skip { display: none; } .hub-rail ~ main { margin: 0 auto; } }
