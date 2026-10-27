@@ -1,0 +1,15 @@
+{{ if eq .chezmoi.os "linux" -}}
+{{- $sum := "" -}}
+{{- range concat (glob (joinPath .chezmoi.workingTree "skills/**")) (glob (joinPath .chezmoi.workingTree "claude/agents/**")) -}}
+{{-   if not (stat .).isDir }}{{ $sum = print $sum . (include . | sha256sum) }}{{ end -}}
+{{- end -}}
+#!/bin/sh
+# Copies our skills and Claude agents into place. To retire one, delete it here and list it in .chezmoiremove.
+# Reruns when any of them changes: {{ $sum | sha256sum }}
+set -e
+mkdir -p "$HOME/.agents/skills" "$HOME/.claude/agents"
+for entry in {{ joinPath .chezmoi.workingTree "skills" | quote }}/*; do
+  rsync -a --delete "$entry" "$HOME/.agents/skills/"
+done
+rsync -a {{ joinPath .chezmoi.workingTree "claude/agents" | quote }}/ "$HOME/.claude/agents/"
+{{ end -}}

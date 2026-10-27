@@ -1,0 +1,22 @@
+{{- /* T3 Code reloads this file when it changes. */ -}}
+{
+  "defaultThreadEnvMode": "worktree",
+  "defaultAutoPull": true,
+  "pullRequestMergeMethod": "rebase",
+  "sourceControlWritingStyle": { "mode": "conventional_commits" },
+  "removeAgentCreditsOnMerge": true,
+  "continueThreadsAfterServerUpdate": true,
+  "autoResumeLimitedThreads": true,
+  "snoozeLimitedThreads": true,
+  "sidebarAutoSettleAfterDays": 10,
+  "storageCleanup": { "worktreeAfterDays": 10, "worktreeOnDelete": true },
+  "backgroundActivity": { "schemaVersion": 1, "profile": "performance" },
+  "providerInstances": {
+    "claudeAgent_claude_api": {
+      "driver": "claudeAgent",
+      "displayName": "Claude API",
+      "enabled": true,
+      "config": { "binaryPath": "claude-api" }
+    }
+  }
+}

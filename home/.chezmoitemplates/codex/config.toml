@@ -1,0 +1,58 @@
+{{- $impeccable := joinPath .chezmoi.homeDir ".agents/skills/impeccable/scripts/impeccable" -}}
+{{- $design := printf "[ ! -f '%s' ] || '%s' hook" $impeccable $impeccable -}}
+sandbox_mode = "danger-full-access"
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
+web_search = "live"
+# MCP logins call back to a fixed port so they can run over an SSH tunnel.
+mcp_oauth_credentials_store = "file"
+mcp_oauth_callback_port = 1456
+
+[features]
+memories = true
+# Plugins and apps installed on the ChatGPT account stay off the box.
+remote_plugin = false
+apps = false
+
+[sandbox_workspace_write]
+network_access = true
+
+# Codex runs commands in a PTY and already sets NO_COLOR, TERM=dumb and the pagers.
+[shell_environment_policy.set]
+GIT_EDITOR = "true"
+GIT_TERMINAL_PROMPT = "0"
+GIT_ADVICE = "0"
+GH_PROMPT_DISABLED = "1"
+GH_NO_UPDATE_NOTIFIER = "1"
+NO_UPDATE_NOTIFIER = "1"
+DOCKER_CLI_HINTS = "false"
+{{- range $name, $value := .toolEnv }}
+{{ $name }} = {{ $value | quote }}
+{{- end }}
+
+# Remote MCP servers, also in ~/.claude.json. Other services use their CLIs.
+[mcp_servers.linear]
+url = "https://mcp.linear.app/mcp"
+
+[mcp_servers.axiom]
+url = "https://mcp.axiom.co/mcp"
+
+[mcp_servers.neon]
+url = "https://mcp.neon.tech/mcp"
+
+# atuin logs agent shell commands, kept out of your Ctrl-R; impeccable checks UI edits.
+# Declared here, not in hooks.json, which Glen rewrites; codex-trust-hooks trusts them.
+[[hooks.PreToolUse]]
+matcher = "^Bash$"
+hooks = [{ type = "command", command = "atuin hook codex" }]
+
+[[hooks.PostToolUse]]
+matcher = "^Bash$"
+hooks = [{ type = "command", command = "atuin hook codex" }]
+
+[[hooks.PostToolUse]]
+matcher = "Edit|Write|apply_patch"
+hooks = [{ type = "command", command = {{ $design | quote }}, timeout = 5, statusMessage = "Checking UI changes" }]
+
+[[hooks.Stop]]
+hooks = [{ type = "command", command = {{ $design | quote }}, timeout = 30, statusMessage = "Design deep pass" }]

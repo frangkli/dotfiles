@@ -1,0 +1,6 @@
+{{- /* Ubuntu's AppArmor blocks the sandbox of downloaded Chromes; Playwright skips it by default too.
+     Chromium ignores the OS trust store on Linux, so trust Portless's CA for https://*.localhost. */ -}}
+{
+  "args": "--no-sandbox",
+  "caCert": {{ joinPath .chezmoi.homeDir ".portless/ca.pem" | quote }}
+}
