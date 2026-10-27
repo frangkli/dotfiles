@@ -51,6 +51,11 @@ aside .item { display: block; padding: 6px var(--inset); line-height: 20px; colo
 aside .item:hover { background: var(--sunken); }
 aside .item.current { background: var(--sunken); font-weight: 600; }
 aside .item .tag { margin-left: 6px; font-weight: 400; }
+aside .folder { margin: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+aside .folder > summary { margin: 0; padding: 6px var(--inset); line-height: 20px; font-size: inherit; font-weight: 400; color: var(--text); border-radius: 6px; cursor: pointer; }
+aside .folder > summary:hover { background: var(--sunken); }
+aside .folder > summary .count { color: var(--muted); }
+aside .folder > :not(summary) { margin-left: 12px; }
 
 /* Status markers: small ochre "draft", or grey "local" for a doc that is never committed. */
 .tag:is(.draft, .local) { padding: 0; font-size: 12px; font-weight: 400; vertical-align: baseline; border: 0; }

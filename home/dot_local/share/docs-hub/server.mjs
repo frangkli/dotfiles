@@ -486,12 +486,26 @@ function sidebar(repos, docs, repo, worktree, current, query = "") {
   });
   if (!repo.notes) html += select("Branch or worktree · drafts", branchItems);
   const shown = inView(docs, repo, base).toSorted((a, b) => b.date.localeCompare(a.date));
-  const byKind = Object.groupBy(shown, (doc) => doc.kind);
+  // Local docs in subfolders show as a folder tree after the kind groups; the rest group by kind.
+  const nested = shown.filter((doc) => doc.local && doc.path.includes("/"));
+  const byKind = Object.groupBy(shown.filter((doc) => !nested.includes(doc)), (doc) => doc.kind);
   html += '<nav aria-label="Documents in this worktree">';
   for (const kind of [...new Set([...Object.keys(kindLabels), ...Object.keys(byKind)])].filter((kind) => byKind[kind])) {
     html += `<h2>${escapeHtml(kindLabels[kind] ?? kind)} <span class="count">${byKind[kind].length}</span></h2>${byKind[kind].map((doc) => row(doc, { where: false, current: doc === current })).join("")}`;
   }
+  if (nested.length) html += `<h2>Folders <span class="count">${nested.length}</span></h2>${tree(nested, 0, current)}`;
   return `${html}</nav>`;
+}
+
+// One collapsible folder per path segment, folders before files; a folder holding the open document starts open.
+function tree(docs, depth, current) {
+  const folders = Object.groupBy(docs.filter((doc) => doc.path.split("/").length > depth + 1), (doc) => doc.path.split("/")[depth]);
+  let html = "";
+  for (const [name, inside] of Object.entries(folders).toSorted(([a], [b]) => a.localeCompare(b))) {
+    const open = inside.includes(current) ? " open" : "";
+    html += `<details class="folder"${open}><summary>${escapeHtml(name)} <span class="count">${inside.length}</span></summary>${tree(inside, depth + 1, current)}</details>`;
+  }
+  return html + docs.filter((doc) => doc.path.split("/").length === depth + 1).map((doc) => row(doc, { where: false, current: doc === current })).join("");
 }
 
 const icons = {
