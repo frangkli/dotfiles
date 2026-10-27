@@ -1,18 +1,18 @@
 // The docs hub: serves every repo's docs/ and internal/docs/, read live from each checkout and
 // worktree (unmerged branches included), plus docs that are never committed: each main
-// checkout's flat docs/local folder and the flat notes folder for docs about no repo. Read-only,
+// checkout's docs/local folder and the notes folder for docs about no repo. Read-only,
 // loopback only.
 //
 //   node server.mjs [--port 7777] [--root ~/workspace]... [--notes ~/workspace/notes] [--kit <template.html>]
 //
-// URLs: /<repo>/<branch>/<path> for committed docs, /<repo>/~local/<file> for local docs and
-// /~notes/<file> for notes. Git forbids "~" in branch names, so neither collides with a branch.
+// URLs: /<repo>/<branch>/<path> for committed docs, /<repo>/~local/<path> for local docs and
+// /~notes/<path> for notes. Git forbids "~" in branch names, so neither collides with a branch.
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { access, lstat, readdir, readFile, realpath, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { homedir } from "node:os";
-import { basename, dirname, extname, join, posix, sep } from "node:path";
+import { basename, dirname, extname, join, posix, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs, promisify } from "node:util";
 
@@ -146,27 +146,29 @@ async function docFiles(dir) {
   return output.split("\0").filter((path) => /\.(md|html)$/.test(path) && isDocPath(path) && !/(^|\/)\./.test(path));
 }
 
-// A flat folder of uncommitted docs counts only if its real path exists and, for docs/local, stays
+// A folder of uncommitted docs counts only if its real path exists and, for docs/local, stays
 // inside the main checkout.
 async function flatRoot(folder) {
   const [dir, within] = await Promise.all([realpath(folder.dir), folder.within && realpath(folder.within)]).catch(() => []);
   return dir && (!folder.within || dir.startsWith(within + sep)) ? dir : undefined;
 }
 
-// Docs in a flat folder (docs/local or notes): no git status, and the kind comes from the document.
+// Docs in a folder of uncommitted docs (docs/local or notes), subfolders included: no git status, and
+// the kind comes from the document.
 async function flatDocs(repo, folder) {
   const root = await flatRoot(folder);
-  const entries = root ? await readdir(root, { withFileTypes: true }).catch(() => []) : [];
+  const entries = root ? await readdir(root, { withFileTypes: true, recursive: true }).catch(() => []) : [];
   const docs = [];
   for (const entry of entries) {
-    if (!entry.isFile() || entry.name.startsWith(".") || !/\.(md|html)$/.test(entry.name)) continue;
-    const file = join(root, entry.name);
+    const path = posix.join(...relative(root, join(entry.parentPath, entry.name)).split(sep));
+    if (!entry.isFile() || /(^|\/)\./.test(path) || !/\.(md|html)$/.test(entry.name)) continue;
+    const file = join(root, path);
     const [content, info] = await Promise.all([readFile(file, "utf8"), stat(file)]).catch(() => []);
     if (!content) continue;
     const { title, kind, text } = parseDocument(content, entry.name);
     const date = /\d{4}-\d{2}-\d{2}/.exec(entry.name)?.[0] ?? new Date(info.mtimeMs).toISOString().slice(0, 10);
-    const place = repo.notes ? `notes/${entry.name}` : `${repo.name} · docs/local/${entry.name}`;
-    docs.push({ repo: repo.name, worktree: folder, path: entry.name, place, title: title || entry.name, text, date, kind: kind?.toLowerCase() || "note", mtime: info.mtimeMs, merged: true, local: true });
+    const place = repo.notes ? `notes/${path}` : `${repo.name} · docs/local/${path}`;
+    docs.push({ repo: repo.name, worktree: folder, path, place, title: title || entry.name, text, date, kind: kind?.toLowerCase() || "note", mtime: info.mtimeMs, merged: true, local: true });
   }
   return docs;
 }
@@ -209,13 +211,13 @@ function unique(docs) {
 
 // Pages are /<repo>/<branch>/<path> and raw files /raw/<repo>/<branch>/<path>; branch names may
 // contain slashes. A link into a removed worktree matches no worktree but keeps its path. Local docs
-// and notes are a single file name under /<repo>/~local or /~notes.
+// and notes are a path under /<repo>/~local or /~notes, subfolders included.
 function route(pathname, repos) {
   const [, name, ...rest] = pathname.split("/");
   const repo = repos.get(name);
   if (repo?.notes || rest[0] === "~local") {
     const file = (repo?.notes ? rest : rest.slice(1)).join("/");
-    const valid = /^[^/\\]+\.(md|html)$/.test(file) && !file.startsWith(".") && !file.includes("\0");
+    const valid = /\.(md|html)$/.test(file) && posix.normalize(file) === file && !/(^|\/)\./.test(file) && !/[\\\0]/.test(file);
     return { repo, worktree: repo?.local, path: valid ? file : undefined, extra: file !== "" };
   }
   const tail = rest.join("/");
@@ -227,13 +229,13 @@ function route(pathname, repos) {
   return { repo, worktree, path: valid ? path : undefined, extra: tail !== (worktree?.key ?? "") };
 }
 
-// Serves only regular files whose real path stays inside the worktree's docs folder, or directly in
-// a flat folder of local docs.
+// Serves only regular files whose real path stays inside the worktree's docs folder, or inside a
+// folder of local docs.
 async function resolveFile(worktree, path) {
   if (worktree.local) {
     const root = await flatRoot(worktree);
     const file = root && (await realpath(join(root, path)).catch(() => undefined));
-    if (!file || dirname(file) !== root) return undefined;
+    if (!file?.startsWith(root + sep)) return undefined;
     return (await stat(file)).isFile() ? { file, directory: false } : undefined;
   }
   const root = await folderRoot(worktree.dir, rootOf(path));
