@@ -5,7 +5,6 @@
   "pullRequestMergeMethod": "rebase",
   "sourceControlWritingStyle": { "mode": "conventional_commits" },
   "removeAgentCreditsOnMerge": true,
-  "continueThreadsAfterServerUpdate": true,
   "autoResumeLimitedThreads": true,
   "snoozeLimitedThreads": true,
   "sidebarAutoSettleAfterDays": 10,
