@@ -1,8 +1,0 @@
-{{ if lookPath "systemctl" -}}
-#!/bin/sh
-# Reruns whenever the unit changes: {{ include "dot_config/systemd/user/docs-hub.service" | sha256sum }}
-set -e
-systemctl --user daemon-reload
-systemctl --user enable docs-hub.service
-systemctl --user restart docs-hub.service
-{{ end -}}

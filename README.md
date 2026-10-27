@@ -33,7 +33,7 @@ My skills and Claude subagents live in [fstack](https://github.com/frangkli/fsta
 
 ## Around the agents
 
-- A docs hub serves every worktree's plans live, so agents reply with a link instead of starting a server.
+- [Lectern](https://github.com/frangkli/lectern) serves every worktree's plans live, so agents reply with a link instead of starting a server.
 - Agent commands are searchable in [atuin](https://atuin.sh), and sessions are kept for `retro` and `tune-up` to learn from.
 - [AgentsView](https://github.com/kenn-io/agentsview) tracks sessions, cost and tool errors.
 - A short global `AGENTS.md` keeps threads off each other's processes and dev servers.

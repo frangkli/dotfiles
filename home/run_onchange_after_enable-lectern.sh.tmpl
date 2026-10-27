@@ -1,0 +1,8 @@
+{{ if lookPath "systemctl" -}}
+#!/bin/sh
+# Reruns whenever the unit changes: {{ include "dot_config/systemd/user/lectern.service" | sha256sum }}
+set -e
+systemctl --user daemon-reload
+systemctl --user enable lectern.service
+systemctl --user restart lectern.service
+{{ end -}}
