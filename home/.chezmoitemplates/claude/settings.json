@@ -1,0 +1,28 @@
+{
+  "attribution": { "commit": "", "pr": "", "sessionUrl": false },
+  {{- /* claude.ai connectors, skills and plugins stay off the box. */}}
+  "disableClaudeAiConnectors": true,
+  "syncClaudeAiSkills": false,
+  "syncClaudeAiPlugins": false,
+  {{- /* Transcripts are kept: retro, prevent-repeats and AgentsView read them. */}}
+  "cleanupPeriodDays": 3650,
+  {{- /* impeccable runs from its plugin; this hides the Codex copy in ~/.agents/skills. */}}
+  "skillOverrides": { "impeccable": "off" },
+  "env": {
+    "DISABLE_AUTOUPDATER": "1",
+    "GIT_TERMINAL_PROMPT": "0",
+    "GIT_ADVICE": "0",
+    "PYTHONUNBUFFERED": "1",
+    {{- /* ponytail's subagent hook injects only where this matches: all but the role agents in ~/.claude/agents. */}}
+    "PONYTAIL_SUBAGENT_MATCHER": "^(?!(?:reviewer|verifier|fixer|writer|ci-reader)$)"
+    {{- range $name, $value := .toolEnv }},
+    {{ $name | quote }}: {{ $value | quote }}
+    {{- end }}
+  },
+  {{- /* atuin logs agent shell commands, kept out of your Ctrl-R. */}}
+  "hooks": {
+    "PreToolUse": [{ "matcher": "^Bash$", "hooks": [{ "type": "command", "command": "atuin hook claude-code" }] }],
+    "PostToolUse": [{ "matcher": "^Bash$", "hooks": [{ "type": "command", "command": "atuin hook claude-code" }] }],
+    "PostToolUseFailure": [{ "matcher": "^Bash$", "hooks": [{ "type": "command", "command": "atuin hook claude-code" }] }]
+  }
+}

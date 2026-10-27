@@ -1,0 +1,20 @@
+{{ if eq .chezmoi.os "linux" -}}
+#!/bin/sh
+# Links our skills and Claude agents into place, so an edit on the box is an edit to this repo.
+# Reruns when the list changes: {{ glob (joinPath .chezmoi.workingTree "skills/*") | concat (glob (joinPath .chezmoi.workingTree "claude/agents/*")) | join " " | sha256sum }}
+set -e
+link() {
+  mkdir -p "$2"
+  for src in "$1"/*; do
+    dst="$2/$(basename "$src")"
+    [ -L "$dst" ] || rm -rf "$dst"
+    ln -sfn "$src" "$dst"
+  done
+  # Drop links to entries since removed from the repo.
+  for dst in "$2"/*; do
+    if [ -L "$dst" ] && [ ! -e "$dst" ]; then rm "$dst"; fi
+  done
+}
+link {{ joinPath .chezmoi.workingTree "skills" | quote }} "$HOME/.agents/skills"
+link {{ joinPath .chezmoi.workingTree "claude/agents" | quote }} "$HOME/.claude/agents"
+{{ end -}}

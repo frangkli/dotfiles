@@ -1,0 +1,27 @@
+{{- /* Merges one of our partial configs over the file an app owns: our keys win, the app keeps the rest.
+     Lists are replaced whole, and a key deleted from a partial stays in the app's file until removed there.
+     When nothing would change, the file passes through untouched, so the app's own formatting shows no drift. */ -}}
+{{- $current := dict -}}
+{{- $ours := dict -}}
+{{- if eq .format "json" -}}
+{{-   if .current }}{{ $current = fromJson .current }}{{ end -}}
+{{-   $ours = fromJson .partial -}}
+{{- else if eq .format "toml" -}}
+{{-   if .current }}{{ $current = fromToml .current }}{{ end -}}
+{{-   $ours = fromToml .partial -}}
+{{- else if eq .format "yaml" -}}
+{{-   if .current }}{{ $current = fromYaml .current }}{{ end -}}
+{{-   $ours = fromYaml .partial -}}
+{{- else -}}
+{{-   fail (printf "merge: unknown format %q" .format) -}}
+{{- end -}}
+{{- $merged := list $current $ours | jq ".[0] * .[1]" | first -}}
+{{- if and .current (eq (toJson $current) (toJson $merged)) -}}
+{{-   .current -}}
+{{- else if eq .format "json" -}}
+{{-   toPrettyJson $merged -}}
+{{- else if eq .format "toml" -}}
+{{-   toToml $merged -}}
+{{- else -}}
+{{-   toYaml $merged -}}
+{{- end -}}

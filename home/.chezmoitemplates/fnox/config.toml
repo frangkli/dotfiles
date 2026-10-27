@@ -1,0 +1,9 @@
+# Box-level secret declarations. fnox keeps the providers and the encrypted Infisical login, set by the bootstrap runbook.
+# A project that declares the same name in its fnox.toml replaces the entry; otherwise it inherits these.
+[secrets.OPENAI_API_KEY]
+provider = "devbox"
+value = "OPENAI_API_KEY"
+
+[secrets.ANTHROPIC_API_KEY]
+provider = "devbox"
+value = "ANTHROPIC_API_KEY"

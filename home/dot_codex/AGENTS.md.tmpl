@@ -29,4 +29,5 @@ You are on an always-on Linux devbox shared by many agent threads at once. You h
   - Sentry: `sentry`.
   - PostHog: `posthog-cli`. Run `posthog-cli api --agent-help` first, and `--dry-run` before any change.
   - Neon: the `neon` CLI to link a project, pull env and manage branches; the Neon MCP for SQL and schema on Neon-hosted databases.
+- **Dotfiles:** this box's setup comes from `frangkli/dotfiles`, checked out at `~/.local/share/chezmoi`. Change the repo, not the file in `~`: `skills/` and `claude/agents/` are linked live (run `chezmoi apply` after adding one); for anything else, edit the path `chezmoi source-path <file>` prints (app settings take their keys from `home/.chezmoitemplates/`), then run `chezmoi apply`. Show the owner the diff and wait for a yes before pushing.
 - **Git and GitHub:** commit as the configured user, using Conventional Commits for commit messages and PR titles. Never add co-author trailers, "generated with" lines or any other AI or agent attribution to commits, pull requests, issues or comments.

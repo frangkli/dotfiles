@@ -1,0 +1,8 @@
+{{- /* Remote MCP servers, also in ~/.codex/config.toml. Other services use their CLIs. */ -}}
+{
+  "mcpServers": {
+    "linear": { "type": "http", "url": "https://mcp.linear.app/mcp" },
+    "axiom": { "type": "http", "url": "https://mcp.axiom.co/mcp" },
+    "neon": { "type": "http", "url": "https://mcp.neon.tech/mcp" }
+  }
+}

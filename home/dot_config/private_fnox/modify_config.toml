@@ -1,9 +1,2 @@
 {{- /* chezmoi:modify-template */ -}}
-{{- /* Box-level secret declarations. fnox owns the rest: the providers and the encrypted Infisical login, set by the bootstrap runbook. */ -}}
-{{- /* A project that declares the same name in its fnox.toml replaces the entry; otherwise it inherits these. */ -}}
-{{- $config := dict -}}
-{{- if .chezmoi.stdin -}}{{- $config = fromToml .chezmoi.stdin -}}{{- end -}}
-{{- $config
-    | setValueAtPath "secrets.OPENAI_API_KEY" (dict "provider" "devbox" "value" "OPENAI_API_KEY")
-    | setValueAtPath "secrets.ANTHROPIC_API_KEY" (dict "provider" "devbox" "value" "ANTHROPIC_API_KEY")
-    | toToml -}}
+{{- includeTemplate "merge" (dict "current" .chezmoi.stdin "format" "toml" "partial" (includeTemplate "fnox/config.toml" .)) -}}

@@ -1,0 +1,3 @@
+# pnpm 11+ already blocks unreviewed build scripts and exotic subdependencies, and waits a day for new releases.
+# Refuse a version whose publishing provenance got weaker than earlier releases.
+trustPolicy: no-downgrade

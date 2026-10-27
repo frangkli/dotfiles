@@ -1,6 +1,2 @@
 {{- /* chezmoi:modify-template */ -}}
-{{- /* Sets only these keys; pnpm owns the rest. pnpm 11+ already blocks unreviewed build scripts and exotic subdependencies, and waits a day for new releases. */ -}}
-{{- $config := dict -}}
-{{- if .chezmoi.stdin -}}{{- $config = fromYaml .chezmoi.stdin -}}{{- end -}}
-{{- /* Refuse a version whose publishing provenance got weaker than earlier releases. */ -}}
-{{- $config | setValueAtPath "trustPolicy" "no-downgrade" | toYaml -}}
+{{- includeTemplate "merge" (dict "current" .chezmoi.stdin "format" "yaml" "partial" (includeTemplate "pnpm/config.yaml" .)) -}}

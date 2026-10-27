@@ -1,9 +1,2 @@
 {{- /* chezmoi:modify-template */ -}}
-{{- /* Ubuntu's AppArmor blocks the sandbox of downloaded Chromes; Playwright skips it by default too.
-     Chromium ignores the OS trust store on Linux, so trust Portless's CA for https://*.localhost. */ -}}
-{{- $config := dict -}}
-{{- if .chezmoi.stdin -}}{{- $config = fromJson .chezmoi.stdin -}}{{- end -}}
-{{- $config
-    | setValueAtPath "args" "--no-sandbox"
-    | setValueAtPath "caCert" (joinPath .chezmoi.homeDir ".portless/ca.pem")
-    | toPrettyJson -}}
+{{- includeTemplate "merge" (dict "current" .chezmoi.stdin "format" "json" "partial" (includeTemplate "agent-browser/config.json" .)) -}}

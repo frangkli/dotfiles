@@ -8,7 +8,8 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply frangkli
 
 It asks for your name and email up front, so you don't need to fork it to fix my git config. Macs skip the agent stuff.
 
-- `home/`: configs, scripts, services, and the skills and hooks my agents use.
+- `home/`: configs, scripts and services. App-owned settings get only the keys in `home/.chezmoitemplates/`.
+- `skills/` and `claude/agents/`: my agent skills and Claude subagents, linked into place so edits on the box land here.
 - `infra/`: the box, a GCP VM set up with OpenTofu and cloud-init.
 
 ## Why

@@ -1,5 +1,0 @@
-# Remote MCP servers for Claude Code and Codex. Other services use their CLIs.
-mcp:
-  linear: https://mcp.linear.app/mcp
-  axiom: https://mcp.axiom.co/mcp
-  neon: https://mcp.neon.tech/mcp
