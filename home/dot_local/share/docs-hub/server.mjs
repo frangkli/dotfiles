@@ -27,20 +27,27 @@ const { values: options } = parseArgs({
 
 const here = dirname(fileURLToPath(import.meta.url));
 const run = promisify(execFile);
-// Committed docs: everything under docs/, and under internal/docs/ for repos published by an export
-// that drops internal/. docs/local is the main checkout's uncommitted folder, listed on its own.
+// The folders the hub lists, relative to a checkout. Edit these to add or remove one.
+// Committed docs: everything under each of docRoots (internal/docs/ for repos published by an export
+// that drops internal/). localRoot is the main checkout's uncommitted folder, listed on its own.
 const docRoots = ["docs", "internal/docs"];
-const rootOf = (path) => (path.startsWith("internal/docs/") ? "internal/docs" : "docs");
-const isDocPath = (path) => /^(internal\/)?docs\/./.test(path) && !path.startsWith("docs/local/");
-// The kind a document gets when it doesn't declare one, from the folder under docs/ it sits in.
+const localRoot = "docs/local";
+// The kind a document gets when it doesn't declare one, from the first folder under its doc root.
 const folders = { plans: "plan", research: "research", specs: "spec" };
+
+// The longest doc root a path sits under, or undefined.
+const rootOf = (path) => docRoots.filter((root) => path.startsWith(`${root}/`)).sort((a, b) => b.length - a.length)[0];
+const isDocPath = (path) => Boolean(rootOf(path)) && !path.startsWith(`${localRoot}/`) && path.length > rootOf(path).length + 1;
+const docPathIn = new RegExp(`(?:^|/)((?:${docRoots.map((root) => root.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})/.*)$`);
 const folderKind = (path) => {
-  const folder = path.replace(/^(internal\/)?docs\//, "").split("/")[0];
+  const folder = path.slice(rootOf(path).length + 1).split("/")[0];
   return Object.hasOwn(folders, folder) ? folders[folder] : "note";
 };
-const kindLabels = {
-  plan: "Plans", explainer: "Explainers", tradeoff: "Tradeoffs",
-  research: "Research", experiment: "Experiments", spec: "Specs", note: "Notes",
+// Every kind the hub knows, in the order it lists them: [one, many]. Any other kind lists after these.
+const kinds = {
+  plan: ["Plan", "Plans"], spec: ["Spec", "Specs"], research: ["Research", "Research"],
+  explainer: ["Explainer", "Explainers"], tradeoff: ["Tradeoff", "Tradeoffs"],
+  experiment: ["Experiment", "Experiments"], review: ["Review", "Reviews"], note: ["Note", "Notes"],
 };
 const types = {
   ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
@@ -62,16 +69,22 @@ function frontMatter(source) {
   return { fields, body: match ? source.slice(match[0].length) : source };
 }
 
-// Title, kind and searchable text. Kind comes from <meta name="doc-kind"> or `kind:` front matter.
+// Title, kind, summary and searchable text. Kind comes from <meta name="doc-kind"> or `kind:` front
+// matter. The summary is the lede, else the first paragraph after the title.
 function parseDocument(source, path) {
+  const clip = (text) => (text.length > 280 ? `${text.slice(0, 280).replace(/\s+\S*$/, "")}…` : text);
   if (path.endsWith(".html")) {
     const title = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(source)?.[1] ?? /<h1[^>]*>([\s\S]*?)<\/h1>/i.exec(source)?.[1];
     const kind = /<meta name="doc-kind" content="([^"]+)"/i.exec(source)?.[1];
     const body = source.replace(/<(script|style|head)\b[\s\S]*?<\/\1>/gi, " ");
-    return { title: stripTags(title ?? ""), kind, text: stripTags(body) };
+    const afterTitle = body.slice(Math.max(0, body.search(/<\/h1>/i)));
+    const lede = /<p\b[^>]*\blede\b[^>]*>([\s\S]*?)<\/p>/i.exec(body)?.[1] ?? /<p(?![^>]*\beyebrow\b)[^>]*>([\s\S]*?)<\/p>/i.exec(afterTitle)?.[1];
+    return { title: stripTags(title ?? ""), kind, summary: clip(stripTags(lede ?? "")), text: stripTags(body) };
   }
   const { fields, body } = frontMatter(source);
-  return { title: fields.title || /^# (.+)$/m.exec(body)?.[1] || "", kind: fields.kind, text: body };
+  const prose = body.replace(/^```[\s\S]*?^```/gm, "").split(/\n\s*\n/).find((block) => /^\s*[\p{L}*_`[(]/u.test(block) && !/^\s*([-*+] |\d+[.)] |\|)/.test(block));
+  const summary = (prose ?? "").replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/[`*_]/g, "").replace(/\s+/g, " ").trim();
+  return { title: fields.title || /^# (.+)$/m.exec(body)?.[1] || "", kind: fields.kind, summary: clip(fields.description || summary), text: body };
 }
 
 // Each clone's `git worktree list` finds its worktrees wherever they live, so only the clones
@@ -101,7 +114,7 @@ async function findRepos() {
         const key = record.branch?.replace("refs/heads/", "") ?? `@${basename(record.worktree)}`;
         return { dir: record.worktree, main: record.worktree === main, key, label: key, url: `/${encodePath(name)}/${encodePath(key)}` };
       });
-    const local = { dir: join(main, "docs", "local"), within: main, local: true, key: "~local", label: "local", url: `/${encodePath(name)}/~local` };
+    const local = { dir: join(main, localRoot), within: main, local: true, key: "~local", label: "local", url: `/${encodePath(name)}/~local` };
     repos.set(name, { name, dir: main, worktrees, local });
   }
   if (await stat(options.notes).then((info) => info.isDirectory(), () => false)) {
@@ -112,7 +125,7 @@ async function findRepos() {
 }
 
 const docBlobs = async (dir, commit) => {
-  const output = await git(dir, "ls-tree", "-r", "-z", commit, "--", "docs", "internal/docs");
+  const output = await git(dir, "ls-tree", "-r", "-z", commit, "--", ...docRoots);
   return new Map(output.split("\0").filter(Boolean).map((line) => [line.split("\t")[1], line.split(/[ \t]/)[2]]));
 };
 
@@ -165,10 +178,10 @@ async function flatDocs(repo, folder) {
     const file = join(root, path);
     const [content, info] = await Promise.all([readFile(file, "utf8"), stat(file)]).catch(() => []);
     if (!content) continue;
-    const { title, kind, text } = parseDocument(content, entry.name);
+    const { title, kind, summary, text } = parseDocument(content, entry.name);
     const date = /\d{4}-\d{2}-\d{2}/.exec(entry.name)?.[0] ?? new Date(info.mtimeMs).toISOString().slice(0, 10);
-    const place = repo.notes ? `notes/${path}` : `${repo.name} · docs/local/${path}`;
-    docs.push({ repo: repo.name, worktree: folder, path, place, title: title || entry.name, text, date, kind: kind?.toLowerCase() || "note", mtime: info.mtimeMs, merged: true, local: true });
+    const place = repo.notes ? `notes/${path}` : `${repo.name} · ${localRoot}/${path}`;
+    docs.push({ repo: repo.name, worktree: folder, path, place, title: title || entry.name, summary, text, date, kind: kind?.toLowerCase() || "note", mtime: info.mtimeMs, merged: true, local: true });
   }
   return docs;
 }
@@ -187,15 +200,32 @@ async function scan(repos) {
         const [content, info] = await Promise.all([readFile(file), lstat(file)]).catch(() => []);
         if (!content || !info.isFile()) continue;
         const blob = createHash(algorithm).update(`blob ${content.length}\0`).update(content).digest("hex");
-        const { title, kind, text } = parseDocument(content.toString("utf8"), path);
+        const { title, kind, summary, text } = parseDocument(content.toString("utf8"), path);
         const date = /\d{4}-\d{2}-\d{2}/.exec(path)?.[0] ?? new Date(info.mtimeMs).toISOString().slice(0, 10);
-        const doc = { repo: repo.name, worktree, path, place: `${repo.name} · ${worktree.key} · ${path}`, title: title || basename(path), text, date };
+        const doc = { repo: repo.name, worktree, path, place: `${repo.name} · ${worktree.key} · ${path}`, title: title || basename(path), summary, text, date };
         const isMerged = merged.get(path) === blob || inherited.get(path) === blob;
         docs.push({ ...doc, kind: kind?.toLowerCase() || folderKind(path), mtime: info.mtimeMs, merged: isMerged });
       }
     }
   }
   return docs;
+}
+
+// The library: the last scan, refreshed behind the request so pages answer at once. A request that
+// finds nothing, like a link to a document saved a moment ago, scans again before it says so.
+let snapshot;
+let pending;
+const rescan = () =>
+  (pending ??= (async () => {
+    const repos = await findRepos();
+    snapshot = { at: Date.now(), repos, docs: await scan(repos) };
+    return snapshot;
+  })().finally(() => (pending = undefined)));
+async function library(fresh) {
+  const age = snapshot ? Date.now() - snapshot.at : Infinity;
+  if (fresh || age > 30_000) return rescan();
+  if (age > 1000) rescan().catch(console.error);
+  return snapshot;
 }
 
 // A merged document sits in every checkout, some copies behind the default branch; list it once,
@@ -224,7 +254,7 @@ function route(pathname, repos) {
   const worktree = repo?.worktrees
     .toSorted((a, b) => b.key.length - a.key.length)
     .find((candidate) => tail === candidate.key || tail.startsWith(`${candidate.key}/`));
-  const path = worktree ? tail.slice(worktree.key.length + 1) : /(?:^|\/)((?:internal\/)?docs\/.*)$/.exec(tail)?.[1];
+  const path = worktree ? tail.slice(worktree.key.length + 1) : docPathIn.exec(tail)?.[1];
   const valid = isDocPath(path ?? "") && posix.normalize(path) === path && !path.includes("\0");
   return { repo, worktree, path: valid ? path : undefined, extra: tail !== (worktree?.key ?? "") };
 }
@@ -244,6 +274,12 @@ async function resolveFile(worktree, path) {
   const info = await stat(file);
   return info.isFile() || info.isDirectory() ? { file, directory: info.isDirectory() } : undefined;
 }
+
+// The kit names Schibsted Grotesk and Geist Mono and falls back to system faces; the hub loads the two faces
+// for every page it serves, so a document stays self-contained on disk.
+// The saved theme, set before the page first paints so a page never flashes the system's theme.
+const themeScript = '<script>try{const t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}</script>';
+const fontLinks = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Geist+Mono:wght@400..600&display=swap">';
 
 // The kit's CSS and script, read from the visual-doc template so the hub matches every document.
 async function kit(tag) {
@@ -287,7 +323,8 @@ function markdown(source) {
       for (i++; i < lines.length && !lines[i].trimStart().startsWith(match[1]); i++) code.push(lines[i]);
       i++;
       const text = escapeHtml(code.join("\n"));
-      out.push(match[2] === "mermaid" ? `<pre class="mermaid">${text}</pre>` : `<pre><code>${text}</code></pre>`);
+      const language = match[2] ? ` class="language-${match[2].toLowerCase()}"` : "";
+      out.push(match[2] === "mermaid" ? `<pre class="mermaid">${text}</pre>` : `<pre><code${language}>${text}</code></pre>`);
     } else if ((match = /^ {0,3}(#{1,6})\s+(.*?)[\s#]*$/.exec(line))) {
       out.push(`<h${match[1].length}>${inline(match[2])}</h${match[1].length}>`);
       i++;
@@ -392,56 +429,105 @@ function withHeadingIds(html) {
 // A document as the browser gets it: Markdown rendered with the kit, every heading linkable.
 async function documentHtml(file) {
   const source = await readFile(file, "utf8");
-  if (extname(file) !== ".md") return withHeadingIds(source);
+  // An HTML document carries a copy of the kit from when it was written; serve the current one instead.
+  const [style, script] = await Promise.all([kit("style"), kit("script")]);
+  if (extname(file) !== ".md") {
+    // Without a kit to serve (the template is missing), the document keeps its own.
+    const withFonts = source.replace(/<head\b[^>]*>/i, (head) => head + fontLinks);
+    if (!style) return withHeadingIds(withFonts);
+    return withHeadingIds(withFonts
+      .replace(/(<style id="kit">)[\s\S]*?(<\/style>)/, (_, open, close) => open + style + close)
+      .replace(/(<script id="kit-js">)[\s\S]*?(<\/script>)/, (_, open, close) => open + script + close));
+  }
   const { fields, body } = frontMatter(source);
   const title = escapeHtml(fields.title || /^# (.+)$/m.exec(body)?.[1] || basename(file));
-  const head = `<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title>`;
-  return withHeadingIds(`<!doctype html><html lang="en"><head>${head}<style>${await kit("style")}</style></head><body><main>${markdown(body)}</main><script>${await kit("script")}</script></body></html>`);
+  const head = `<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title>${fontLinks}`;
+  return withHeadingIds(`<!doctype html><html lang="en"><head>${head}<style>${style}</style></head><body><main>${markdown(body)}</main><script>${script}</script></body></html>`);
 }
 
 const encodePath = (path) => path.split("/").map(encodeURIComponent).join("/");
 const docUrl = (doc) => `${doc.worktree.url}/${encodePath(doc.path)}`;
 const drafts = (docs) => docs.filter((doc) => !doc.merged).length;
-const plural = (count, word) => `${count} ${word}${count === 1 ? "" : "s"}`;
-// The only status markers: a quiet tag on a draft or an uncommitted local doc. Merged documents show nothing.
-const status = (doc) =>
-  doc.local ? '<span class="tag local">local</span>' : doc.merged ? "" : '<span class="tag draft">draft</span>';
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const plural = (count, one, many = `${one}s`) => `${count} ${count === 1 ? one : many}`;
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const known = (kind) => Object.hasOwn(kinds, kind);
+const kindName = (kind, many = false) => (known(kind) ? kinds[kind][many ? 1 : 0] : kind[0].toUpperCase() + kind.slice(1));
+const kindsIn = (docs) => {
+  const present = new Set(docs.map((doc) => doc.kind));
+  return [...new Set([...Object.keys(kinds), ...present])].filter((kind) => present.has(kind));
+};
+const statusOf = (doc) => (doc.local ? "local" : doc.merged ? "merged" : "draft");
+const flag = (doc) =>
+  doc.local ? '<span class="hub-flag">Local</span>' : doc.merged ? "" : '<span class="hub-flag draft">Draft</span>';
+// Where a document sits, as its own folder shows it.
+const shownPath = (doc) => (doc.worktree.key === "~notes" ? `notes/${doc.path}` : doc.local ? `${localRoot}/${doc.path}` : doc.path);
+
+const icon = (name) => `<svg class="hub-i" aria-hidden="true"><use href="#hub-${name}"/></svg>`;
+const sprite = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>${Object.entries({
+  search: '<circle cx="7.25" cy="7.25" r="4.5"/><path d="m10.6 10.6 3.15 3.15"/>',
+  branch: '<circle cx="4.75" cy="3.75" r="1.5"/><circle cx="4.75" cy="12.25" r="1.5"/><circle cx="11.25" cy="5.25" r="1.5"/><path d="M4.75 5.25v5.5M11.25 6.75c0 2.75-3.5 2.4-5.4 4.1"/>',
+  link: '<path d="M6.75 9.25a2.75 2.75 0 0 0 3.9 0l2-2a2.76 2.76 0 0 0-3.9-3.9l-.6.6"/><path d="M9.25 6.75a2.75 2.75 0 0 0-3.9 0l-2 2a2.76 2.76 0 0 0 3.9 3.9l.6-.6"/>',
+}).map(([name, paths]) => `<symbol id="hub-${name}" viewBox="0 0 16 16">${paths}</symbol>`).join("")}</defs></svg>`;
+
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const dayStart = (ms) => new Date(ms).setHours(0, 0, 0, 0);
-const dayLabel = (ms, now = Date.now()) => {
-  const days = Math.round((dayStart(now) - dayStart(ms)) / 864e5);
+const daysAgo = (ms, now = Date.now()) => Math.round((dayStart(now) - dayStart(ms)) / 864e5);
+const shortDate = (ms, now = Date.now()) => {
   const date = new Date(ms);
-  if (days <= 0) return "Today";
-  if (days === 1) return "Yesterday";
-  return `${months[date.getMonth()]} ${date.getDate()}${date.getFullYear() === new Date(now).getFullYear() ? "" : `, ${date.getFullYear()}`}`;
+  const year = date.getFullYear() === new Date(now).getFullYear() ? "" : `, ${date.getFullYear()}`;
+  return `${months[date.getMonth()].slice(0, 3)} ${date.getDate()}${year}`;
 };
 const ago = (ms, now = Date.now()) => {
   const minutes = Math.max(0, Math.round((now - ms) / 6e4));
-  if (minutes < 1) return "now";
-  if (minutes < 60) return `${minutes}m ago`;
-  if (minutes < 24 * 60 && dayStart(ms) === dayStart(now)) return `${Math.round(minutes / 60)}h ago`;
-  const label = dayLabel(ms, now);
-  return label === "Yesterday" ? "yesterday" : label;
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  if (daysAgo(ms, now) === 0) return `${Math.round(minutes / 60)} h ago`;
+  return daysAgo(ms, now) === 1 ? "Yesterday" : shortDate(ms, now);
 };
-const time = (doc) => {
-  const iso = new Date(doc.mtime).toISOString();
-  return `<time datetime="${iso}" title="${iso.slice(0, 16).replace("T", " ")} UTC">${ago(doc.mtime)}</time>`;
+const clock = (ms) => new Date(ms).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+const stamp = (ms) => new Date(ms).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+const time = (ms, text) => `<time datetime="${new Date(ms).toISOString()}" title="${escapeHtml(stamp(ms))}">${text}</time>`;
+// A day's heading: its name, then its date.
+const dayHeading = (ms, now = Date.now()) => {
+  const date = new Date(ms);
+  const days = daysAgo(ms, now);
+  const full = `${months[date.getMonth()]} ${date.getDate()}${date.getFullYear() === new Date(now).getFullYear() ? "" : `, ${date.getFullYear()}`}`;
+  if (days <= 0) return ["Today", `${weekdays[date.getDay()]}, ${full}`];
+  if (days === 1) return ["Yesterday", `${weekdays[date.getDay()]}, ${full}`];
+  return days < 7 ? [weekdays[date.getDay()], full] : [full, weekdays[date.getDay()]];
 };
 
-// One document in a list: when it changed, its title, kind and draft tag, then where it lives.
-// Sidebar items show only the title and the draft tag.
-function row(doc, { where = true, current = false, snippet = "" } = {}) {
-  const title = `<span class="title">${escapeHtml(doc.title)}</span>`;
-  const aria = current ? ' aria-current="page"' : "";
-  if (!where) return `<a class="item${current ? " current" : ""}" href="${docUrl(doc)}"${aria}>${title}${status(doc)}</a>`;
-  const place = doc.place;
-  const excerpt = snippet ? `<span class="excerpt">${escapeHtml(snippet)}</span>` : "";
-  return `<a class="item" href="${docUrl(doc)}">${time(doc)}<span class="body"><span class="head">${title}<span class="kind">${escapeHtml(doc.kind)}</span>${status(doc)}</span><span class="path">${escapeHtml(place)}</span>${excerpt}</span></a>`;
+// Marks search terms in escaped text, outside its entities.
+const highlight = (html, terms) =>
+  terms.length
+    ? html.split(/(&\w+;)/).map((part, i) => (i % 2 ? part : part.replace(new RegExp(`(${terms.map(escapeRegExp).join("|")})`, "gi"), "<mark>$1</mark>"))).join("")
+    : html;
+
+// Documents as a list, in groups (days, kinds or folders): each title with its status and when it
+// changed, its summary, then what and where it is. A list that is all one kind, or all in one place,
+// leaves that out. Search results add the path, where a term may have matched; the timeline shows
+// the time of day.
+function docList(groups, { terms = [], kind = true, where = true, clockTime = false, allLocal = false } = {}) {
+  const mark = (text) => highlight(escapeHtml(text), terms);
+  const item = ({ doc, snippet }) => {
+    const summary = snippet ?? doc.summary;
+    const place = doc.local ? escapeHtml(doc.repo === "notes" ? "Notes" : `${doc.repo}, local`) : `${escapeHtml(doc.repo)}<span class="hub-branch">${icon("branch")}${mark(doc.worktree.key)}</span>`;
+    const meta = [kind && escapeHtml(kindName(doc.kind)), where && place, terms.length && `<span class="hub-path">${mark(shownPath(doc))}</span>`].filter(Boolean);
+    return `<li class="hub-item"><p class="hub-item-head"><a class="hub-title" href="${docUrl(doc)}" title="${escapeHtml(shownPath(doc))}" data-doc="${docUrl(doc)}" data-mtime="${Math.round(doc.mtime)}">${mark(doc.title)}</a>${allLocal ? "" : flag(doc)}</p>${time(doc.mtime, clockTime ? clock(doc.mtime) : ago(doc.mtime))}${summary ? `<p class="hub-summary">${mark(summary)}</p>` : ""}${meta.length ? `<p class="hub-meta">${meta.map((part) => `<span>${part}</span>`).join("")}</p>` : ""}</li>`;
+  };
+  return groups
+    .map(({ label, note, rows }) => `<section class="hub-group">${label ? `<h2><span>${label}</span>${note ? `<span class="hub-group-note">${note}</span>` : ""}<span class="hub-group-n">${plural(rows.length, "document")}</span></h2>` : ""}<ol class="hub-list">${rows.map(item).join("")}</ol></section>`)
+    .join("");
 }
 
-// A heading with a count over one bordered list, newest first.
-const list = (heading, items) =>
-  `<section class="group"><h2>${heading} <span class="count">${items.length}</span></h2><div class="card">${items.map(({ doc, snippet }) => row(doc, { snippet })).join("")}</div></section>`;
+function timeline(docs) {
+  const days = Map.groupBy(docs, (doc) => dayStart(doc.mtime));
+  return docList([...days].map(([day, items]) => {
+    const [label, note] = dayHeading(day);
+    return { label, note, rows: items.map((doc) => ({ doc })) };
+  }), { clockTime: true });
+}
 
 // Every term must appear in the title, the location, the kind, the status or the text. Title and
 // location matches rank first, then how often the terms occur.
@@ -450,16 +536,19 @@ function search(docs, query) {
   const results = [];
   for (const doc of unique(docs)) {
     const title = doc.title.toLowerCase();
-    const where = `${doc.place} ${doc.kind} ${doc.local ? "local" : doc.merged ? "merged" : "draft"}`.toLowerCase();
+    const where = `${doc.place} ${doc.kind} ${statusOf(doc)}`.toLowerCase();
     const text = doc.text.toLowerCase();
     if (!terms.every((term) => title.includes(term) || where.includes(term) || text.includes(term))) continue;
     const score = terms.reduce(
       (sum, term) => sum + (title.includes(term) ? 20 : 0) + (where.includes(term) ? 10 : 0) + Math.min(text.split(term).length - 1, 25),
       0,
     );
-    const at = Math.max(0, text.indexOf(terms[0]));
+    const at = text.indexOf(terms[0]);
     const start = Math.max(0, at - 80);
-    results.push({ doc, score, snippet: `${start > 0 ? "…" : ""}${doc.text.slice(start, at + 160).trim()}…` });
+    // Markdown's emphasis and code marks would show as symbols, so they go.
+    const plain = doc.text.slice(start, at + 180).replace(/\*\*|__|`/g, "").replace(/\s+/g, " ").trim();
+    const snippet = at < 0 ? undefined : `${start > 0 ? "…" : ""}${plain}…`;
+    results.push({ doc, score, snippet });
   }
   return results.toSorted((a, b) => b.score - a.score || b.doc.mtime - a.doc.mtime);
 }
@@ -468,112 +557,207 @@ function search(docs, query) {
 const inView = (docs, repo, worktree) =>
   docs.filter((doc) => doc.worktree === worktree || (worktree?.main && doc.worktree === repo.local));
 
-function sidebar(repos, docs, repo, worktree, current, query = "") {
-  const select = (label, items) =>
-    `<label>${label}<select>${items.map(([url, text, selected, count]) => `<option value="${url}"${selected ? " selected" : ""}${count ? ` title="${plural(count, "draft")}"` : ""}>${escapeHtml(text)}</option>`).join("")}</select></label>`;
-  const repoItems = [...repos.values()].map((candidate) => {
-    const count = drafts(docs.filter((doc) => doc.repo === candidate.name));
-    return [candidate.worktrees[0].url, `${candidate.name}${count ? ` · ${count}` : ""}`, candidate === repo, count];
-  });
-  let html = `<form action="/"><input type="search" name="q" value="${escapeHtml(query)}" placeholder="Search every document" aria-label="Search every document"></form>`;
-  html += select("Repository · drafts", repo ? repoItems : [["", "Choose a repository", true], ...repoItems]);
-  if (!repo) return html;
-  // A repo's local docs belong to its main checkout's view.
-  const base = worktree === repo.local && !repo.notes ? repo.worktrees.find((candidate) => candidate.main) : worktree;
-  const branchItems = repo.worktrees.map((candidate) => {
-    const count = drafts(docs.filter((doc) => doc.worktree === candidate));
-    return [candidate.url, `${candidate.key}${count ? ` · ${count}` : ""}`, candidate === base, count];
-  });
-  if (!repo.notes) html += select("Branch or worktree · drafts", branchItems);
-  const shown = inView(docs, repo, base).toSorted((a, b) => b.date.localeCompare(a.date));
-  // Local docs in subfolders show as a folder tree after the kind groups; the rest group by kind.
-  const nested = shown.filter((doc) => doc.local && doc.path.includes("/"));
-  const byKind = Object.groupBy(shown.filter((doc) => !nested.includes(doc)), (doc) => doc.kind);
-  html += '<nav aria-label="Documents in this worktree">';
-  for (const kind of [...new Set([...Object.keys(kindLabels), ...Object.keys(byKind)])].filter((kind) => byKind[kind])) {
-    html += `<h2>${escapeHtml(kindLabels[kind] ?? kind)} <span class="count">${byKind[kind].length}</span></h2>${byKind[kind].map((doc) => row(doc, { where: false, current: doc === current })).join("")}`;
-  }
-  if (nested.length) html += `<h2>Folders <span class="count">${nested.length}</span></h2>${tree(nested, 0, current)}`;
-  return `${html}</nav>`;
+const searchField = (query = "", large = false, keep = {}) =>
+  `<form class="hub-search${large ? " hub-search-lg" : ""}" action="/" role="search"><label>${icon("search")}<span class="hub-sr">Search every document</span><input type="search" name="q" value="${escapeHtml(query)}" placeholder="${large ? "Search titles, paths and text" : "Search"}" autocomplete="off" spellcheck="false"><kbd aria-hidden="true">/</kbd></label>${Object.entries(keep).filter(([, value]) => value).map(([name, value]) => `<input type="hidden" name="${name}" value="${escapeHtml(value)}">`).join("")}</form>`;
+
+// A small menu of a repository's branches and worktrees, newest first, each with its drafts and its
+// last change.
+function branchMenu(repo, docs, shown) {
+  const items = repo.worktrees
+    .map((candidate) => ({ candidate, own: docs.filter((doc) => doc.worktree === candidate) }))
+    .map((item) => ({ ...item, last: Math.max(0, ...item.own.map((doc) => doc.mtime)) }))
+    .toSorted((a, b) => b.last - a.last)
+    .map(({ candidate, own, last }) => `<li><a href="${candidate.url}"${candidate === shown ? ' aria-current="page"' : ""}><span class="hub-menu-name">${escapeHtml(candidate.key)}</span><span class="hub-menu-meta">${drafts(own) ? `<span class="hub-warn">${plural(drafts(own), "draft")}</span>` : ""}${last ? time(last, ago(last)) : "Empty"}</span></a></li>`);
+  return `<details class="hub-menu"><summary class="hub-button">${icon("branch")}<span>${escapeHtml(shown.label)}</span><span class="hub-sr">: switch branch</span><svg class="hub-i hub-chevron" aria-hidden="true" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg></summary><ul class="hub-menu-list">${items.join("")}</ul></details>`;
 }
 
-// One collapsible folder per path segment, folders before files; a folder holding the open document starts open.
-function tree(docs, depth, current) {
-  const folders = Object.groupBy(docs.filter((doc) => doc.path.split("/").length > depth + 1), (doc) => doc.path.split("/")[depth]);
-  let html = "";
-  for (const [name, inside] of Object.entries(folders).toSorted(([a], [b]) => a.localeCompare(b))) {
-    const open = inside.includes(current) ? " open" : "";
-    html += `<details class="folder"${open}><summary>${escapeHtml(name)} <span class="count">${inside.length}</span></summary>${tree(inside, depth + 1, current)}</details>`;
-  }
-  return html + docs.filter((doc) => doc.path.split("/").length === depth + 1).map((doc) => row(doc, { where: false, current: doc === current })).join("");
+// The library: recent documents, then every repository and the notes, with how many documents and
+// drafts each holds. Every page shows it at the left; current is the repository shown, or "home".
+function libraryIndex(repos, docs, current) {
+  const all = unique(docs);
+  const item = (repo) => {
+    const own = all.filter((doc) => doc.repo === repo.name);
+    const count = drafts(own);
+    const main = repo.worktrees.find((other) => other.main) ?? repo.worktrees[0];
+    return `<li><a href="${main.url}"${repo === current ? ' aria-current="page"' : ""}><span class="hub-index-name">${escapeHtml(repo.notes ? "Notes" : repo.name)}</span><span class="hub-index-n">${own.length}<span class="hub-sr"> documents</span>${count ? `<span aria-hidden="true">/</span><span class="hub-warn"><span class="hub-sr">, </span>${count}<span class="hub-sr"> ${count === 1 ? "draft" : "drafts"}</span></span>` : ""}</span></a></li>`;
+  };
+  const list = [...repos.values()];
+  const notes = list.filter((repo) => repo.notes);
+  return `<nav class="hub-nav" aria-label="Library"><ul><li><a href="/"${current === "home" ? ' aria-current="page"' : ""}><span class="hub-index-name">Recent</span></a></li></ul><h2>Repositories</h2><ul>${list.filter((repo) => !repo.notes).map(item).join("")}</ul>${notes.length ? `<h2>Notes</h2><ul>${notes.map(item).join("")}</ul>` : ""}</nav>`;
 }
 
-const icons = {
-  menu: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/></svg>',
-  open: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 2.5h4.5V7M13.5 2.5 7.5 8.5M11.5 9.5v3a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3"/></svg>',
-  contents: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4h7.5M6 8h7.5M6 12h7.5"/><circle cx="3" cy="4" r=".6"/><circle cx="3" cy="8" r=".6"/><circle cx="3" cy="12" r=".6"/></svg>',
-};
+function repoPage(repo, docs, shown) {
+  const list = (shown.local ? docs.filter((doc) => doc.worktree === shown) : inView(docs, repo, shown)).toSorted((a, b) => b.mtime - a.mtime);
+  const count = drafts(list);
+  const picker = !repo.notes && repo.worktrees.length > 1;
+  const on = repo.notes ? "" : ` on ${picker ? branchMenu(repo, docs, shown.local ? repo.worktrees.find((candidate) => candidate.main) : shown) : escapeHtml(shown.label)}`;
+  const head = `<header class="hub-head"><h1>${escapeHtml(repo.notes ? "Notes" : repo.name)}</h1><div class="hub-sub">${plural(list.length, "document")}${on}${count ? `<span class="hub-warn">, ${plural(count, "draft")}</span>` : ""}</div></header>`;
+  if (!list.length) return { head, body: `<div class="hub-empty"><p class="hub-empty-title">No documents here yet</p><p>Anything saved under ${docRoots.map((root) => `<code>${root}/</code>`).join(" or ")} in this checkout shows up here.</p></div>` };
+  // Notes and local folders group by folder, and show each note's kind; committed docs group by kind.
+  const byFolder = Boolean(repo.notes || shown.local);
+  const groups = byFolder ? Map.groupBy(list, (doc) => (doc.path.includes("/") ? doc.path.slice(0, doc.path.lastIndexOf("/")) : "")) : Map.groupBy(list, (doc) => doc.kind);
+  const keys = byFolder ? [...groups.keys()].toSorted() : kindsIn(list);
+  const body = docList(
+    keys.map((key) => ({ label: escapeHtml(byFolder ? (key ? `${key}/` : "Top level") : kindName(key, true)), rows: groups.get(key).map((doc) => ({ doc })) })),
+    { kind: byFolder, where: false, allLocal: byFolder },
+  );
+  return { head, body };
+}
 
-// crumbs: [text, url] pairs, the last one the current page.
-function page({ title, crumbs = [], side, main, headings = [], doc, home = false }) {
-  const toc = headings.length
-    ? `<nav id="toc" aria-label="Contents"><h2>Contents</h2>${headings.map((h) => `<a class="h${h.level}" href="#${escapeHtml(h.id)}">${escapeHtml(h.text)}</a>`).join("")}</nav>`
-    : "";
+// The hub's bar, on every page: home, where you are, search, theme.
+function bar({ crumbs = [], doc, home = false, query = "" }) {
   const trail = crumbs
-    .map(([text, url], i) => (i < crumbs.length - 1 && url ? `<a href="${url}">${escapeHtml(text)}</a>` : `<span aria-current="page">${escapeHtml(text)}</span>`))
-    .join('<span class="sep" aria-hidden="true">/</span>');
-  const open = doc ? `<a class="open" href="/raw${docUrl(doc)}" target="_blank" aria-label="Open alone" title="Open alone">${icons.open}</a>` : "";
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(title)}</title><link rel="stylesheet" href="/assets/kit.css"><link rel="stylesheet" href="/assets/hub.css"></head>
-<body class="${[toc && "has-toc", doc && "is-doc", home && "is-home"].filter(Boolean).join(" ")}">
-<header class="bar"><button id="menu" aria-label="Documents" aria-expanded="false">${icons.menu}</button><a class="brand" href="/">Docs</a><nav class="crumbs" aria-label="Location">${trail}</nav>${open}<div data-theme-control></div>${toc ? `<button id="contents" aria-label="Contents" aria-expanded="false">${icons.contents}<span>Contents</span></button>` : ""}</header>
-<aside>${side}</aside><div class="main">${main}</div>${toc}
-<script src="/assets/kit.js"></script>
-<script>
-const frame = document.querySelector("iframe");
-const toggle = (button, name) => button?.addEventListener("click", () => button.setAttribute("aria-expanded", document.body.classList.toggle(name)));
-toggle(document.getElementById("menu"), "drawer");
-toggle(document.getElementById("contents"), "toc-open");
-for (const select of document.querySelectorAll("aside select")) select.onchange = () => (location = select.value);
-if (frame) {
-  const show = (id) => frame.contentDocument.getElementById(decodeURIComponent(id))?.scrollIntoView();
-  for (const link of document.querySelectorAll("#toc a")) {
-    link.onclick = (event) => {
-      event.preventDefault();
-      show(link.hash.slice(1));
-      history.replaceState(null, "", link.hash);
-      document.body.classList.remove("toc-open");
-    };
+    .map(([text, url], i) => (i < crumbs.length - 1 && url ? `<li><a href="${url}">${escapeHtml(text)}</a></li>` : `<li><span aria-current="page">${escapeHtml(text)}</span></li>`))
+    .join("");
+  const data = doc ? ` data-doc="${docUrl(doc)}" data-mtime="${Math.round(doc.mtime)}"` : "";
+  return `<div class="hub-bar" role="banner"${data}><a class="hub-mark" href="/">Docs</a>${trail ? `<nav class="hub-crumbs" aria-label="Breadcrumb"><ol>${trail}</ol></nav>` : '<span class="hub-crumbs"></span>'}<div class="hub-tools">${home ? "" : searchField(query)}<div data-theme-control></div></div></div>`;
+}
+
+// An index page: the bar and the library, then a head and the content in one column.
+function indexPage({ title, crumbs, head, body, nav, home = false, query = "" }) {
+  return `<!doctype html><html lang="en" data-hub><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(title)} · Docs</title>${themeScript}${fontLinks}<link rel="stylesheet" href="/assets/kit.css"><link rel="stylesheet" href="/assets/hub.css"></head>
+<body class="hub-body${home ? " hub-home" : ""}"><a class="hub-skip" href="#hub-main">Skip to content</a>${sprite}${bar({ crumbs, home, query })}${nav}
+<main class="hub-page" id="hub-main" tabindex="-1">${head}${body}</main>
+<script>${hubScript}</script><script src="/assets/kit.js"></script>${speculation}</body></html>`;
+}
+
+// The rail beside a document: its contents and Copy link, then what it is and where else it lives.
+// Narrow screens show it as a disclosure above the document.
+function rail(doc, headings, docs) {
+  const toc = headings.length
+    ? `<nav class="hub-toc" aria-label="Contents"><h2>Contents</h2><ol>${headings.map((h) => `<li class="h${h.level}"><a href="#${escapeHtml(h.id)}">${escapeHtml(h.text)}</a></li>`).join("")}</ol></nav>`
+    : "";
+  const state = { draft: ["Draft", "Only on this branch, or changed here"], merged: ["Merged", "On the default branch"], local: ["Local", "Never committed"] }[statusOf(doc)];
+  const where = doc.worktree.key === "~notes" ? "Notes" : doc.local ? `${doc.repo}, local` : `${doc.repo}, ${doc.worktree.key}`;
+  const others = docs.filter((other) => other.repo === doc.repo && other.path === doc.path && other !== doc).toSorted((a, b) => b.mtime - a.mtime);
+  const versions = others.length
+    ? `<section class="hub-versions"><h2>Also on</h2><ul>${others.map((other) => `<li><a href="${docUrl(other)}"><span>${escapeHtml(other.worktree.key)}</span>${time(other.mtime, ago(other.mtime))}</a></li>`).join("")}</ul></section>`
+    : "";
+  const details = `<section class="hub-details"><h2>Details</h2><dl>
+<div><dt>Kind</dt><dd>${escapeHtml(kindName(doc.kind))}</dd></div>
+<div><dt>Status</dt><dd><span class="hub-state ${statusOf(doc)}">${state[0]}</span><span class="hub-note">${state[1]}</span></dd></div>
+<div><dt>Updated</dt><dd>${time(doc.mtime, ago(doc.mtime))}<span class="hub-note">${escapeHtml(stamp(doc.mtime))}</span></dd></div>
+<div><dt>Location</dt><dd>${escapeHtml(where)}<code>${escapeHtml(shownPath(doc))}</code></dd></div>
+</dl></section>`;
+  return `<aside class="hub-rail" aria-label="About this document"><details class="hub-rail-box"><summary>${headings.length ? "Contents and details" : "Details"}</summary>${toc}<button class="hub-button hub-copy" type="button" data-copy>${icon("link")}<span>Copy link</span></button>${details}${versions}</details></aside>`;
+}
+
+// A document served as itself: its own page, with the hub's bar and rail added around its content.
+function docPage(html, { doc, headings, docs, crumbs, nav }) {
+  const date = new Date(doc.mtime);
+  const eyebrow = `${escapeHtml(kindName(doc.kind))} · ${months[date.getMonth()].slice(0, 3)} ${date.getDate()}, ${date.getFullYear()}`;
+  return html
+    .replace(/^([\s\S]*?<main>)(<h1>[\s\S]*?<\/h1>)/, (match, before, title) => (doc.path.endsWith(".md") ? `${before}<header><p class="eyebrow">${eyebrow}</p>${title}</header>` : match))
+    .replace(/<html\b([^>]*)>/i, (_, attributes) => `<html data-hub="doc"${attributes}>`)
+    .replace(/<\/head>/i, () => `${themeScript}<link rel="stylesheet" href="/assets/hub.css"></head>`)
+    .replace(/<body\b[^>]*>/i, (open) => `${open}<a class="hub-skip" href="#hub-main">Skip to content</a>${sprite}${bar({ crumbs, doc })}${nav}${rail(doc, headings, docs)}<span id="hub-main" tabindex="-1"></span>`)
+    .replace(/<\/body>(?![\s\S]*<\/body>)/i, () => `<script>${hubScript}</script>${speculation}</body>`);
+}
+
+// The hub's behaviour: "/" to search, branch pickers, unread marks, copy link, and on a document the
+// rail, its scroll spy and live reload.
+// Links to other hub pages prerender while the pointer rests on them, so a click shows a finished page.
+const speculation = `<script type="speculationrules">${JSON.stringify({ prerender: [{ where: { and: [{ href_matches: "/*" }, { not: { href_matches: "/raw/*" } }] }, eagerness: "moderate" }] })}</script>`;
+
+const hubScript = `
+{
+  const bar = document.querySelector(".hub-bar");
+  addEventListener("keydown", (event) => {
+    if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey || event.target.closest("input, select, textarea, [contenteditable]")) return;
+    const field = document.querySelector(".hub-search-lg input, .hub-bar input[type=search]");
+    if (!field) return;
+    event.preventDefault();
+    field.focus();
+    field.select();
+  });
+  // Menus close on a click outside them, or on Escape.
+  for (const menu of document.querySelectorAll(".hub-menu")) {
+    addEventListener("click", (event) => menu.contains(event.target) || (menu.open = false));
+    menu.addEventListener("keydown", (event) => event.key === "Escape" && ((menu.open = false), menu.querySelector("summary").focus()));
   }
-  frame.onload = () => {
-    if (sessionStorage.scroll) frame.contentWindow.scrollTo(0, Number(sessionStorage.scroll));
-    else if (location.hash) show(location.hash.slice(1));
-    sessionStorage.removeItem("scroll");
-    // Links to other documents open in the hub; links off the box open in a new tab.
-    frame.contentDocument.addEventListener("click", (event) => {
-      const link = event.target.closest("a[href]");
-      const url = link && new URL(link.href);
-      if (!url || url.pathname === frame.contentWindow.location.pathname) return;
-      event.preventDefault();
-      if (url.origin === location.origin) location = url.pathname.replace(/^\\/raw/, "") + url.hash;
-      else open(url, "_blank", "noopener");
+
+  // Unread: new, or updated since you last opened it, counting from your first visit to the hub.
+  const read = (key, fallback) => {
+    try {
+      return JSON.parse(localStorage.getItem(key)) ?? fallback;
+    } catch {
+      return fallback;
+    }
+  };
+  const write = (key, value) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {}
+  };
+  let since = read("hub:since", 0);
+  if (!since) write("hub:since", (since = Date.now()));
+  const seen = read("hub:seen", {});
+  // A page prerendered on hover counts as read only once it is shown.
+  const markRead = () => write("hub:seen", { ...read("hub:seen", {}), [bar.dataset.doc]: Number(bar.dataset.mtime) });
+  if (bar.dataset.doc) document.prerendering ? document.addEventListener("prerenderingchange", markRead, { once: true }) : markRead();
+  for (const link of document.querySelectorAll("[data-doc]:not(.hub-bar)")) {
+    const mtime = Number(link.dataset.mtime);
+    if (mtime <= since || (seen[link.dataset.doc] ?? 0) >= mtime) continue;
+    link.insertAdjacentHTML("afterend", '<span class="hub-flag unread">' + (link.dataset.doc in seen ? "Updated" : "New") + "</span>");
+  }
+
+  for (const button of document.querySelectorAll("[data-copy]")) {
+    const label = button.querySelector("span");
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        label.textContent = "Copied";
+      } catch {
+        label.textContent = "Copy failed";
+      }
+      setTimeout(() => (label.textContent = "Copy link"), 1600);
     });
-  };
-  // Live reload: the server sends an event when the file changes on disk.
-  new EventSource("/events?doc=${doc ? encodeURIComponent(docUrl(doc)) : ""}").onmessage = () => {
-    sessionStorage.scroll = frame.contentWindow.scrollY;
-    location.reload();
-  };
+  }
+
+  const box = document.querySelector(".hub-rail-box");
+  if (box) {
+    // The rail is always open beside the page, and a closed disclosure above it on narrow screens.
+    const wide = matchMedia("(min-width: 1200px)");
+    const sync = () => (box.open = wide.matches);
+    sync();
+    wide.addEventListener("change", sync);
+    const links = [...box.querySelectorAll(".hub-toc a")];
+    const targets = links.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))));
+    // With three or more sections, each subsection belongs to the section above it and folds away
+    // until that section is in view. section[i] is the section of subsection i.
+    const items = links.map((link) => link.parentElement);
+    const fold = items.filter((item) => item.classList.contains("h2")).length >= 3;
+    const section = {};
+    items.forEach((item, i, all) => {
+      if (item.classList.contains("h3")) section[i] = all.findLastIndex((other, j) => j < i && other.classList.contains("h2"));
+    });
+    let queued = 0;
+    const spy = () => {
+      queued = 0;
+      let active = -1;
+      targets.forEach((target, i) => {
+        if (target && target.getBoundingClientRect().top < 120) active = i;
+      });
+      links.forEach((link, i) => (i === active ? link.setAttribute("aria-current", "location") : link.removeAttribute("aria-current")));
+      const open = section[active] ?? active;
+      if (fold) items.forEach((item, i) => (item.hidden = i in section && section[i] !== open));
+    };
+    addEventListener("scroll", () => (queued ||= requestAnimationFrame(spy)), { passive: true });
+    spy();
+    for (const link of links) link.addEventListener("click", () => wide.matches || (box.open = false));
+    // Live reload: the server sends an event when the file changes on disk.
+    new EventSource("/events?doc=" + encodeURIComponent(bar.dataset.doc)).onmessage = () => location.reload();
+  }
 }
-</script></body></html>`;
-}
+`;
 
 function send(response, code, type, body, headers = {}) {
-  response.writeHead(code, { "content-type": type, "cache-control": "no-store", "x-content-type-options": "nosniff", ...headers });
+  response.writeHead(code, { "content-type": type, "cache-control": "no-cache", "x-content-type-options": "nosniff", ...headers });
   response.end(body);
 }
 
-async function handle(request, response) {
+async function handle(request, response, fresh = false) {
   const url = new URL(request.url ?? "/", "http://localhost");
   const pathname = decodeURIComponent(url.pathname);
   if (request.method !== "GET" && request.method !== "HEAD") return send(response, 405, types[".txt"], "Method not allowed");
@@ -581,12 +765,13 @@ async function handle(request, response) {
   if (pathname === "/assets/kit.js") return send(response, 200, types[".js"], await kit("script"));
   if (pathname === "/assets/hub.css") return send(response, 200, types[".css"], await readFile(join(here, "hub.css")));
 
-  const repos = await findRepos();
+  const { repos, docs } = await library(fresh);
+  // /raw serves a document on its own, without the hub's bar; /events tells a page its file changed.
   if (pathname.startsWith("/raw/") || pathname === "/events") {
     const target = pathname === "/events" ? decodeURIComponent(url.searchParams.get("doc") ?? "") : pathname.slice(4);
     const { worktree, path } = route(target, repos);
     const found = worktree && path && (await resolveFile(worktree, path.endsWith("/") ? `${path}index.html` : path));
-    if (!found) return send(response, 404, types[".txt"], "Not found");
+    if (!found) return fresh ? send(response, 404, types[".txt"], "Not found") : handle(request, response, true);
     if (pathname === "/events") {
       response.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-store" });
       const mtime = () => stat(found.file).then((info) => info.mtimeMs, () => 0);
@@ -604,46 +789,69 @@ async function handle(request, response) {
     return send(response, 200, types[extension] ?? "application/octet-stream", await readFile(found.file));
   }
 
-  const docs = await scan(repos);
-  const respond = (code, title, main, extra = {}) =>
-    send(response, code, types[".html"], page({ title, main, side: sidebar(repos, docs, extra.repo, extra.worktree, extra.doc, extra.query), ...extra }));
+  const html = (code, page) => send(response, code, types[".html"], page);
   if (pathname === "/") {
     const query = url.searchParams.get("q")?.trim() ?? "";
-    const results = query ? search(docs, query) : unique(docs).toSorted((a, b) => b.mtime - a.mtime).map((doc) => ({ doc }));
-    const heading = query ? `Results${results.length > 50 ? ", first 50 shown" : ""}` : "Recently updated";
-    const form = `<form class="search" action="/" role="search"><input type="search" name="q" value="${escapeHtml(query)}" placeholder="Search every document" aria-label="Search every document"><button type="submit">Search</button></form>`;
-    const intro = '<p class="muted">Plans, research, specs and notes from every checkout and worktree on this box, drafts and local docs included.</p>';
-    const body = results.length ? list(heading, results.slice(0, 50)) : '<p class="muted">Nothing found.</p>';
-    const crumbs = [[query ? "Search" : "All repositories"]];
-    return respond(200, "Docs", `<div class="list"><h1>Docs</h1>${intro}${form}${body}</div>`, { query, crumbs, home: true });
+    const kind = url.searchParams.get("kind") ?? "";
+    const state = url.searchParams.get("status") ?? "";
+    const all = url.searchParams.has("all");
+    const pool = query ? search(docs, query) : unique(docs).toSorted((a, b) => b.mtime - a.mtime).map((doc) => ({ doc }));
+    const byKind = (result) => !kind || result.doc.kind === kind;
+    const byState = (result) => !state || statusOf(result.doc) === state;
+    const shown = pool.filter(byKind).filter(byState);
+    const href = (changes) => {
+      const params = new URLSearchParams(Object.entries({ q: query, kind, status: state, ...changes }).filter(([, value]) => value));
+      return params.size ? `/?${params}` : "/";
+    };
+    const tab = (text, count, link, on, className = "") => `<li${className ? ` class="${className}"` : ""}><a href="${link}"${on ? ' aria-current="true"' : ""}>${text}<span class="hub-n">${count}</span></a></li>`;
+    const kindPool = pool.filter(byState).map((result) => result.doc);
+    const statePool = pool.filter(byKind).map((result) => result.doc);
+    const filters = `<nav class="hub-filters" aria-label="Filter documents"><ul>${tab("All", kindPool.length, href({ kind: "" }), !kind)}${kindsIn(kindPool).map((name) => tab(escapeHtml(kindName(name, true)), kindPool.filter((doc) => doc.kind === name).length, href({ kind: name }), kind === name)).join("")}</ul><ul>${tab("Drafts", statePool.filter((doc) => statusOf(doc) === "draft").length, href({ status: state === "draft" ? "" : "draft" }), state === "draft", "is-draft")}${tab("Local", statePool.filter((doc) => statusOf(doc) === "local").length, href({ status: state === "local" ? "" : "local" }), state === "local")}</ul></nav>`;
+    const limit = all ? Infinity : 60;
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    const results = query
+      ? `<div class="hub-results">${docList([{ rows: shown.slice(0, limit) }], { terms })}</div>`
+      : timeline(shown.slice(0, limit).map(({ doc }) => doc));
+    const more = shown.length > limit ? `<p class="hub-more"><a class="hub-button" href="${href({ all: "1" })}">Show all ${shown.length}</a></p>` : "";
+    const empty = `<div class="hub-empty"><p class="hub-empty-title">Nothing matches</p><p>${query ? "Try fewer or shorter words, or " : ""}<a href="/">clear the search and filters</a>.</p></div>`;
+    const everything = unique(docs);
+    const repoCount = [...repos.values()].filter((repo) => !repo.notes).length;
+    const sub = query
+      ? `${plural(shown.length, "document")} ${shown.length === 1 ? "matches" : "match"}`
+      : `${plural(everything.length, "document")} across ${plural(repoCount, "repository", "repositories")} and your notes, <span class="hub-warn">${plural(drafts(everything), "draft")}</span>`;
+    const head = `<header class="hub-head"><h1${query ? ' class="is-query"' : ""}>${query ? `Results for “${escapeHtml(query)}”` : "Recent"}</h1><p class="hub-sub">${sub}</p>${searchField(query, true, { kind, status: state })}${filters}</header>`;
+    return html(200, indexPage({ title: query ? `Search: ${query}` : "Recent", crumbs: [], head, body: shown.length ? results + more : empty, nav: libraryIndex(repos, docs, "home"), home: true, query }));
   }
 
   const { repo, worktree, path, extra } = route(pathname, repos);
-  const notFound = () => respond(404, "Not found", '<div class="list"><h1>Not found</h1><p class="muted">No checkout on the box has this document.</p></div>', { crumbs: [["Not found"]] });
+  const notFound = () =>
+    fresh ? html(404, indexPage({ title: "Not found", crumbs: [["Not found"]], head: '<header class="hub-head"><h1>Not found</h1><p class="hub-sub">No checkout on this box has this document. It may have lived on a branch whose worktree was removed.</p></header>', body: '<p><a class="hub-button" href="/">Back to recent documents</a></p>', nav: libraryIndex(repos, docs) })) : handle(request, response, true);
   if (!repo) return notFound();
   const main = repo.worktrees.find((candidate) => candidate.main) ?? repo.worktrees[0];
   const shown = worktree ?? main;
   if (!shown) return notFound();
   const doc = path && docs.find((candidate) => candidate.worktree === shown && candidate.path === path);
+  // A document's images and other files resolve beside it, so its relative links work in the hub.
+  if (path && worktree && !doc && !/\.(md|html)$/.test(path)) {
+    const found = await resolveFile(worktree, path);
+    if (found && !found.directory) return send(response, 200, types[extname(found.file).toLowerCase()] ?? "application/octet-stream", await readFile(found.file));
+  }
   // A link into a removed worktree, or to a file the worktree no longer has, falls back to the main checkout.
   if (path && (!doc || !worktree)) {
+    if (!fresh) return handle(request, response, true);
     const fallback = docs.find((candidate) => candidate.worktree === main && candidate.path === path);
     return fallback ? send(response, 302, types[".txt"], "", { location: docUrl(fallback) }) : notFound();
   }
   if (!path && extra) return notFound();
-  const where = repo.notes ? "notes" : `${repo.name} · ${shown.label}`;
-  const crumbs = repo.notes ? [["notes", shown.url]] : [[repo.name, main.url], [shown.label, shown.url]];
-  const context = { repo, worktree: shown, doc, crumbs };
+  const crumbs = repo.notes ? [["Notes", shown.url]] : [[repo.name, main.url], [shown.local ? "local" : shown.key, shown.url]];
   if (!doc) {
-    const shownDocs = (shown.local ? docs.filter((candidate) => candidate.worktree === shown) : inView(docs, repo, shown)).toSorted((a, b) => b.mtime - a.mtime);
-    const rows = shownDocs.length ? list("Recently updated", shownDocs.map((candidate) => ({ doc: candidate }))) : '<p class="muted">No documents in this worktree.</p>';
-    return respond(200, where, `<div class="list"><h1>${escapeHtml(where)}</h1>${rows}</div>`, context);
+    const { head, body } = repoPage(repo, docs, shown);
+    return html(200, indexPage({ title: repo.notes ? "Notes" : `${repo.name} · ${shown.label}`, crumbs, head, body, nav: libraryIndex(repos, docs, repo) }));
   }
   const found = await resolveFile(shown, path);
   if (!found) return notFound();
-  const { headings } = await documentHtml(found.file);
-  context.crumbs.push([doc.title]);
-  return respond(200, doc.title, `<iframe src="/raw${docUrl(doc)}" title="${escapeHtml(doc.title)}"></iframe>`, { ...context, headings });
+  const { html: page, headings } = await documentHtml(found.file);
+  return html(200, docPage(page, { doc, headings, docs, crumbs: [...crumbs, [doc.title]], nav: libraryIndex(repos, docs, repo) }));
 }
 
 createServer((request, response) => {
