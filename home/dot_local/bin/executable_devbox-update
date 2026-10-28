@@ -17,9 +17,11 @@ if [ "$pnpm_now" != "$pnpm_latest" ]; then echo "pnpm default $pnpm_now -> $pnpm
 if [ -f /var/run/reboot-required ]; then echo "Reboot required"; fi
 
 [ "${1:-}" = --apply ] || exit 0
-sudo apt-get update && sudo apt-get upgrade
+sudo apt-get update && sudo apt-get full-upgrade
 mise self-update --yes
 mise upgrade
+# mise upgrades uv itself; the Pythons uv downloaded need their own upgrade.
+uv python upgrade
 vp upgrade
 vp env default "$node_latest" "pnpm@$pnpm_latest"
 # Portless's root service records the node and portless paths at install time.
