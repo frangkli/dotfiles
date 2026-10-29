@@ -28,3 +28,8 @@ infisical = "latest"
 age = "latest"
 "github:kenn-io/agentsview" = "latest"
 "github:entireio/cli" = "latest" # ships entire and git-remote-entire, which git needs for entire:// remotes
+
+[settings]
+# Our checkouts and worktrees; an untrusted repo config breaks every shim in its folder.
+# Third-party clones go under ~/.cache/clones instead (global AGENTS.md).
+trusted_config_paths = ["~/workspace", "~/.t3/worktrees"]
