@@ -7,7 +7,7 @@
   "removeAgentCreditsOnMerge": true,
   "autoResumeLimitedThreads": true,
   "snoozeLimitedThreads": true,
-  "sidebarAutoSettleAfterDays": 10,
+  "sidebarAutoSettleAfterDays": null,
   "storageCleanup": { "worktreeAfterDays": 10, "worktreeOnDelete": true },
   "backgroundActivity": { "schemaVersion": 1, "profile": "performance" },
   "providerInstances": {
