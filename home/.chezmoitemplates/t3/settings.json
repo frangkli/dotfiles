@@ -2,7 +2,7 @@
 {
   "defaultThreadEnvMode": "worktree",
   "defaultAutoPull": true,
-  "pullRequestMergeMethod": "rebase",
+  "pullRequestMergeMethod": "squash", {{/* branches catch up by merging main, and rebase-merge can refuse a merge commit that resolved a conflict */}}
   "sourceControlWritingStyle": { "mode": "conventional_commits" },
   "removeAgentCreditsOnMerge": true,
   "autoResumeLimitedThreads": true,
