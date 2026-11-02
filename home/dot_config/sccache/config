@@ -1,0 +1,2 @@
+[cache.disk]
+size = 53687091200 # 50 GiB in bytes; the 10 GiB default evicts dependencies shared across worktrees
