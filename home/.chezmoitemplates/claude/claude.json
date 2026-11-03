@@ -3,6 +3,7 @@
   "mcpServers": {
     "linear": { "type": "http", "url": "https://mcp.linear.app/mcp" },
     "axiom": { "type": "http", "url": "https://mcp.axiom.co/mcp" },
-    "neon": { "type": "http", "url": "https://mcp.neon.tech/mcp" }
+    "neon": { "type": "http", "url": "https://mcp.neon.tech/mcp" },
+    "context": { "type": "http", "url": "https://mcp.context.dev/mcp" }
   }
 }
