@@ -40,6 +40,9 @@ url = "https://mcp.axiom.co/mcp"
 [mcp_servers.neon]
 url = "https://mcp.neon.tech/mcp"
 
+[mcp_servers.context]
+url = "https://mcp.context.dev/mcp"
+
 # atuin logs agent shell commands, kept out of your Ctrl-R; impeccable checks UI edits.
 # Declared here, not in hooks.json, which Glen rewrites; codex-trust-hooks trusts them.
 [[hooks.PreToolUse]]
