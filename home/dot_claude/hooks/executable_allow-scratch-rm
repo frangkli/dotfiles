@@ -1,0 +1,162 @@
+#!/usr/bin/env python3
+"""PermissionRequest hook: approves a Bash rm or rmdir of agent scratch space in bypassPermissions mode.
+
+Claude Code still asks before some removals in bypass mode ("Dangerous rm operation ..."), for
+example when the command also cds. This answers yes only when every rm and rmdir target lies
+strictly inside a T3 worktree ($HOME/.t3/worktrees/<repo>/<worktree>/...) or a .context folder
+under $HOME. Anything else, a parse error included, prints nothing, so the normal prompt shows.
+The rest of the command runs anyway in bypass mode, so only the removals are judged.
+
+Run with --self-test to check the rules.
+"""
+import json
+import os
+import re
+import shlex
+import sys
+
+RM = {"rm", "rmdir"}
+NEVER = {"sudo", "doas", "eval", "xargs", "-delete", "-exec", "-execdir", "-ok", "-okdir"}
+# Commands that can run an rm given as their argument.
+WRAPPERS = {"env", "command", "builtin", "exec", "nohup", "time", "timeout", "nice", "ionice",
+            "stdbuf", "setsid", "watch", "parallel", "find"}
+KEYWORDS = {"!", "{", "}", "if", "then", "else", "elif", "do", "while", "until"}
+
+
+def segments(command):
+    """Splits a command into simple commands' words, dropping redirections. Raises ValueError."""
+    command = re.sub(r"(?<![^\s;&|()])\d+(?=[<>])", "", command)  # 2>/dev/null -> >/dev/null
+    lexer = shlex.shlex(command, posix=True, punctuation_chars=";|&()<>\n")
+    lexer.whitespace = " \t\r"
+    lexer.whitespace_split = True
+    lexer.commenters = ""
+    words, redirect = [], False
+    for token in lexer:
+        if redirect:
+            redirect = False
+        elif set(token) <= set(";|&()\n"):
+            yield words
+            words = []
+        elif set(token) <= set("<>&"):
+            redirect = True
+        elif set(token) <= set(";|&()\n<>"):
+            raise ValueError(f"unexpected operator {token}")
+        else:
+            words.append(token)
+    yield words
+
+
+def scratch(path, home):
+    """Whether path is strictly inside a worktree or a .context folder under home."""
+    for prefix in ("~", "$HOME", "${HOME}"):
+        if path == prefix or path.startswith(prefix + "/"):
+            path = home + path[len(prefix):]
+            break
+    parent, name = os.path.split(path)
+    if (not path.startswith("/") or re.search(r"[$`{}~\\]", path) or re.search(r"[*?\[]", parent)
+            or name in ("", ".", "..") or ".." in parent.split("/")):
+        return False
+    parts = os.path.relpath(os.path.join(os.path.realpath(parent), name), os.path.realpath(home)).split("/")
+    if parts[0] == "..":
+        return False
+    return (parts[:2] == [".t3", "worktrees"] and len(parts) > 4) or ".context" in parts[:-1]
+
+
+def allowed(event, home):
+    if event.get("permission_mode") != "bypassPermissions" or event.get("tool_name") != "Bash":
+        return False
+    command = event["tool_input"]["command"]
+    if "$(" in command or "`" in command:
+        return False
+    try:
+        commands = list(segments(command))
+    except ValueError:
+        return False
+    removals = 0
+    for words in commands:
+        names = [os.path.basename(word) for word in words]
+        # A word with spaces that mentions rm is a script for something else, as in bash -c 'rm ...'.
+        if any(name in NEVER for name in names) or any(
+                len(pieces := re.split(r"[\s;&|()<>]+", word)) > 1 and RM & {os.path.basename(p) for p in pieces}
+                for word in words):
+            return False
+        i = 0
+        while i < len(words) and (words[i] in KEYWORDS or re.match(r"\w+=", words[i])):
+            i += 1
+        if i == len(words):
+            continue
+        if "$" in words[i]:
+            return False
+        if names[i] in RM:
+            args = words[i + 1:]
+            paths = args[args.index("--") + 1:] if "--" in args else [a for a in args if not a.startswith("-")]
+            if not paths or not all(scratch(path, home) for path in paths):
+                return False
+            removals += 1
+        elif names[i] in WRAPPERS and RM & set(names):
+            return False
+    return removals > 0
+
+
+def self_test():
+    home = "/home/user"
+    real = ("docker rm -f some-test-container >/dev/null && rm -rf /home/user/.t3/worktrees/repo/branch/.context/chtest"
+            " && cd /home/user/.t3/worktrees/repo/branch && ls")
+    cases = [
+        (real, True),
+        ("rm -rf ~/.t3/worktrees/r/w/target", True),
+        ("rm -rf $HOME/.context/x ${HOME}/.t3/worktrees/r/w/a/b", True),
+        ("rm -rf ~/.t3/worktrees/r/w/*", True),
+        ("rm -rf -- ~/.context/-x 2>/dev/null; rmdir ~/proj/.context/empty", True),
+        ("rm -rf ~/.t3/worktrees/r/w", False),
+        ("rm -rf ~/.t3/worktrees/r/w/", False),
+        ("rm -rf ~/.t3/worktrees/r/w/.", False),
+        ("rm -rf ~/.t3/worktrees/r/*", False),
+        ("rm -rf ~/.t3/worktrees/r/*/x", False),
+        ("rm -rf ~/.t3/worktrees/r/w/../../x", False),
+        ("rm -rf ~", False),
+        ("rm -rf $HOME/.context", False),
+        ("rm -rf /tmp/.context/x", False),
+        ('rm -rf "$(pwd)/x"', False),
+        ("rm -rf `pwd`/x", False),
+        ("rm -rf .context/x", False),
+        ("rm -rf ~/.context/x ~/x", False),
+        ("rm -rf ~/.context/{a,b}", False),
+        ("$RM -rf ~/.context/x", False),
+        ("sudo rm -rf ~/.context/x", False),
+        ("eval rm -rf ~/.context/x", False),
+        ("echo ~/.context/x | xargs rm -rf", False),
+        ("find ~/.context -delete", False),
+        ("env rm -rf ~/.context/x", False),
+        ("rm -rf ~/.context/x && bash -c 'rm -rf ~'", False),
+        ("rm -rf ~/.context/x; echo hi\nrm -rf ~", False),
+        ("rm -rf ~/.context/x; rm -rf ~", False),
+        ("rm -rf ~/.context/x 'unclosed", False),
+        ("rm", False),
+        ("ls ~/.context", False),
+    ]
+    failures = 0
+    for command, expected in cases:
+        got = allowed({"permission_mode": "bypassPermissions", "tool_name": "Bash",
+                       "tool_input": {"command": command}}, home)
+        failures += got != expected
+        print(f"{'ok  ' if got == expected else 'FAIL'} {'allow' if got else 'none '} {command!r}")
+    for event, label in [({"permission_mode": "default", "tool_name": "Bash", "tool_input": {"command": real}}, "default mode"),
+                         ({"permission_mode": "bypassPermissions", "tool_name": "Write", "tool_input": {"command": real}}, "Write tool")]:
+        got = allowed(event, home)
+        failures += got
+        print(f"{'FAIL' if got else 'ok  '} {'allow' if got else 'none '} real case, {label}")
+    print(f"{failures} failed")
+    return 1 if failures else 0
+
+
+if __name__ == "__main__":
+    if sys.argv[1:] == ["--self-test"]:
+        sys.exit(self_test())
+    try:
+        event = json.load(sys.stdin)
+    except ValueError:
+        sys.exit(0)
+    if allowed(event, os.path.expanduser("~")):
+        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PermissionRequest",
+                                                 "decision": {"behavior": "allow"}}}))
