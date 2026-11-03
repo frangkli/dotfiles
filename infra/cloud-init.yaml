@@ -25,6 +25,8 @@ packages:
   # Memory safety nets
   - systemd-zram-generator
   - earlyoom
+  # Per-process and per-cgroup resource history, replayed with `atop -r`
+  - atop
   # Machine basics; user tools come from the dotfiles
   - xfsprogs
   - git
@@ -42,10 +44,21 @@ write_files:
     content: |
       [zram0]
 
+  # Sample every 10 seconds instead of 10 minutes so short spikes stay visible; keep a week.
+  # Written before the package installs; cloud-init's apt keeps an existing config file.
+  - path: /etc/default/atop
+    content: |
+      LOGOPTS=""
+      LOGINTERVAL=10
+      LOGGENERATIONS=7
+      LOGPATH=/var/log/atop
+
   # The default of 128 runs out with many dev servers and watchers.
+  # Delay accounting lets atop show how long each process waited on disk and swap-in.
   - path: /etc/sysctl.d/90-devbox.conf
     content: |
       fs.inotify.max_user_instances = 8192
+      kernel.task_delayacct = 1
 
   - path: /usr/local/sbin/devbox-data-setup
     permissions: "0755"

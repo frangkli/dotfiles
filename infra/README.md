@@ -8,7 +8,7 @@ The box: one GCP VM in us-west1, set up with OpenTofu and cloud-init. This is a 
 | `variables.tf` | Every knob: project, machine type, disk sizes, user |
 | `network.tf` | Private network; the only inbound rules are SSH through Google's IAP tunnel and Tailscale's UDP port |
 | `compute.tf` | VM, boot disk, a separate data disk for `/home`, daily snapshots |
-| `cloud-init.yaml` | First boot: user, data disk, Docker, Tailscale, zram and earlyoom |
+| `cloud-init.yaml` | First boot: user, data disk, Docker, Tailscale, zram, earlyoom and atop |
 | `outputs.tf` | Break-glass SSH and serial-console commands |
 | `tailscale/policy.hujson` | Example tailnet policy |
 
