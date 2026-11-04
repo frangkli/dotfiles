@@ -1,19 +1,34 @@
 {{- /* Merges one of our partial configs over the file an app owns: our keys win, the app keeps the rest.
      Lists are replaced whole, and a key deleted from a partial stays in the app's file until removed there.
-     When nothing would change, the file passes through untouched, so the app's own formatting shows no drift. */ -}}
+     When nothing would change, the file passes through untouched, so the app's own formatting shows no drift.
+     An optional .extras path names an uncommitted machine-local file in the same format, merged over the partial;
+     its hook lists are appended to the partial's for each event instead of replacing them. */ -}}
 {{- $current := dict -}}
 {{- $ours := dict -}}
+{{- $extras := "" -}}
+{{- with get . "extras" }}{{ if stat . }}{{ $extras = include . }}{{ end }}{{ end -}}
 {{- if eq .format "json" -}}
 {{-   if .current }}{{ $current = fromJson .current }}{{ end -}}
 {{-   $ours = fromJson .partial -}}
+{{-   if $extras }}{{ $extras = fromJson $extras }}{{ end -}}
 {{- else if eq .format "toml" -}}
 {{-   if .current }}{{ $current = fromToml .current }}{{ end -}}
 {{-   $ours = fromToml .partial -}}
+{{-   if $extras }}{{ $extras = fromToml $extras }}{{ end -}}
 {{- else if eq .format "yaml" -}}
 {{-   if .current }}{{ $current = fromYaml .current }}{{ end -}}
 {{-   $ours = fromYaml .partial -}}
+{{-   if $extras }}{{ $extras = fromYaml $extras }}{{ end -}}
 {{- else -}}
 {{-   fail (printf "merge: unknown format %q" .format) -}}
+{{- end -}}
+{{- if $extras -}}
+{{-   $ours = list $ours (omit $extras "hooks") | jq ".[0] * .[1]" | first -}}
+{{-   with get $extras "hooks" -}}
+{{-     $hooks := get $ours "hooks" | default dict -}}
+{{-     range $event, $entries := . }}{{ $_ := set $hooks $event (concat (get $hooks $event | default list) $entries) }}{{ end -}}
+{{-     $_ := set $ours "hooks" $hooks -}}
+{{-   end -}}
 {{- end -}}
 {{- $merged := list $current $ours | jq ".[0] * .[1]" | first -}}
 {{- if and .current (eq (toJson $current) (toJson $merged)) -}}
