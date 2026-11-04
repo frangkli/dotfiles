@@ -1,6 +1,7 @@
 {{ if eq .chezmoi.os "linux" -}}
+{{- $extras := joinPath (dir .chezmoi.configFile) "extras/codex/config.toml" -}}
 #!/bin/sh -l
-# Reruns when the Codex hooks or the installed plugins change: {{ include ".chezmoitemplates/codex/config.toml" | sha256sum }} {{ include "run_onchange_after_install-skills.sh.tmpl" | sha256sum }}
+# Reruns when the Codex hooks or the installed plugins change: {{ include ".chezmoitemplates/codex/config.toml" | sha256sum }} {{ if stat $extras }}{{ include $extras | sha256sum }} {{ end }}{{ include "run_onchange_after_install-skills.sh.tmpl" | sha256sum }}
 set -e
 codex-trust-hooks
 {{ end -}}

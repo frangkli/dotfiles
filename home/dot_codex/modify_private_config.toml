@@ -1,2 +1,2 @@
 {{- /* chezmoi:modify-template */ -}}
-{{- includeTemplate "merge" (dict "current" .chezmoi.stdin "format" "toml" "partial" (includeTemplate "codex/config.toml" .)) -}}
+{{- includeTemplate "merge" (dict "current" .chezmoi.stdin "format" "toml" "partial" (includeTemplate "codex/config.toml" .) "extras" (joinPath (dir .chezmoi.configFile) "extras/codex/config.toml")) -}}

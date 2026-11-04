@@ -1,2 +1,2 @@
 {{- /* chezmoi:modify-template */ -}}
-{{- includeTemplate "merge" (dict "current" .chezmoi.stdin "format" "json" "partial" (includeTemplate "claude/settings.json" .)) -}}
+{{- includeTemplate "merge" (dict "current" .chezmoi.stdin "format" "json" "partial" (includeTemplate "claude/settings.json" .) "extras" (joinPath (dir .chezmoi.configFile) "extras/claude/settings.json")) -}}

@@ -8,7 +8,7 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply frangkli
 
 It asks for your name and email up front, so you don't need to fork it to fix my git config. Macs skip the agent stuff.
 
-- `home/`: configs, scripts and services. App-owned settings get only the keys in `home/.chezmoitemplates/`.
+- `home/`: configs, scripts and services. App-owned settings get only the keys in `home/.chezmoitemplates/`. To add one machine's own Claude Code or Codex settings, put them in `~/.config/chezmoi/extras/claude/settings.json` or `extras/codex/config.toml`, which stay out of the repo. Their hooks run beside ours, and their other keys win.
 - `infra/`: the box, a GCP VM set up with OpenTofu and cloud-init.
 
 ## Why
