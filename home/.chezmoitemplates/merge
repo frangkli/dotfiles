@@ -6,7 +6,7 @@
 {{- $current := dict -}}
 {{- $ours := dict -}}
 {{- $extras := "" -}}
-{{- if and .extras (stat .extras) }}{{ $extras = include .extras }}{{ end -}}
+{{- with get . "extras" }}{{ if stat . }}{{ $extras = include . }}{{ end }}{{ end -}}
 {{- if eq .format "json" -}}
 {{-   if .current }}{{ $current = fromJson .current }}{{ end -}}
 {{-   $ours = fromJson .partial -}}
@@ -23,10 +23,12 @@
 {{-   fail (printf "merge: unknown format %q" .format) -}}
 {{- end -}}
 {{- if $extras -}}
-{{-   $hooks := $ours.hooks | default dict -}}
-{{-   range $event, $entries := $extras.hooks }}{{ $_ := set $hooks $event (concat (get $hooks $event | default list) $entries) }}{{ end -}}
 {{-   $ours = list $ours (omit $extras "hooks") | jq ".[0] * .[1]" | first -}}
-{{-   if $extras.hooks }}{{ $_ := set $ours "hooks" $hooks }}{{ end -}}
+{{-   with get $extras "hooks" -}}
+{{-     $hooks := get $ours "hooks" | default dict -}}
+{{-     range $event, $entries := . }}{{ $_ := set $hooks $event (concat (get $hooks $event | default list) $entries) }}{{ end -}}
+{{-     $_ := set $ours "hooks" $hooks -}}
+{{-   end -}}
 {{- end -}}
 {{- $merged := list $current $ours | jq ".[0] * .[1]" | first -}}
 {{- if and .current (eq (toJson $current) (toJson $merged)) -}}
