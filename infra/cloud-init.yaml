@@ -27,6 +27,8 @@ packages:
   - earlyoom
   # Per-process and per-cgroup resource history, replayed with `atop -r`
   - atop
+  # Load, memory, swap and pressure every 10 minutes, read back with `sar`
+  - sysstat
   # Machine basics; user tools come from the dotfiles
   - xfsprogs
   - git
@@ -88,3 +90,8 @@ runcmd:
   - usermod -aG docker ${username}
   - systemctl start systemd-zram-setup@zram0.service
   - sysctl --system
+  # Ubuntu installs sysstat switched off. Turn it on and keep four weeks of sar history
+  # instead of one, so trends outlast atop's week.
+  - sed -i 's/^ENABLED=.*/ENABLED="true"/' /etc/default/sysstat
+  - sed -i 's/^HISTORY=.*/HISTORY=28/' /etc/sysstat/sysstat
+  - systemctl enable --now sysstat
