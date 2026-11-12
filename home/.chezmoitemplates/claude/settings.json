@@ -13,6 +13,8 @@
     "GIT_TERMINAL_PROMPT": "0",
     "GIT_ADVICE": "0",
     "PYTHONUNBUFFERED": "1",
+    {{- /* Tags Claude Code's metrics with the repository's remote, so a collector can tell projects apart. */}}
+    "OTEL_METRICS_INCLUDE_REPOSITORY": "1",
     {{- /* ponytail's subagent hook injects only where this matches: all but the role agents in ~/.claude/agents. */}}
     "PONYTAIL_SUBAGENT_MATCHER": "^(?!(?:reviewer|verifier|fixer|writer|ci-reader)$)"
     {{- range $name, $value := .toolEnv }},
