@@ -17,6 +17,9 @@ require("blink.cmp").setup {
     default = { "lsp", "path" },
     per_filetype = { lua = { inherit_defaults = true, "lazydev" } },
     providers = {
+      -- File paths only when the language server has nothing to suggest: servers already
+      -- complete import paths, so this avoids each file showing up twice.
+      lsp = { fallbacks = { "path" } },
       lazydev = { name = "LazyDev", module = "lazydev.integrations.blink", score_offset = 100 },
     },
   },
