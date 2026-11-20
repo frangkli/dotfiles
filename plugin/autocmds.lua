@@ -10,10 +10,28 @@ autocmd("TextYankPost", {
   end,
 })
 
+-- Comment continuation on <CR> / o / O:
+--   /* ...  <CR>  ->  " * "   (block comments continue)
+--   // ...  <CR>  ->  ""      (line comments // # -- don't)
+-- Done by adding the `f` flag ("don't repeat on the next line") to every
+-- single-line entry in 'comments'; block comments (s/m/e parts) keep continuing.
 autocmd("FileType", {
-  desc = "Don't continue comments on <CR> or o/O",
-  callback = function()
-    vim.opt_local.formatoptions:remove { "r", "o" }
+  desc = "Continue block comments but not line comments",
+  callback = function(ev)
+    local ft = vim.bo[ev.buf].filetype
+    if ft == "markdown" or ft == "text" then
+      return -- lists are handled by markdown-plus
+    end
+    local parts = {}
+    for _, part in ipairs(vim.split(vim.bo[ev.buf].comments, ",", { plain = true })) do
+      local flags, leader = part:match "^([^:]*):(.*)$"
+      if flags and not flags:find "[smef]" then
+        part = "f" .. flags .. ":" .. leader
+      end
+      table.insert(parts, part)
+    end
+    vim.bo[ev.buf].comments = table.concat(parts, ",")
+    vim.opt_local.formatoptions:append { "r", "o" }
   end,
 })
 
