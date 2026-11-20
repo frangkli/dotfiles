@@ -40,7 +40,7 @@ lua_ls, gopls, rust_analyzer, pyrefly, marksman, harper_ls (see `plugin/lsp.lua`
 
 ## Keys
 
-Leader is `<Space>`. Press any prefix and wait for a popup of what follows;
+Leader is `<Space>`; local leader (filetype-specific keys) is `\`. Press any prefix and wait for a popup of what follows;
 `<Space>fk` searches every keymap.
 
 | Keys | Action |
@@ -58,7 +58,7 @@ Leader is `<Space>`. Press any prefix and wait for a popup of what follows;
 | `<Space>g…` | Git: `s` status, `c` commit, `a` amend, `b` branches, `l`/`L` log, `h` stage hunk, `r` reset hunk, `p` preview, `k` blame line, `K` blame file, `d` diff, `P` push, `F` pull |
 | `]h` `[h` / `ih` | Next/prev git hunk / hunk text object |
 | `gsa` `gsd` `gsr` | Surround add / delete / replace |
-| `,l` (markdown) | Make link: on a URL like `astro.build`, or on selected text (uses a URL from the clipboard, else asks) |
+| `\l` (markdown) | Make link: on a URL like `astro.build`, or on selected text (uses a URL from the clipboard, else asks) |
 | `<Space>t…` | Toggles: `f` format on save, `h` inlay hints, `d` diagnostics, `w` wrap, `b` inline blame, `m` markdown rendering |
 | `<Space>s…` | Sessions: `s` save, `l` load (this dir), `f` find, `d` delete |
 | `<Space>bd` / `<Space>bo` | Delete buffer / other buffers |

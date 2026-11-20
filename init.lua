@@ -2,7 +2,7 @@
 -- Files in plugin/ are sourced automatically after this file, in alphabetical order.
 
 vim.g.mapleader = " "
-vim.g.maplocalleader = ","
+vim.g.maplocalleader = "\\" -- for filetype-specific keys (e.g. \l in markdown)
 
 -- Experimental 0.12 message + cmdline UI: no more "Press ENTER" prompts.
 require("vim._core.ui2").enable {}

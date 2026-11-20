@@ -4,8 +4,8 @@ vim.keymap.set({ "n", "x" }, "j", "v:count ? 'j' : 'gj'", { buffer = true, expr 
 vim.keymap.set({ "n", "x" }, "k", "v:count ? 'k' : 'gk'", { buffer = true, expr = true })
 
 -- Links ---------------------------------------------------------------------
---   ,l  (normal) on a URL like astro.build   ->  [astro.build](https://astro.build)
---   ,l  (visual) on some text                ->  [text](<url>)
+--   \l  (normal) on a URL like astro.build   ->  [astro.build](https://astro.build)
+--   \l  (visual) on some text                ->  [text](<url>)
 --       uses the clipboard if it holds a URL, otherwise asks for one
 local function to_url(s)
   return (s:match "^%a[%w+.-]*:" and s) or "https://" .. s
