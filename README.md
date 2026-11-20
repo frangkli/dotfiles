@@ -60,7 +60,7 @@ Leader is `<Space>`; local leader (filetype-specific keys) is `\`. Press any pre
 | `]h` `[h` / `ih` | Next/prev git hunk / hunk text object |
 | `gsa` `gsd` `gsr` | Surround add / delete / replace |
 | Markdown lists | `<CR>`/`o` continue a list, `<CR>` on an empty item ends it, `<Tab>`/`<S-Tab>` nest (insert mode), `\mx` toggles a checkbox (`<C-t>` in insert) |
-| Markdown links | `\ml` insert a link / link the selection, `\ma` link a bare `https://` URL, `\me` edit link, `gx` open. Press `\` and wait for all markdown keys |
+| Markdown links | `\mk` link the URL or domain under the cursor (`astro.build` → `[astro.build](https://astro.build)`), `\ml` insert a link / link the selection, `\ma` link a URL with a custom title, `\me` edit link, `gx` open. Press `\` and wait for all markdown keys |
 | `<Space>t…` | Toggles: `f` format on save, `h` inlay hints, `d` diagnostics, `w` wrap, `b` inline blame, `m` markdown rendering |
 | `<Space>s…` | Sessions: `s` save, `l` load (this dir), `f` find, `d` delete |
 | `<Space>bd` / `<Space>bo` | Delete buffer / other buffers |

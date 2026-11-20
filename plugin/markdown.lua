@@ -14,7 +14,8 @@ vim.keymap.set("n", "<leader>tm", "<Cmd>RenderMarkdown toggle<CR>", { desc = "To
 --   <Tab> / <S-Tab> indent / outdent a list item (insert mode); numbers update automatically
 --   \mx             toggle a checkbox (<C-t> in insert mode)
 --   \ml             insert a link, or turn the selection into one (asks for the URL)
---   \ma             turn the bare URL under the cursor into a link
+--   \mk             link the URL or domain under the cursor, no prompts (after/ftplugin)
+--   \ma             link the https:// URL under the cursor, asking for its title
 --   \mb \mi         bold / italic (word or selection)
 --   gx              open the link under the cursor
 require("markdown-plus").setup {}
