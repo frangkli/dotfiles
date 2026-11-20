@@ -59,7 +59,27 @@ map("n", "<leader>bo", function()
 end, { desc = "Delete other buffers" })
 
 -- File explorer: columns view; edit names like text, then `=` to apply
-require("mini.files").setup { windows = { preview = true, width_preview = 50 } }
+require("mini.files").setup {
+  windows = { preview = true, width_preview = 50 },
+  options = { permanent_delete = false }, -- deletions go to the macOS Trash (below)
+}
+-- mini.files first moves deleted entries into its own trash folder; hand them on
+-- to the macOS Trash (same as the shell's `rm` -> `trash`), so Finder can recover them.
+vim.api.nvim_create_autocmd("User", {
+  pattern = "MiniFilesActionDelete",
+  callback = function(ev)
+    local to = ev.data.to
+    if to and vim.fn.executable "/usr/bin/trash" == 1 then
+      vim.system({ "/usr/bin/trash", to }, {}, function(res)
+        if res.code ~= 0 then
+          vim.schedule(function()
+            vim.notify("Couldn't move to Trash; still in " .. to, vim.log.levels.WARN)
+          end)
+        end
+      end)
+    end
+  end,
+})
 map("n", "<leader>e", function()
   local path = vim.api.nvim_buf_get_name(0)
   MiniFiles.open(vim.uv.fs_stat(path) and path or nil)
