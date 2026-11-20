@@ -1,5 +1,6 @@
 -- fzf-lua: fuzzy finder for files, grep, buffers, LSP, git, and more.
--- Inside a picker: <C-/> or <F1> shows its keys; <C-q> sends results to quickfix.
+-- Inside a picker: <F1> shows its keys; <Tab> multi-select; <M-q> sends to quickfix;
+-- <C-v>/<C-s>/<C-t> open in vsplit/split/tab. In git status: <Left> stage, <Right> unstage.
 local fzf = require "fzf-lua"
 fzf.setup {
   "border-fused",
