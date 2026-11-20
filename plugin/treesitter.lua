@@ -40,7 +40,9 @@ local function attach(buf, lang)
   end
   vim.wo[0][0].foldmethod = "expr"
   vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
-  if vim.treesitter.query.get(lang, "indents") then
+  -- Treesitter indent is experimental; Vim's own CSS indent handles comments better
+  local builtin_indent = { css = true, scss = true, less = true }
+  if not builtin_indent[lang] and vim.treesitter.query.get(lang, "indents") then
     vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
   end
 end
