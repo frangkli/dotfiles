@@ -3,6 +3,56 @@ vim.opt_local.wrap = true
 vim.keymap.set({ "n", "x" }, "j", "v:count ? 'j' : 'gj'", { buffer = true, expr = true })
 vim.keymap.set({ "n", "x" }, "k", "v:count ? 'k' : 'gk'", { buffer = true, expr = true })
 
+-- Lists ---------------------------------------------------------------------
+-- <CR> at the end of a list item (and `o` on one) starts the next item:
+--   - foo     ->  -
+--   - [x] foo ->  - [ ]
+--   3. foo    ->  4.
+-- <CR> on an empty item removes its marker (ends the list).
+local function next_item(line)
+  local indent, bullet, rest = line:match "^(%s*)([-*+])%s+%[[ xX]%]%s*(.*)$"
+  if indent then
+    return indent .. bullet .. " [ ] ", rest
+  end
+  indent, bullet, rest = line:match "^(%s*)([-*+])%s+(.*)$"
+  if indent then
+    return indent .. bullet .. " ", rest
+  end
+  local num, delim
+  indent, num, delim, rest = line:match "^(%s*)(%d+)([.)])%s+(.*)$"
+  if indent then
+    return indent .. (tonumber(num) + 1) .. delim .. " ", rest
+  end
+end
+
+-- Replaces the current line with `text` and puts the cursor at its end.
+-- Called through <Cmd> so it runs in order with the surrounding keys.
+function _G.MarkdownSetLine(text)
+  vim.api.nvim_set_current_line(text)
+  vim.api.nvim_win_set_cursor(0, { vim.fn.line ".", #text })
+end
+local function set_line_keys(text)
+  return vim.keycode(("<Cmd>lua MarkdownSetLine(%q)<CR>"):format(text))
+end
+
+vim.keymap.set("i", "<CR>", function()
+  local line = vim.api.nvim_get_current_line()
+  local at_end = vim.api.nvim_win_get_cursor(0)[2] >= #line
+  local marker, rest = next_item(line)
+  if marker and at_end then
+    if rest == "" then -- empty item: end the list
+      return set_line_keys ""
+    end
+    return vim.keycode "<CR>" .. set_line_keys(marker)
+  end
+  return MiniPairs and MiniPairs.cr() or vim.keycode "<CR>"
+end, { buffer = true, expr = true, replace_keycodes = false, desc = "Newline, continuing lists" })
+
+vim.keymap.set("n", "o", function()
+  local marker = next_item(vim.api.nvim_get_current_line())
+  return marker and ("o" .. set_line_keys(marker)) or "o"
+end, { buffer = true, expr = true, replace_keycodes = false, desc = "Open line, continuing lists" })
+
 -- Links ---------------------------------------------------------------------
 --   \l  (normal) on a URL like astro.build   ->  [astro.build](https://astro.build)
 --   \l  (visual) on some text                ->  [text](<url>)

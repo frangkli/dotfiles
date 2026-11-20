@@ -58,6 +58,7 @@ Leader is `<Space>`; local leader (filetype-specific keys) is `\`. Press any pre
 | `<Space>g…` | Git: `s` status, `c` commit, `a` amend, `b` branches, `l`/`L` log, `h` stage hunk, `r` reset hunk, `p` preview, `k` blame line, `K` blame file, `d` diff, `P` push, `F` pull |
 | `]h` `[h` / `ih` | Next/prev git hunk / hunk text object |
 | `gsa` `gsd` `gsr` | Surround add / delete / replace |
+| Markdown lists | `<CR>` at the end of an item (or `o` on one) continues the list: bullets, `- [ ]` checkboxes, numbers; `<CR>` on an empty item ends it |
 | `\l` (markdown) | Make link: on a URL like `astro.build`, or on selected text (uses a URL from the clipboard, else asks) |
 | `<Space>t…` | Toggles: `f` format on save, `h` inlay hints, `d` diagnostics, `w` wrap, `b` inline blame, `m` markdown rendering |
 | `<Space>s…` | Sessions: `s` save, `l` load (this dir), `f` find, `d` delete |
