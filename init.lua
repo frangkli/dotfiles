@@ -53,6 +53,7 @@ vim.pack.add({
   -- Git & markdown
   gh "lewis6991/gitsigns.nvim",
   gh "MeanderingProgrammer/render-markdown.nvim",
+  gh "YousefHadder/markdown-plus.nvim",
 }, { confirm = false })
 
 -- :PackUpdate shows a review buffer (:w to apply, :q to cancel).

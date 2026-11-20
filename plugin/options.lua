@@ -13,6 +13,8 @@ o.sidescrolloff = 8
 o.wrap = false -- markdown/text turn it back on (after/ftplugin)
 o.linebreak = true -- when wrapping, break between words
 o.breakindent = true
+o.breakindentopt = "list:-1" -- wrapped list items line up under the item's text
+o.smoothscroll = true -- scroll wrapped lines one screen line at a time
 o.list = true
 o.listchars = "tab:» ,trail:·,nbsp:␣"
 o.fillchars = "eob: ,fold: ,foldopen:\u{f47c},foldclose:\u{f460},foldsep: "
@@ -58,7 +60,10 @@ vim.diagnostic.config {
   severity_sort = true,
   underline = true,
   update_in_insert = false,
-  virtual_text = { spacing = 2, source = "if_many" },
+  -- Other lines: short message at the end of the line.
+  -- Cursor line: full message on its own lines underneath.
+  virtual_text = { spacing = 2, source = "if_many", current_line = false },
+  virtual_lines = { current_line = true },
   float = { source = "if_many" },
   signs = {
     text = {

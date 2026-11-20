@@ -17,7 +17,7 @@ after/ftplugin/*.lua     per-filetype tweaks (markdown wraps lines)
 Everything in `plugin/` is loaded automatically. To drop a feature, delete its file
 (or lines) and its entry in `init.lua`, then run `:PackClean`.
 
-## Plugins (17)
+## Plugins (18)
 
 | Plugin | Does |
 | --- | --- |
@@ -34,6 +34,7 @@ Everything in `plugin/` is loaded automatically. To drop a feature, delete its f
 | nvim-treesitter (+context, ts-autotag) | Parsers, sticky function header, auto-close tags |
 | gitsigns | Git change markers, hunks, blame |
 | render-markdown | Styled markdown in the buffer |
+| markdown-plus | Markdown editing: list continuation, Tab nesting, renumbering, checkboxes, links, tables |
 
 Language servers: vtsls, astro, svelte, tailwindcss, oxlint/biome, jsonls, yamlls,
 lua_ls, gopls, rust_analyzer, pyrefly, marksman, harper_ls (see `plugin/lsp.lua`).
@@ -58,8 +59,8 @@ Leader is `<Space>`; local leader (filetype-specific keys) is `\`. Press any pre
 | `<Space>g…` | Git: `s` status, `c` commit, `a` amend, `b` branches, `l`/`L` log, `h` stage hunk, `r` reset hunk, `p` preview, `k` blame line, `K` blame file, `d` diff, `P` push, `F` pull |
 | `]h` `[h` / `ih` | Next/prev git hunk / hunk text object |
 | `gsa` `gsd` `gsr` | Surround add / delete / replace |
-| Markdown lists | `<CR>` at the end of an item (or `o` on one) continues the list: bullets, `- [ ]` checkboxes, numbers; `<CR>` on an empty item ends it |
-| `\l` (markdown) | Make link: on a URL like `astro.build`, or on selected text (uses a URL from the clipboard, else asks) |
+| Markdown lists | `<CR>`/`o` continue a list, `<CR>` on an empty item ends it, `<Tab>`/`<S-Tab>` nest (insert mode), `\mx` toggles a checkbox (`<C-t>` in insert) |
+| Markdown links | `\ml` insert a link / link the selection, `\ma` link a bare `https://` URL, `\me` edit link, `gx` open. Press `\` and wait for all markdown keys |
 | `<Space>t…` | Toggles: `f` format on save, `h` inlay hints, `d` diagnostics, `w` wrap, `b` inline blame, `m` markdown rendering |
 | `<Space>s…` | Sessions: `s` save, `l` load (this dir), `f` find, `d` delete |
 | `<Space>bd` / `<Space>bo` | Delete buffer / other buffers |
