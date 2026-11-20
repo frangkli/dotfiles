@@ -60,10 +60,8 @@ vim.diagnostic.config {
   severity_sort = true,
   underline = true,
   update_in_insert = false,
-  -- Other lines: short message at the end of the line.
-  -- Cursor line: full message on its own lines underneath.
-  virtual_text = { spacing = 2, source = "if_many", current_line = false },
-  virtual_lines = { current_line = true },
+  -- Message at the end of the line. Full text: <C-w>d (or ]d / [d to jump to it).
+  virtual_text = { spacing = 2, source = "if_many" },
   float = { source = "if_many" },
   signs = {
     text = {
