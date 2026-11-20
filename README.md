@@ -36,7 +36,7 @@ Everything in `plugin/` is loaded automatically. To drop a feature, delete its f
 | render-markdown | Styled markdown in the buffer |
 | markdown-plus | Markdown editing: list continuation, Tab nesting, renumbering, checkboxes, links, tables |
 
-Language servers: vtsls, astro, svelte, tailwindcss, oxlint/biome, jsonls, yamlls,
+Language servers: vtsls, astro, svelte, tailwindcss, cssls, oxlint/biome, jsonls, yamlls,
 lua_ls, gopls, rust_analyzer, pyrefly, marksman (harper_ls is set up but off; see `plugin/lsp.lua`).
 
 ## Keys

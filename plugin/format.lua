@@ -12,6 +12,8 @@ require("conform").setup {
     json = web,
     jsonc = web,
     css = web,
+    scss = web,
+    less = web,
     astro = web,
     svelte = web,
     lua = { "stylua" },

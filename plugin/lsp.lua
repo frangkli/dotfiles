@@ -11,6 +11,7 @@ local servers = {
   "astro",
   "svelte",
   "tailwindcss", -- only starts in projects that use Tailwind
+  "cssls", -- CSS / SCSS / Less
   "oxlint", -- only starts in projects with an oxlint config
   "biome", -- only starts in projects with a biome.json (and no oxlint config)
   "jsonls",
@@ -110,7 +111,22 @@ vim.lsp.config("tailwindcss", {
       on_dir(root)
     end
   end,
+  settings = {
+    tailwindCSS = {
+      -- Also complete/lint classes passed to these helpers, e.g. cn("px-2", cond && "bg-red-500")
+      classFunctions = { "cn", "clsx", "cva", "tw", "twMerge" },
+    },
+  },
 })
+
+-- CSS / SCSS / Less. Tailwind 4 at-rules (@theme, @apply, @utility, @variant, ...)
+-- aren't standard CSS, so don't flag them as unknown.
+local css_settings = { validate = true, lint = { unknownAtRules = "ignore" } }
+vim.lsp.config("cssls", { settings = { css = css_settings, scss = css_settings, less = css_settings } })
+
+-- Color swatches (Tailwind classes, hex/rgb values) shown as a small ■ before the
+-- color instead of painting the text's background. Built into 0.12.
+vim.lsp.document_color.enable(true, nil, { style = "virtual" })
 
 vim.lsp.config("jsonls", {
   settings = { json = { schemas = require("schemastore").json.schemas(), validate = { enable = true } } },
