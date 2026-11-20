@@ -56,7 +56,7 @@ Leader is `<Space>`; local leader (filetype-specific keys) is `\`. Press any pre
 | `grn` / `gra` | Rename / code action |
 | `[d` `]d` / `<C-w>d` | Prev/next diagnostic / show diagnostic |
 | `<Space>cf` | Format |
-| `<Space>g…` | Git: `s` status, `c` commit, `a` amend, `b` branches, `l`/`L` log, `h` stage hunk, `r` reset hunk, `p` preview, `k` blame line, `K` blame file, `d` diff, `P` push, `F` pull |
+| `<Space>g…` | Git: `s` status (`<C-s>` stage/unstage, `<C-x>` discard), `c` commit, `a` amend, `b` branches, `l`/`L` log, `h` stage hunk, `r` reset hunk, `p` preview, `k` blame line, `K` blame file, `d` diff, `P` push, `F` pull |
 | `]h` `[h` / `ih` | Next/prev git hunk / hunk text object |
 | `gsa` `gsd` `gsr` | Surround add / delete / replace |
 | Markdown lists | `<CR>`/`o` continue a list, `<CR>` on an empty item ends it, `<Tab>`/`<S-Tab>` nest (insert mode), `\mx` toggles a checkbox (`<C-t>` in insert) |

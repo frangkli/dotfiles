@@ -1,6 +1,7 @@
 -- fzf-lua: fuzzy finder for files, grep, buffers, LSP, git, and more.
 -- Inside a picker: <F1> shows its keys; <Tab> multi-select; <M-q> sends to quickfix;
--- <C-v>/<C-s>/<C-t> open in vsplit/split/tab. In git status: <Left> stage, <Right> unstage.
+-- <C-v>/<C-s>/<C-t> open in vsplit/split/tab.
+-- Git status: <C-s> stage/unstage (also <Left>/<Right>), <C-x> discard changes.
 local fzf = require "fzf-lua"
 fzf.setup {
   "border-fused",
@@ -9,6 +10,11 @@ fzf.setup {
   grep = { formatter = "path.filename_first" },
   oldfiles = { include_current_session = true, cwd_only = true },
   lsp = { jump1 = true }, -- jump straight there when there's only one result
+  git = {
+    status = {
+      actions = { ["ctrl-s"] = { fn = require("fzf-lua.actions").git_stage_unstage, reload = true } },
+    },
+  },
 }
 fzf.register_ui_select() -- use fzf-lua for vim.ui.select (code actions, etc.)
 
