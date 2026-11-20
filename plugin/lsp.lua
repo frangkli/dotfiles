@@ -22,7 +22,7 @@ local servers = {
   "pyrefly",
   -- Prose
   "marksman", -- markdown links and headings
-  "harper_ls", -- grammar / spelling, runs locally
+  "harper_ls", -- grammar (not spelling), runs locally
 }
 local tools = { "stylua", "oxfmt" } -- formatters run by conform (plugin/format.lua)
 
@@ -120,7 +120,11 @@ vim.lsp.config("yamlls", {
 })
 
 -- Grammar checking only in prose, not in every code comment
-vim.lsp.config("harper_ls", { filetypes = { "markdown", "text", "gitcommit" } })
+vim.lsp.config("harper_ls", {
+  filetypes = { "markdown", "text", "gitcommit" },
+  -- grammar only: spell-checking prose full of tool names is mostly noise
+  settings = { ["harper-ls"] = { linters = { SpellCheck = false } } },
+})
 
 vim.lsp.enable(servers)
 
