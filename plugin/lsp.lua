@@ -22,7 +22,7 @@ local servers = {
   "pyrefly",
   -- Prose
   "marksman", -- markdown links and headings
-  "harper_ls", -- grammar (not spelling), runs locally
+  -- "harper_ls", -- grammar checker for prose (off for now; uncomment to re-enable)
 }
 local tools = { "stylua", "oxfmt" } -- formatters run by conform (plugin/format.lua)
 
